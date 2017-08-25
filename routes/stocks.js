@@ -5,11 +5,12 @@ const auto_stocks = ["F","TSLA","FCAU","TM","HMC","RACE","CARZ"];
 const airline_stocks = ["DAL","UAL","SKYW","JBLU","ALK","LUV","JETS"];
 const hotel_stocks = ["MAR", "HLT", "H", "MGM", "LVS", "WYN", "WYNN", "STAY", "IHG"];
 
+
 router.get('/', function(req, res, next) {
   res.json({
     "auto_stocks": list(auto_stocks),
     "airline_stocks": list(airline_stocks),
-    "hotel_stocks": list(airline_stocks)
+    "hotel_stocks": list(airline_stocks),
   });
 });
 
