@@ -15,7 +15,19 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/:stock', function(req, res, next) {
-  res.json({stock: req.params.stock, prices: {'2017-08-01': 22.4, '2017-08-02': 21.2, '2017-08-03': 25.6}});
+  res.json({
+    stock: req.params.stock,
+    dates: [
+      '2017-08-01',
+      '2017-08-02',
+      '2017-08-03'
+    ],
+    prices: [
+      22.4,
+      21.2,
+      25.6
+    ]
+  });
 });
 
 function list(stocks){
