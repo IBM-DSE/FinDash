@@ -1,0 +1,13 @@
+
+# Dependency directories
+node_modules/
+
+# Client (React) build files
+client/build/
+
+# dotenv environment variables file
+.env
+
+# Extraneous files
+README.md
+.gitignore
