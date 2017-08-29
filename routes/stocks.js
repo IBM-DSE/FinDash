@@ -32,7 +32,7 @@ router.get('/:stock', function(req, res, next) {
 
 function list(stocks){
   return stocks.map(function(stock) { return {
-    id: stock.toLowerCase(),
+    id: stock,
     name: stock
   }});
 }

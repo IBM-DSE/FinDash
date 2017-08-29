@@ -3,11 +3,22 @@ import {Line} from 'react-chartjs-2';
 import './App.css';
 
 class App extends Component {
-  state = {users: [], stocks: {
-    auto_stocks: [],
-    airline_stocks: [],
-    hotel_stocks: []
-  }, chartData: {}};
+  constructor() {
+    super();
+    this.stock_list = this.stock_list.bind(this);
+    this.toggleCheckbox = this.toggleCheckbox.bind(this);
+  }
+
+  state = {
+    users: [],
+    stocks: {
+      auto_stocks: [],
+      airline_stocks: [],
+      hotel_stocks: []
+    },
+    displayStocks: ['F'],
+    chartData: {}
+  };
 
   componentDidMount() {
     fetch('/users')
@@ -35,15 +46,15 @@ class App extends Component {
               <div className="row">
                 <div className="col-md-4">
                   <h3>Auto</h3>
-                  {list(this.state.stocks.auto_stocks)}
+                  {this.stock_list(this.state.stocks.auto_stocks)}
                 </div>
                 <div className="col-md-4">
                   <h3>Airlines</h3>
-                  {list(this.state.stocks.airline_stocks)}
+                  {this.stock_list(this.state.stocks.airline_stocks)}
                 </div>
                 <div className="col-md-4">
                   <h3>Hotels</h3>
-                  {list(this.state.stocks.hotel_stocks)}
+                  {this.stock_list(this.state.stocks.hotel_stocks)}
                 </div>
               </div>
 
@@ -56,6 +67,26 @@ class App extends Component {
         </div>
       </div>
     );
+  }
+
+  stock_list(arr) {
+    return arr.map(elem =>
+      <div key={elem.id}>
+        <input type="checkbox" defaultChecked={this.state.displayStocks.includes(elem.id)} onChange={this.toggleCheckbox} id={elem.id}></input> {elem.name}
+      </div>
+    )
+  }
+
+  toggleCheckbox(event) {
+    if (event.target.checked) {
+      this.state.displayStocks.push(event.target.id)
+    } else {
+      let index = this.state.displayStocks.indexOf(event.target.id);
+      if (index > -1) {
+        this.state.displayStocks.splice(index, 1);
+      }
+    }
+    console.log(this.state.displayStocks);
   }
 }
 
