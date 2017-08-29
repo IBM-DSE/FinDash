@@ -10,16 +10,12 @@ router.get('/', function(req, res, next) {
   res.json({
     "auto_stocks": list(auto_stocks),
     "airline_stocks": list(airline_stocks),
-    "hotel_stocks": list(airline_stocks),
+    "hotel_stocks": list(hotel_stocks),
   });
 });
 
-router.get('/auto', function(req, res, next) {
-  res.json(list(auto_stocks));
-});
-
-router.get('/airlines', function(req, res, next) {
-  res.json(list(airline_stocks));
+router.get('/:stock', function(req, res, next) {
+  res.json({stock: req.params.stock, prices: {'2017-08-01': 22.4, '2017-08-02': 21.2, '2017-08-03': 25.6}});
 });
 
 function list(stocks){
