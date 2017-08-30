@@ -14,7 +14,7 @@ class App extends Component {
         airline_stocks: [],
         hotel_stocks: []
       },
-      displayStocks: ['F']
+      displayStocks: []
     };
   }
 
@@ -100,7 +100,7 @@ function list(arr, id_prefix=''){
 class StockChart extends Component {
   constructor(props) {
     super(props);
-    this.generateChartData = this.generateChartData.bind(this);
+    this.updateChartData = this.updateChartData.bind(this);
     this.state = {
       chartData: {
         labels: [],
@@ -110,26 +110,27 @@ class StockChart extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    fetch('/stocks/TSLA')
-      .then(res => res.json())
-      .then(stock_data => this.generateChartData(stock_data, this.props.displayStocks))
-      .then(chartData => this.setState({ chartData }));
+    let new_stock = nextProps.displayStocks.filter(x => this.props.displayStocks.indexOf(x) === -1)[0];
+    console.log(nextProps.displayStocks);
+    console.log(new_stock);
+    if(new_stock){
+      fetch('/stocks/'+new_stock)
+        .then(res => res.json())
+        .then(stock_data => this.updateChartData(stock_data))
+        .then(chartData => this.setState({ chartData }));
+    }
   }
 
   render() { return (<Line data={this.state.chartData} />); }
 
-  generateChartData(stock_data, stocks){
-    let chartData = {};
+  updateChartData(stock_data){
+    let chartData = this.state.chartData;
     chartData.labels = stock_data.dates;
 
-    let datasets = [];
-    for(let i in stocks){
-      let dataset = JSON.parse(orig_dataset);
-      dataset.label = stocks[i];
-      dataset.data = stock_data.prices;
-      datasets.push(dataset);
-    }
-    chartData.datasets = datasets;
+    let dataset = JSON.parse(orig_dataset);
+    dataset.label = stock_data.stock;
+    dataset.data = stock_data.prices;
+    chartData.datasets.push(dataset);
 
     return chartData;
   }
