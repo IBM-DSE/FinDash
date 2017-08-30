@@ -101,6 +101,7 @@ class StockChart extends Component {
   constructor(props) {
     super(props);
     this.updateChartData = this.updateChartData.bind(this);
+    this.removeStock = this.removeStock.bind(this);
     this.state = {
       chartData: {
         labels: [],
@@ -110,14 +111,13 @@ class StockChart extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    let new_stock = nextProps.displayStocks.filter(x => this.props.displayStocks.indexOf(x) === -1)[0];
-    console.log(nextProps.displayStocks);
-    console.log(new_stock);
+    let new_stock = arr_diff(nextProps.displayStocks, this.props.displayStocks);
     if(new_stock){
-      fetch('/stocks/'+new_stock)
-        .then(res => res.json())
-        .then(stock_data => this.updateChartData(stock_data))
-        .then(chartData => this.setState({ chartData }));
+      fetch('/stocks/'+new_stock).then(res => res.json())
+        .then(stock_data => this.updateChartData(stock_data));
+    } else {
+      let del_stock = arr_diff(this.props.displayStocks, nextProps.displayStocks);
+      if(del_stock) { this.removeStock(del_stock); }
     }
   }
 
@@ -132,7 +132,19 @@ class StockChart extends Component {
     dataset.data = stock_data.prices;
     chartData.datasets.push(dataset);
 
-    return chartData;
+    this.setState({ chartData })
+  }
+
+  removeStock(stock) {
+    let chartData = this.state.chartData;
+    let newDatasets = [];
+    for(let i in chartData.datasets){
+      if (chartData.datasets[i]['label'] !== stock){
+        newDatasets.push(chartData.datasets[i]);
+      }
+    }
+    chartData.datasets = newDatasets;
+    this.setState({ chartData })
   }
 }
 
@@ -157,5 +169,9 @@ const orig_dataset = JSON.stringify({
   pointHitRadius: 10,
   data: [65, 59, 80, 81, 56, 55, 40]
 });
+
+function arr_diff(arr1, arr2){
+  return arr1.filter(x => !arr2.includes(x))[0];
+}
 
 export default App;
