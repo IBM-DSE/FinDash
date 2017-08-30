@@ -31,7 +31,6 @@ router.get('/:stock', function(req, res, next) {
     conn.query(query, function (err, data) {
       if (err) console.log(err);
       else{
-        console.log(data);
         if (data.length > 0 && data[0]['SYMBOL'] === req.params.stock) {
           res.json({
             stock: req.params.stock,
