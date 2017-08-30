@@ -1,7 +1,6 @@
 applications:
-- name: SailFin
+- name: FinDash
   buildpack: https://github.com/cloudfoundry/nodejs-buildpack
   command: npm run build_client && npm start
-  memory: 512M
   env:
     NODE_ENV: production

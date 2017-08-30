@@ -1,16 +1,20 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var sassMiddleware = require('node-sass-middleware');
+let express = require('express');
+let path = require('path');
+let favicon = require('serve-favicon');
+let logger = require('morgan');
+let cookieParser = require('cookie-parser');
+let bodyParser = require('body-parser');
+let sassMiddleware = require('node-sass-middleware');
 
-var index = require('./routes/index');
-var users = require('./routes/users');
-var stocks = require('./routes/stocks');
+let index = require('./routes/index');
+let users = require('./routes/users');
+let stocks = require('./routes/stocks');
 
-var app = express();
+let app = express();
+
+// Redirect http to https if we're in production
+if (process.env.NODE_ENV === 'production')
+  app.use(requireHTTPS);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -40,7 +44,7 @@ app.use('/stocks', stocks);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  var err = new Error('Not Found');
+  let err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
@@ -55,5 +59,12 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+function requireHTTPS(req, res, next) {
+  if (req.headers && req.headers.$wssp === "80") {
+    return res.redirect('https://' + req.get('host') + req.url);
+  }
+  next();
+}
 
 module.exports = app;
