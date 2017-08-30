@@ -41,6 +41,7 @@ class App extends Component {
             <div className="col-md-8">
 
               <h2>Stocks</h2>
+              <div>{this.state.displayStocks}</div>
               <Line data={this.state.chartData} />
 
               <div className="row">
@@ -61,7 +62,7 @@ class App extends Component {
             </div>
             <div className="col-md-4">
               <h2>Clients</h2>
-              {list(this.state.users)}
+              {list(this.state.users, 'client-')}
             </div>
           </div>
         </div>
@@ -78,21 +79,28 @@ class App extends Component {
   }
 
   toggleCheckbox(event) {
-    if (event.target.checked) {
-      this.state.displayStocks.push(event.target.id)
-    } else {
-      let index = this.state.displayStocks.indexOf(event.target.id);
-      if (index > -1) {
-        this.state.displayStocks.splice(index, 1);
+    let stock = event.target.id;
+    let add = event.target.checked;
+    this.setState(function(prevState) {
+      let displayStocks = prevState.displayStocks.slice(0);
+      if (add) {
+        displayStocks.push(stock);
+      } else {
+        let index = displayStocks.indexOf(stock);
+        if (index > -1) {
+          displayStocks.splice(index, 1);
+        }
       }
-    }
-    console.log(this.state.displayStocks);
+      return {displayStocks: displayStocks};
+    });
   }
+
 }
 
-function list(arr){
+function list(arr, id_prefix=''){
+  console.log(id_prefix);
   return arr.map(elem =>
-    <div key={elem.id}>{elem.name}</div>
+    <div key={id_prefix+elem.id} id={id_prefix+elem.id}>{elem.name}</div>
   )
 }
 
