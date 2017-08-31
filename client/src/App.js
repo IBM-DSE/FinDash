@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { ToggleButtonGroup, ToggleButton } from 'react-bootstrap';
 import StockChart from './StockChart';
 import ClientList from './ClientList';
 import './App.css';
@@ -57,25 +58,23 @@ class App extends Component {
     let categories = Object.keys(stocks);
     let width = (12/categories.length).toString();
     return (categories.map(category =>
-      <div className={"col-md-"+width}>
-        <div className="stock-list">
-          <h3>{category}</h3>
+      <div key={"category-"+category} className={"col-md-"+width}>
+        <h3>{category}</h3>
+        <ToggleButtonGroup type="checkbox" className="full-width">
           {this.stockList(stocks[category])}
-        </div>
+        </ToggleButtonGroup>
       </div>
     ));
   }
 
   stockList(arr) {
     return (arr.map(elem =>
-      <div key={elem.id}>
-        <input type="checkbox" defaultChecked={this.state.displayStocks.includes(elem.id)} onChange={this.toggleCheckbox} id={elem.id}></input> {elem.name}
-      </div>
+      <ToggleButton key={elem.id} value={elem.id} className="btn-stock" onChange={this.toggleCheckbox} block>{elem.name}</ToggleButton>
     ));
   }
 
   toggleCheckbox(event) {
-    let stock = event.target.id;
+    let stock = event.target.value;
     let add = event.target.checked;
     this.setState(function(prevState) {
       let displayStocks = prevState.displayStocks.slice(0);
