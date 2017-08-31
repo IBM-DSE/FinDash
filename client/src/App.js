@@ -19,10 +19,10 @@ class App extends Component {
   }
 
   componentDidMount() {
-    fetch('/users/clients')
+    fetch('/api/users/clients')
       .then(res => res.json())
       .then(clients => this.setState({ clients }));
-    fetch('/stocks')
+    fetch('/api/stocks')
       .then(res => res.json())
       .then(stocks => this.setState({ stocks }));
   }
@@ -115,7 +115,7 @@ class StockChart extends Component {
   componentWillReceiveProps(nextProps) {
     let new_stock = arr_diff(nextProps.displayStocks, this.props.displayStocks);
     if(new_stock){
-      fetch('/stocks/'+new_stock).then(res => res.json())
+      fetch('/api/stocks/'+new_stock).then(res => res.json())
         .then(stock_data => this.updateChartData(stock_data));
     } else {
       let del_stock = arr_diff(this.props.displayStocks, nextProps.displayStocks);
