@@ -1,16 +1,14 @@
-var express = require('express');
-var router = express.Router();
+let express = require('express');
+let router = express.Router();
+let fs = require('fs');
+let path = require('path');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
-
-  res.json([{
-    id: 1,
-    name: "Tim Chef"
-  }, {
-    id: 2,
-    name: "Jefferey Bayzos"
-  }]);
+  let jsonPath = path.join(__dirname, '..', 'data', 'users.json');
+  fs.readFile(jsonPath, 'utf8', function(err, data) {
+    res.json(JSON.parse(data));
+  });
 });
 
 module.exports = router;
