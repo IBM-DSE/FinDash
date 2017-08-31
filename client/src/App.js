@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import StockChart from './StockChart';
+import ClientList from './ClientList';
 import './App.css';
 
 class App extends Component {
@@ -8,7 +9,6 @@ class App extends Component {
     this.stock_list = this.stock_list.bind(this);
     this.toggleCheckbox = this.toggleCheckbox.bind(this);
     this.state = {
-      clients: [],
       stocks: {
         auto_stocks: [],
         airline_stocks: [],
@@ -19,9 +19,6 @@ class App extends Component {
   }
 
   componentDidMount() {
-    fetch('/api/users/clients')
-      .then(res => res.json())
-      .then(clients => this.setState({ clients }));
     fetch('/api/stocks')
       .then(res => res.json())
       .then(stocks => this.setState({ stocks }));
@@ -56,7 +53,7 @@ class App extends Component {
             </div>
             <div className="col-md-4">
               <h2>Clients</h2>
-              {clientList(this.state.clients)}
+              <ClientList />
             </div>
           </div>
         </div>
@@ -89,14 +86,6 @@ class App extends Component {
     });
   }
 
-}
-
-function clientList(arr){
-  return arr.map(client =>
-    <button key={'client-'+client.id} className="btn btn-lg btn-default btn-client">
-      <img src={"/images/"+client.image} className="btn-client-img"/> {client.name}
-    </button>
-  )
 }
 
 export default App;
