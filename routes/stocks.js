@@ -8,9 +8,10 @@ const hotel_stocks = ["MAR", "HLT", "H", "MGM", "LVS", "WYN", "WYNN", "STAY", "I
 
 router.get('/', function(req, res, next) {
   res.json({
-    "auto_stocks": list(auto_stocks),
-    "airline_stocks": list(airline_stocks),
-    "hotel_stocks": list(hotel_stocks),
+    "Auto": list(auto_stocks),
+    "Airlines": list(airline_stocks),
+    "Hotels": list(hotel_stocks),
+    "Tech": [{id: 'AMZN', name: 'Amazon'}]
   });
 });
 

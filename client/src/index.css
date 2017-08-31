@@ -4,6 +4,11 @@ body {
   font-family: sans-serif;
 }
 
+.stock-list {
+  padding-left: 45%;
+  text-align: left;
+}
+
 .btn-client {
   width: 100%;
   margin-top: 20px;

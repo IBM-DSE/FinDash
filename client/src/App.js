@@ -6,14 +6,12 @@ import './App.css';
 class App extends Component {
   constructor(props) {
     super(props);
-    this.stock_list = this.stock_list.bind(this);
+    this.stockPanel = this.stockPanel.bind(this);
+    this.stockCategories = this.stockCategories.bind(this);
+    this.stockList = this.stockList.bind(this);
     this.toggleCheckbox = this.toggleCheckbox.bind(this);
     this.state = {
-      stocks: {
-        auto_stocks: [],
-        airline_stocks: [],
-        hotel_stocks: []
-      },
+      stocks: {},
       displayStocks: []
     };
   }
@@ -34,26 +32,14 @@ class App extends Component {
 
               <h2>Stocks</h2>
               <StockChart displayStocks={displayStocks} />
-
-              <div className="row">
-                <div className="col-md-4">
-                  <h3>Auto</h3>
-                  {this.stock_list(this.state.stocks.auto_stocks)}
-                </div>
-                <div className="col-md-4">
-                  <h3>Airlines</h3>
-                  {this.stock_list(this.state.stocks.airline_stocks)}
-                </div>
-                <div className="col-md-4">
-                  <h3>Hotels</h3>
-                  {this.stock_list(this.state.stocks.hotel_stocks)}
-                </div>
-              </div>
+              {this.stockPanel()}
 
             </div>
             <div className="col-md-4">
+
               <h2>Clients</h2>
               <ClientList />
+
             </div>
           </div>
         </div>
@@ -61,12 +47,31 @@ class App extends Component {
     );
   }
 
-  stock_list(arr) {
-    return arr.map(elem =>
+  stockPanel() {
+    return <div className="row">
+      {this.stockCategories(this.state.stocks)}
+    </div>
+  }
+
+  stockCategories(stocks) {
+    let categories = Object.keys(stocks);
+    let width = (12/categories.length).toString();
+    return (categories.map(category =>
+      <div className={"col-md-"+width}>
+        <div className="stock-list">
+          <h3>{category}</h3>
+          {this.stockList(stocks[category])}
+        </div>
+      </div>
+    ));
+  }
+
+  stockList(arr) {
+    return (arr.map(elem =>
       <div key={elem.id}>
         <input type="checkbox" defaultChecked={this.state.displayStocks.includes(elem.id)} onChange={this.toggleCheckbox} id={elem.id}></input> {elem.name}
       </div>
-    )
+    ));
   }
 
   toggleCheckbox(event) {
