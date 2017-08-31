@@ -8,7 +8,7 @@ class App extends Component {
     this.stock_list = this.stock_list.bind(this);
     this.toggleCheckbox = this.toggleCheckbox.bind(this);
     this.state = {
-      users: [],
+      clients: [],
       stocks: {
         auto_stocks: [],
         airline_stocks: [],
@@ -19,9 +19,9 @@ class App extends Component {
   }
 
   componentDidMount() {
-    fetch('/users')
+    fetch('/users/clients')
       .then(res => res.json())
-      .then(users => this.setState({ users }));
+      .then(clients => this.setState({ clients }));
     fetch('/stocks')
       .then(res => res.json())
       .then(stocks => this.setState({ stocks }));
@@ -56,7 +56,7 @@ class App extends Component {
             </div>
             <div className="col-md-4">
               <h2>Clients</h2>
-              {list(this.state.users, 'client-')}
+              {clientList(this.state.clients)}
             </div>
           </div>
         </div>
@@ -91,9 +91,11 @@ class App extends Component {
 
 }
 
-function list(arr, id_prefix=''){
-  return arr.map(elem =>
-    <div key={id_prefix+elem.id} id={id_prefix+elem.id}>{elem.name}</div>
+function clientList(arr){
+  return arr.map(client =>
+    <button key={'client-'+client.id} className="btn btn-lg btn-default btn-client">
+      <img src={"/images/"+client.image} className="btn-client-img"/> {client.name}
+    </button>
   )
 }
 
