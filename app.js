@@ -36,9 +36,9 @@ app.use(sassMiddleware({
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'client/build')));
 } else {
-  app.use(express.static(path.join(__dirname, 'public')));
   app.use('/', index);
 }
+app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/users', users);
 app.use('/api/stocks', stocks);
 
