@@ -28,15 +28,17 @@ class StockChart extends Component {
   render() { return (<Line data={this.state.chartData} />); }
 
   addChartData(stock_data){
-    let chartData = this.state.chartData;
-    chartData.labels = stock_data.dates;
+    if(stock_data.dates.length > 0 && stock_data.prices.length > 0){
+      let chartData = this.state.chartData;
+      chartData.labels = stock_data.dates;
 
-    let dataset = JSON.parse(orig_dataset);
-    dataset.label = stock_data.stock;
-    dataset.data = stock_data.prices;
-    chartData.datasets.push(dataset);
+      let dataset = JSON.parse(orig_dataset);
+      dataset.label = stock_data.stock;
+      dataset.data = stock_data.prices;
+      chartData.datasets.push(dataset);
 
-    this.setState({ chartData })
+      this.setState({ chartData })
+    }
   }
 
   removeChartData(stock) {
