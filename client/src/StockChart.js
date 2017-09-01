@@ -4,8 +4,8 @@ import {Line} from 'react-chartjs-2';
 class StockChart extends Component {
   constructor(props) {
     super(props);
-    this.updateChartData = this.updateChartData.bind(this);
-    this.removeStock = this.removeStock.bind(this);
+    this.addChartData = this.addChartData.bind(this);
+    this.removeChartData = this.removeChartData.bind(this);
     this.state = {
       chartData: {
         labels: [],
@@ -18,16 +18,16 @@ class StockChart extends Component {
     let new_stock = arr_diff(nextProps.displayStocks, this.props.displayStocks);
     if(new_stock){
       fetch('/api/stocks/'+new_stock).then(res => res.json())
-        .then(stock_data => this.updateChartData(stock_data));
+        .then(stock_data => this.addChartData(stock_data));
     } else {
       let del_stock = arr_diff(this.props.displayStocks, nextProps.displayStocks);
-      if(del_stock) { this.removeStock(del_stock); }
+      if(del_stock) { this.removeChartData(del_stock); }
     }
   }
 
   render() { return (<Line data={this.state.chartData} />); }
 
-  updateChartData(stock_data){
+  addChartData(stock_data){
     let chartData = this.state.chartData;
     chartData.labels = stock_data.dates;
 
@@ -39,7 +39,7 @@ class StockChart extends Component {
     this.setState({ chartData })
   }
 
-  removeStock(stock) {
+  removeChartData(stock) {
     let chartData = this.state.chartData;
     let newDatasets = [];
     for(let i in chartData.datasets){
