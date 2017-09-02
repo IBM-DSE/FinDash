@@ -44,13 +44,17 @@ class StockChart extends Component {
   addChartData(stock_data){
     if(stock_data.dates.length > 0 && stock_data.prices.length > 0){
       let chartData = this.state.chartData;
-      chartData.labels = stock_data.dates;
+
+      let startInd = binSearch(chartData.labels[0], stock_data.dates);
+      let endInd = binSearch(chartData.labels[chartData.labels.length-1], stock_data.dates);
+
+      chartData.labels = stock_data.dates.slice(startInd, endInd+1);
 
       let dataset = JSON.parse(orig_dataset);
       dataset.label = stock_data.stock;
-      dataset.data = stock_data.prices;
-      chartData.datasets.push(dataset);
+      dataset.data = stock_data.prices.slice(startInd, endInd+1);
 
+      chartData.datasets.push(dataset);
       this.setState({ chartData })
     }
   }
@@ -92,6 +96,25 @@ const orig_dataset = JSON.stringify({
 
 function arr_diff(arr1, arr2){
   return arr1.filter(x => !arr2.includes(x))[0];
+}
+
+// From https://stackoverflow.com/questions/8584902/get-closest-number-out-of-array
+function binSearch(num, arr) {
+  let mid;
+  let lo = 0;
+  let hi = arr.length - 1;
+  while (hi - lo > 1) {
+    mid = Math.floor ((lo + hi) / 2);
+    if (arr[mid] < num) {
+      lo = mid;
+    } else {
+      hi = mid;
+    }
+  }
+  if (num - arr[lo] <= arr[hi] - num) {
+    return arr[lo];
+  }
+  return hi;
 }
 
 export default StockChart;
