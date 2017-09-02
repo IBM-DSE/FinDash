@@ -26,7 +26,7 @@ class ClientList extends Component {
 function clientList(arr){
   return arr.map(client =>
     <button key={'client-'+client.id} className="btn btn-lg btn-default btn-client">
-      <img src={"/images/"+client.image} className="btn-client-img"/> {client.name}
+      <img src={"/images/"+client.image} alt={'client-'+client.id} className="btn-client-img"/> {client.name}
     </button>
   )
 }

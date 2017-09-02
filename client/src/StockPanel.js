@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { ToggleButtonGroup, ToggleButton, Button, Glyphicon } from 'react-bootstrap';
+import { Button, ToggleButton, ToggleButtonGroup, Glyphicon } from 'react-bootstrap';
 import StockChart from './StockChart';
 import './daterangepicker.css';
 let DateRangePicker = require('react-bootstrap-daterangepicker');
@@ -38,10 +38,10 @@ class StockPanel extends Component {
 
         <StockChart displayStocks={this.state.displayStocks} startDate={start} endDate={end} />
 
+        <label>Date Range:</label>{' '}
         <DateRangePicker startDate={this.state.startDate} endDate={this.state.endDate} onApply={this.setDates}>
-          <Button className="selected-date-range-btn" style={{width:'100%'}}>
-            <div className="pull-left"><Glyphicon glyph="calendar" /></div>
-            <div className="pull-right"><span>{label}</span> <span className="caret"></span></div>
+          <Button className="selected-date-range-btn">
+            <div className="pull-left"><Glyphicon glyph="calendar" /> <span>{label}</span> <span className="caret"></span></div>
           </Button>
         </DateRangePicker>
 
