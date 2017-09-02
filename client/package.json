@@ -7,9 +7,12 @@
     "chart.js": "^2.5.0",
     "react": "^15.6.1",
     "react-bootstrap": "^0.31.2",
+    "react-bootstrap-daterangepicker": "^3.4.1",
     "react-chartjs-2": "^2.6.1",
     "react-dom": "^15.6.1",
-    "react-scripts": "1.0.11"
+    "react-scripts": "1.0.11",
+    "twix": "^1.2.0",
+    "moment": "latest"
   },
   "scripts": {
     "start": "react-scripts start",

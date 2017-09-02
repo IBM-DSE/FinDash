@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import {Line} from 'react-chartjs-2';
+let moment = require('moment');
+require('twix');
 
 class StockChart extends Component {
   constructor(props) {
@@ -15,6 +17,7 @@ class StockChart extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    this.setDateRange(nextProps.startDate, nextProps.endDate);
     let new_stock = arr_diff(nextProps.displayStocks, this.props.displayStocks);
     if(new_stock){
       fetch('/api/stocks/'+new_stock).then(res => res.json())
@@ -26,6 +29,17 @@ class StockChart extends Component {
   }
 
   render() { return (<Line data={this.state.chartData} />); }
+
+  setDateRange(startDate, endDate){
+    let itr = moment.twix(startDate,endDate).iterate("days");
+    let range=[];
+    while(itr.hasNext()){
+      range.push(itr.next().format('YYYY-MM-DD'))
+    }
+    let chartData = this.state.chartData;
+    chartData.labels = range;
+    this.setState({ chartData })
+  }
 
   addChartData(stock_data){
     if(stock_data.dates.length > 0 && stock_data.prices.length > 0){

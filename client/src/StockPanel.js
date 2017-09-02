@@ -1,17 +1,23 @@
 import React, { Component } from 'react';
-import { ToggleButtonGroup, ToggleButton } from 'react-bootstrap';
+import { ToggleButtonGroup, ToggleButton, Button, Glyphicon } from 'react-bootstrap';
 import StockChart from './StockChart';
+import './daterangepicker.css';
+let DateRangePicker = require('react-bootstrap-daterangepicker');
+let moment = require('moment');
 
 class StockPanel extends Component {
   constructor(props) {
     super(props);
+    this.setDates = this.setDates.bind(this);
     this.stockPanel = this.stockPanel.bind(this);
     this.stockCategories = this.stockCategories.bind(this);
     this.stockList = this.stockList.bind(this);
     this.toggleCheckbox = this.toggleCheckbox.bind(this);
     this.state = {
       stocks: {},
-      displayStocks: []
+      displayStocks: [],
+      startDate: moment("2017-07-01"),
+      endDate: moment("2017-08-15")
     };
   }
 
@@ -22,13 +28,33 @@ class StockPanel extends Component {
   }
 
   render() {
-    const displayStocks = this.state.displayStocks;
+    let start = this.state.startDate.format('YYYY-MM-DD');
+    let end = this.state.endDate.format('YYYY-MM-DD');
+    let label = start + ' - ' + end;
+    if (start === end) { label = start; }
+
     return(
       <div id="stock-panel">
-        <StockChart displayStocks={displayStocks} />
+
+        <StockChart displayStocks={this.state.displayStocks} startDate={start} endDate={end} />
+
+        <DateRangePicker startDate={this.state.startDate} endDate={this.state.endDate} onApply={this.setDates}>
+          <Button className="selected-date-range-btn" style={{width:'100%'}}>
+            <div className="pull-left"><Glyphicon glyph="calendar" /></div>
+            <div className="pull-right"><span>{label}</span> <span className="caret"></span></div>
+          </Button>
+        </DateRangePicker>
+
         {this.stockPanel()}
       </div>
     );
+  }
+
+  setDates(event, picker) {
+    this.setState({
+      startDate: picker.startDate,
+      endDate:   picker.endDate
+    });
   }
 
   stockPanel() {
