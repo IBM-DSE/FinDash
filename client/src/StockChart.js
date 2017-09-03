@@ -6,9 +6,17 @@ require('twix');
 class StockChart extends Component {
   constructor(props) {
     super(props);
-    this.addChartData = this.addChartData.bind(this);
+    this.addStockData = this.addStockData.bind(this);
+    this.updateDateRange = this.updateDateRange.bind(this);
+    this.updateChartData = this.updateChartData.bind(this);
     this.removeChartData = this.removeChartData.bind(this);
     this.state = {
+      stockData: {
+        dates: [],
+        prices: [],
+        startInd: 0,
+        endInd: 0
+      },
       chartData: {
         labels: [],
         datasets: []
@@ -16,46 +24,88 @@ class StockChart extends Component {
     };
   }
 
-  componentWillReceiveProps(nextProps) {
-    this.setDateRange(nextProps.startDate, nextProps.endDate);
-    let new_stock = arr_diff(nextProps.displayStocks, this.props.displayStocks);
-    if(new_stock){
-      fetch('/api/stocks/'+new_stock).then(res => res.json())
-        .then(stock_data => this.addChartData(stock_data));
-    } else {
-      let del_stock = arr_diff(this.props.displayStocks, nextProps.displayStocks);
-      if(del_stock) { this.removeChartData(del_stock); }
-    }
-  }
-
   render() { return (<Line data={this.state.chartData} />); }
 
-  setDateRange(startDate, endDate){
-    let itr = moment.twix(startDate,endDate).iterate("days");
-    let range=[];
-    while(itr.hasNext()){
-      range.push(itr.next().format('YYYY-MM-DD'))
-    }
-    let chartData = this.state.chartData;
-    chartData.labels = range;
-    this.setState({ chartData })
+  // Component will receive new props, either new display stock or new date ranges
+  componentWillReceiveProps(nextProps) {
+    if(nextProps.displayStocks.length > 0){
+      let new_stock = arr_diff(nextProps.displayStocks, this.props.displayStocks);
+      if(new_stock){
+        fetch('/api/stocks/'+new_stock).then(res => res.json())
+          .then(new_stock_data => this.addStockData(new_stock_data))
+      } else {
+        let del_stock = arr_diff(this.props.displayStocks, nextProps.displayStocks);
+        if(del_stock) { this.removeChartData(del_stock); }
+        else { this.updateDateRange(); }
+      }
+    } else
+      this.updateDateRange();
   }
 
-  addChartData(stock_data){
-    if(stock_data.dates.length > 0 && stock_data.prices.length > 0){
+  updateDateRange(new_stock=null) {
+    let startDate = this.props.startDate;
+    let endDate = this.props.endDate;
+
+    let chartData = this.state.chartData;
+    let stockData = this.state.stockData;
+
+    if(this.state.stockData.dates.length === 0){
+      let itr = moment.twix(startDate,endDate).iterate("days");
+      let range=[];
+      while(itr.hasNext()){ range.push(itr.next().format('YYYY-MM-DD')); }
+      chartData.labels = range;
+    } else {
+      let startInd = binSearch(startDate, stockData.dates);
+      let endInd = binSearch(endDate, stockData.dates);
+      stockData.startInd = startInd; stockData.endInd = endInd;
+      this.setState({ stockData });
+      chartData.labels = stockData.dates.slice(startInd, endInd+1);
+    }
+    this.setState({ chartData });
+    if(new_stock) this.updateChartData(new_stock);
+  }
+
+  // Take the new api stock data and add it to the current state
+  addStockData(new_stock_data) {
+    let stockData = this.state.stockData;
+    let newStockPrices = new_stock_data.prices;
+
+    let updateDates = false;
+    if (stockData.dates.length === 0) { // if this is the first stock we are adding
+      stockData.dates = new_stock_data.dates; // update our state with the new stock data dates
+      updateDates = true;                     // then update the date range
+    }
+    else if ( !(stockData.dates[0] === new_stock_data.dates[0] &&  // check that the stock dates are consistent
+                stockData.dates.length === new_stock_data.dates.length &&
+                stockData.dates[stockData.dates.length-1] === new_stock_data.dates[new_stock_data.dates.length - 1]))
+      console.error('Stock date ranges are inconsistent!');
+
+    // add the new stock prices to our state
+    let new_stock = {};
+    new_stock[new_stock_data.stock] = newStockPrices;
+    stockData.prices.push( new_stock );
+    this.setState({ stockData });
+
+    // Update the date range first or directly update the chart data
+    if(updateDates) this.updateDateRange(new_stock);
+    else this.updateChartData(new_stock);
+  }
+
+  // add the new stock data to the ChartData
+  updateChartData(new_stock){
+    let stockName = Object.keys(new_stock)[0];
+    let stockPrices = new_stock[stockName];
+    if(stockPrices.length > 0){  // if we have some stock data
       let chartData = this.state.chartData;
 
-      let startInd = binSearch(chartData.labels[0], stock_data.dates);
-      let endInd = binSearch(chartData.labels[chartData.labels.length-1], stock_data.dates);
-
-      chartData.labels = stock_data.dates.slice(startInd, endInd+1);
-
+      // create a new chart dataset for the new stock
       let dataset = JSON.parse(orig_dataset);
-      dataset.label = stock_data.stock;
-      dataset.data = stock_data.prices.slice(startInd, endInd+1);
+      dataset.label = stockName;
+      dataset.data = stockPrices.slice(this.state.stockData.startInd, this.state.stockData.endInd+1);
 
+      // add the dataset to the chartData and update the state
       chartData.datasets.push(dataset);
-      this.setState({ chartData })
+      this.setState({ chartData });
     }
   }
 
