@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { BrowserRouter as Router, Route } from 'react-router-dom'
 import StockPanel from './StockPanel';
 import ClientList from './ClientList';
+import ClientPage from './ClientPage';
 import './App.css';
 
 class App extends Component {
@@ -12,6 +13,7 @@ class App extends Component {
         <div className="App">
           <Route exact path="/" component={Home}/>
           <Route path="/about" component={About}/>
+          <Route path={`/clients/:clientId`} component={ClientPage}/>
         </div>
       </Router>
     );
