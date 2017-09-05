@@ -1,58 +1,42 @@
 {
   "clients" : [
     {
-      "id"     : "253895473",
-      "job"    : "Client 107",
-      "source" : "twitter",
+      "id"     : "1000016",
       "name"   : "Leo Rakes",
       "image"  : "profiles/11M.jpg"
     },
     {
-      "job"    : "Client 108",
-      "id"     : "42383441",
-      "source" : "twitter",
+      "id"     : "1000012",
       "name"   : "Frieda Freya Matthews",
       "image"  : "profiles/19F.jpg"
     },
     {
-      "job"    : "Client 109",
-      "id"     : "9642782",
-      "source" : "twitter",
+      "id"     : "1000027",
       "name"   : "Odelia Howie Morrish",
       "image"  : "profiles/14F.jpg"
     },
     {
-      "job"    : "Client 110",
-      "id"     : "30614676",
-      "source" : "twitter",
+      "id"     : "1000005",
       "name"   : "Nigel Vaughn Randall",
       "image"  : "profiles/2M.jpg"
     },
     {
-      "job"    : "Client 111",
-      "id"     : "24606439",
-      "source" : "twitter",
+      "id"     : "1000029",
       "name"   : "Cari Diantha Victor",
       "image"  : "profiles/15F.jpg"
     },
     {
-      "job"    : "Client 112",
-      "id"     : "397689316",
-      "source" : "twitter",
+      "id"     : "1000028",
       "name"   : "Catalina Santos",
       "image"  : "profiles/9F.jpg"
     },
     {
-      "job"    : "Client 113",
-      "id"     : "122916625",
-      "source" : "twitter",
+      "id"     : "1000025",
       "name"   : "Thomas Grönholm",
       "image"  : "profiles/3M.jpg"
     },
     {
-      "job"    : "Client 114",
-      "id"     : "14554154",
-      "source" : "twitter",
+      "id"     : "1000021",
       "name"   : "Liliana Harrietta Hunnisett",
       "image"  : "profiles/10F.jpg"
     }
