@@ -10,10 +10,12 @@ class StockChart extends Component {
     this.updateDateRange = this.updateDateRange.bind(this);
     this.updateChartData = this.updateChartData.bind(this);
     this.removeChartData = this.removeChartData.bind(this);
+    this.toggleNormalization = this.toggleNormalization.bind(this);
     this.state = {
       stockData: {
         dates: [],
         prices: {},
+        normalized: false,
         startInd: 0,
         endInd: 0
       },
@@ -29,7 +31,12 @@ class StockChart extends Component {
   }
 
   render() { return (
-    <Line data={this.state.chartData} />);
+    <div id="stock-chart">
+      <div className="checkbox"><label style={{textAlign: 'left'}}>
+        <input type="checkbox" onChange={this.toggleNormalization} /> Normalize</label>
+      </div>
+      <Line data={this.state.chartData} />
+    </div>);
   }
 
   // Component will receive new props, either new display stock or new date ranges
@@ -63,7 +70,7 @@ class StockChart extends Component {
       stockData.startInd = startInd; stockData.endInd = endInd;
       this.setState({ stockData });
       chartData.labels = stockData.dates.slice(startInd, endInd+1);
-      let new_datasets = chartData.datasets.map(function(dataset) {
+      chartData.datasets.map(function(dataset) {
         dataset.data = stockData.prices[dataset.label].slice(startInd, endInd+1);
         return dataset;
       });
@@ -101,12 +108,14 @@ class StockChart extends Component {
     let stockName = new_stock_data.stock;
     let stockPrices = new_stock_data.prices;
     if(stockPrices.length > 0){  // if we have some stock data
+      let stockData = this.state.stockData;
       let chartData = this.state.chartData;
 
       // create a new chart dataset for the new stock
       let dataset = JSON.parse(orig_dataset);
       dataset.label = stockName;
-      dataset.data = stockPrices.slice(this.state.stockData.startInd, this.state.stockData.endInd+1);
+      dataset.data = stockData.prices[dataset.label].slice(stockData.startInd, stockData.endInd+1);
+      if(stockData.normalized){ dataset = normalizeChartDataset(dataset, stockData); }
 
       // add the dataset to the chartData and update the state
       chartData.datasets.push(dataset);
@@ -124,6 +133,29 @@ class StockChart extends Component {
     }
     chartData.datasets = newDatasets;
     this.setState({ chartData })
+  }
+
+  toggleNormalization(event) {
+    let stockData = this.state.stockData;
+    let chartData = this.state.chartData;
+
+    stockData.normalized = event.target.checked;
+    this.setState({ stockData });
+
+    chartData.datasets.map(function(dataset) { return normalizeChartDataset(dataset, stockData); });
+    this.setState({ chartData });
+  }
+}
+
+function normalizeChartDataset(dataset, stockData) {
+
+  if(stockData.normalized){
+    let factor = 100.0/dataset.data[0];
+    dataset.data = dataset.data.map(function(val) { return factor*val;});
+    return dataset;
+  } else {
+    dataset.data = stockData.prices[dataset.label].slice(stockData.startInd, stockData.endInd+1);
+    return dataset;
   }
 }
 
