@@ -3,3 +3,29 @@ body {
   padding: 0;
   font-family: sans-serif;
 }
+
+.full-width {
+  width: 100%;
+}
+
+.btn-stock.active {
+  color: white;
+  background-color: #337ab7;
+  border-color: #122b40;
+}
+
+.btn-stock.active:hover {
+  color: white;
+  background-color: #204d74;
+  border-color: #122b40;
+}
+
+.btn-client {
+  width: 100%;
+  margin-top: 20px;
+  text-align: left;
+}
+
+.btn-client-img {
+  max-width: 60px;
+}

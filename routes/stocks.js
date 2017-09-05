@@ -8,18 +8,20 @@ const hotel_stocks = ["MAR", "HLT", "H", "MGM", "LVS", "WYN", "WYNN", "STAY", "I
 
 router.get('/', function(req, res, next) {
   res.json({
-    "auto_stocks": list(auto_stocks),
-    "airline_stocks": list(airline_stocks),
-    "hotel_stocks": list(hotel_stocks),
+    "Auto": list(auto_stocks),
+    "Airlines": list(airline_stocks),
+    "Hotels": list(hotel_stocks),
+    "Tech": [{id: 'AMZN', name: 'Amazon'}]
   });
 });
 
 // dashDB query
 let ibmdb = require("ibm_db"),
-  connString = ";HOSTNAME="+process.env.DB_HOST+ ";PORT="+process.env.DB_PORT+
-    ";UID=" +process.env.DB_USER+";PWD="+process.env.DB_PASS+
-    ";DATABASE="+process.env.DB_BASE+";PROTOCOL=TCPIP";
-const queryString = "SELECT SYMBOL,TRADE_DATE,CLOSE_PRICE from STOCK_TRADES WHERE \"SYMBOL\"='X'";
+  connString =  ";HOSTNAME="+process.env.DB_HOST+ ";PORT="+process.env.DB_PORT+
+                ";UID=" +process.env.DB_USER+";PWD="+process.env.DB_PASS+
+                ";DATABASE="+process.env.DB_BASE+";PROTOCOL=TCPIP";
+const queryString = "SELECT SYMBOL,TRADE_DATE,CLOSE_PRICE from STOCK_TRADES WHERE (\"SYMBOL\"='X' " +
+  "AND TRADE_DATE >= '2014-08-18' AND TRADE_DATE <= '2017-08-11') ORDER BY TRADE_DATE";
 const pos = queryString.indexOf('X');
 
 router.get('/:stock', function(req, res, next) {

@@ -4,7 +4,7 @@
   "private": true,
   "engines": {
     "node": "8.3.x",
-    "npm": "5.3.x"
+    "npm": "5.4.x"
   },
   "scripts": {
     "start": "node ./bin/www",
@@ -26,7 +26,9 @@
     "react-chartjs-2": "^2.6.1",
     "react-dom": "^15.6.1",
     "react-scripts": "1.0.11",
-    "serve-favicon": "~2.4.2"
+    "serve-favicon": "~2.4.2",
+    "twix": "^1.2.0",
+    "moment": "latest"
   },
   "devDependencies": {
     "dotenv": "latest"
