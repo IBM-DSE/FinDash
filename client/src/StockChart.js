@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Line} from 'react-chartjs-2';
+import { Line } from 'react-chartjs-2';
 let moment = require('moment');
 require('twix');
 
@@ -13,7 +13,7 @@ class StockChart extends Component {
     this.state = {
       stockData: {
         dates: [],
-        prices: [],
+        prices: {},
         startInd: 0,
         endInd: 0
       },
@@ -24,32 +24,35 @@ class StockChart extends Component {
     };
   }
 
-  render() { return (<Line data={this.state.chartData} />); }
+  componentDidMount() {
+    this.updateDateRange(this.props.startDate, this.props.endDate);
+  }
+
+  render() { return (
+    <Line data={this.state.chartData} />);
+  }
 
   // Component will receive new props, either new display stock or new date ranges
   componentWillReceiveProps(nextProps) {
-    if(nextProps.displayStocks.length > 0){
-      let new_stock = arr_diff(nextProps.displayStocks, this.props.displayStocks);
-      if(new_stock){
-        fetch('/api/stocks/'+new_stock).then(res => res.json())
-          .then(new_stock_data => this.addStockData(new_stock_data))
-      } else {
-        let del_stock = arr_diff(this.props.displayStocks, nextProps.displayStocks);
-        if(del_stock) { this.removeChartData(del_stock); }
-        else { this.updateDateRange(); }
-      }
-    } else
-      this.updateDateRange();
+
+    let new_stock = arr_diff(nextProps.displayStocks, this.props.displayStocks);
+    let del_stock = arr_diff(this.props.displayStocks, nextProps.displayStocks);
+    if (new_stock){
+      fetch('/api/stocks/'+new_stock).then(res => res.json())
+        .then(new_stock_data => this.addStockData(new_stock_data))
+    } else if (del_stock) {
+      this.removeChartData(del_stock);
+    } else if (this.props.startDate !== nextProps.startDate || this.props.endDate !== nextProps.endDate){
+      this.updateDateRange(nextProps.startDate, nextProps.endDate);
+    }
   }
 
-  updateDateRange(new_stock=null) {
-    let startDate = this.props.startDate;
-    let endDate = this.props.endDate;
+  updateDateRange(startDate, endDate, new_stock=null) {
 
     let chartData = this.state.chartData;
     let stockData = this.state.stockData;
 
-    if(this.state.stockData.dates.length === 0){
+    if (this.state.stockData.dates.length === 0) {
       let itr = moment.twix(startDate,endDate).iterate("days");
       let range=[];
       while(itr.hasNext()){ range.push(itr.next().format('YYYY-MM-DD')); }
@@ -60,6 +63,10 @@ class StockChart extends Component {
       stockData.startInd = startInd; stockData.endInd = endInd;
       this.setState({ stockData });
       chartData.labels = stockData.dates.slice(startInd, endInd+1);
+      let new_datasets = chartData.datasets.map(function(dataset) {
+        dataset.data = stockData.prices[dataset.label].slice(startInd, endInd+1);
+        return dataset;
+      });
     }
     this.setState({ chartData });
     if(new_stock) this.updateChartData(new_stock);
@@ -81,20 +88,18 @@ class StockChart extends Component {
       console.error('Stock date ranges are inconsistent!');
 
     // add the new stock prices to our state
-    let new_stock = {};
-    new_stock[new_stock_data.stock] = newStockPrices;
-    stockData.prices.push( new_stock );
+    stockData.prices[new_stock_data.stock] = newStockPrices;
     this.setState({ stockData });
 
     // Update the date range first or directly update the chart data
-    if(updateDates) this.updateDateRange(new_stock);
-    else this.updateChartData(new_stock);
+    if(updateDates) this.updateDateRange(this.props.startDate, this.props.endDate, new_stock_data);
+    else this.updateChartData(new_stock_data);
   }
 
   // add the new stock data to the ChartData
-  updateChartData(new_stock){
-    let stockName = Object.keys(new_stock)[0];
-    let stockPrices = new_stock[stockName];
+  updateChartData(new_stock_data){
+    let stockName = new_stock_data.stock;
+    let stockPrices = new_stock_data.prices;
     if(stockPrices.length > 0){  // if we have some stock data
       let chartData = this.state.chartData;
 

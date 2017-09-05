@@ -17,9 +17,9 @@ router.get('/', function(req, res, next) {
 
 // dashDB query
 let ibmdb = require("ibm_db"),
-  connString = ";HOSTNAME="+process.env.DB_HOST+ ";PORT="+process.env.DB_PORT+
-    ";UID=" +process.env.DB_USER+";PWD="+process.env.DB_PASS+
-    ";DATABASE="+process.env.DB_BASE+";PROTOCOL=TCPIP";
+  connString =  ";HOSTNAME="+process.env.DB_HOST+ ";PORT="+process.env.DB_PORT+
+                ";UID=" +process.env.DB_USER+";PWD="+process.env.DB_PASS+
+                ";DATABASE="+process.env.DB_BASE+";PROTOCOL=TCPIP";
 const queryString = "SELECT SYMBOL,TRADE_DATE,CLOSE_PRICE from STOCK_TRADES WHERE (\"SYMBOL\"='X' " +
   "AND TRADE_DATE >= '2014-08-18' AND TRADE_DATE <= '2017-08-11') ORDER BY TRADE_DATE";
 const pos = queryString.indexOf('X');
