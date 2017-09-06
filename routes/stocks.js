@@ -21,17 +21,19 @@ router.get('/', function(req, res, next) {
 
 // dashDB query
 let ibmdb = require("ibm_db"),
-  connString =  ";HOSTNAME="+process.env.DB_HOST+ ";PORT="+process.env.DB_PORT+
-                ";UID=" +process.env.DB_USER+";PWD="+process.env.DB_PASS+
+  connString =  ";HOSTNAME="+process.env.DB_HOST+";PORT="+process.env.DB_PORT+
+                ";UID="     +process.env.DB_USER+";PWD=" +process.env.DB_PASS+
                 ";DATABASE="+process.env.DB_BASE+";PROTOCOL=TCPIP";
 const queryString = "SELECT SYMBOL,TRADE_DATE,CLOSE_PRICE from STOCK_TRADES WHERE (\"SYMBOL\"='X' " +
-  "AND TRADE_DATE >= '2014-08-18' AND TRADE_DATE <= '2017-08-11') ORDER BY TRADE_DATE";
+  "AND TRADE_DATE >= '2015-10-21' AND TRADE_DATE <= '2017-08-11') ORDER BY TRADE_DATE";
 const pos = queryString.indexOf('X');
 
 router.get('/:stock', function(req, res, next) {
 
+  if(!(process.env.DB_HOST && process.env.DB_PORT && process.env.DB_USER && process.env.DB_PASS && process.env.DB_BASE))
+    return console.error('Missing Database ');
   ibmdb.open(connString, function (err, conn) {
-    if (err) return console.log(err);
+    if (err) return console.error(err);
 
     let query = queryString.slice(0, pos) + req.params.stock + queryString.slice(pos+1);
     conn.query(query, function (err, data) {
