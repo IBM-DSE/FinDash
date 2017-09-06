@@ -118,7 +118,6 @@ class StockChart extends Component {
       let color = getRandomColor();
       dataset.backgroundColor = dataset.borderColor = dataset.pointBorderColor =
         dataset.pointHoverBackgroundColor = dataset.pointHoverBorderColor = color;
-      // console.log("btn-"+stockName);
       document.getElementById("btn-"+stockName).style["background-color"] = color;
 
       dataset.data = stockData.prices[dataset.label].slice(stockData.startInd, stockData.endInd+1);

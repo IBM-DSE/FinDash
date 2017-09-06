@@ -38,8 +38,8 @@ class ClientPage extends Component {
           </div>
 
           <div className="col-md-5">
-            <div className="xl-vals">{client.name}</div>
-            <table className="table table-bordered align-right margin-top">
+            <div className="xx-large">{client.name}</div>
+            <table className="table table-bordered align-right margin-top larger">
               <tbody>
               {attributeRows(client, basicAttrs)}
               </tbody>
@@ -55,15 +55,40 @@ class ClientPage extends Component {
           <div className="col-md-1"></div>
 
           <div className="col-md-10">
-            <table className="table">
+            <table className="table larger">
               <thead>
               <tr className="center-headers">
                 {attributeCols(investorDisplayAttrs)}
               </tr>
               </thead>
               <tbody>
-              <tr className="big-vals">
+              <tr className="">
                 {attributeCols(investorAttrs, client)}
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div className="col-md-1"></div>
+        </div>
+
+        <br/><br/><br/>
+
+        <div className="row">
+          <div className="col-md-2"></div>
+
+          <div className="col-md-8">
+
+            <h3>Predicted Industry Affinity</h3>
+            <table className="table x-large">
+              <thead>
+              <tr className="center-headers">
+                {attributeCols(categories)}
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                {attributeCols(categories, predictions)}
               </tr>
               </tbody>
             </table>
@@ -138,7 +163,16 @@ const basicAttrs = [
 function formatAttrs(key, value){
   if(key === 'Income' || key === 'AccountBalance')
     return stringToCurrency(value);
-  else
+  else if(categories.includes(key)){
+    if(value === '95%')
+      return(<div>
+        {value} <span className="glyphicon glyphicon-arrow-up" style={{color: 'green'}}></span>
+      </div>);
+    else
+      return(<div>
+        {value} <span className="glyphicon glyphicon-arrow-down" style={{color: 'red'}}></span>
+      </div>);
+  } else
     return value;
 }
 
@@ -167,6 +201,15 @@ const stocks = {
     {"id":"AAPL","name":"Apple Inc."}
   ]
 };
+
+const predictions = {
+  'Auto': '95%',
+  'Tech': '84%',
+  'Airlines': '48%',
+  'Hotels': '31%'
+};
+
+const categories = Object.keys(predictions);
 
 function stringToCurrency(str) {
   let num = parseInt(str).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');

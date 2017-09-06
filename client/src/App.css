@@ -32,7 +32,7 @@
 }
 
 .margin-top {
-  margin-top: 33px;
+  margin-top: 18px;
 }
 
 .center-headers > th {
@@ -47,11 +47,19 @@
   text-align: center;
 }
 
-.big-vals {
+.larger {
+  font-size: larger;
+}
+
+.large {
   font-size: large;
 }
 
-.xl-vals {
+.x-large {
+  font-size: x-large;
+}
+
+.xx-large {
   font-size: xx-large;
 }
 
