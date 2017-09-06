@@ -26,3 +26,35 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+.big-img {
+  width: 100%;
+}
+
+.margin-top {
+  margin-top: 33px;
+}
+
+.center-headers > th {
+  text-align: center;
+}
+
+.align-right td {
+  text-align: right;
+}
+
+.align-right th {
+  text-align: center;
+}
+
+.big-vals {
+  font-size: large;
+}
+
+.xl-vals {
+  font-size: xx-large;
+}
+
+.solid-line {
+  border-top-color: lightgray;
+}
