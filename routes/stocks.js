@@ -1,23 +1,21 @@
+require('dotenv').config();
 let express = require('express');
 let router = express.Router();
 let fs = require('fs');
 let csv_parse = require('csv-parse');
 let path = require('path');
 
-const auto_stocks = ["F","TSLA","FCAU","TM","HMC","RACE","CARZ"];
-const airline_stocks = ["AAL","DAL","UAL","SKYW","JBLU","ALK","LUV","JETS"];
-const hotel_stocks = ["MAR", "HLT", "H", "MGM", "LVS", "WYN", "WYNN", "STAY", "IHG"];
+const auto_stocks = ['F','TSLA','FCAU','TM','HMC','RACE','CARZ'];
+const airline_stocks = ['AAL','DAL','UAL','SKYW','JBLU','ALK','LUV','JETS'];
+const hotel_stocks = ['MAR', 'HLT', 'H', 'MGM', 'LVS', 'WYN', 'WYNN', 'STAY', 'IHG'];
+const tech_stocks = ['AMZN', 'GOOGL', 'AAPL'];
 
 router.get('/', function(req, res, next) {
   res.json({
     "Auto": list(auto_stocks),
     "Airlines": list(airline_stocks),
     "Hotels": list(hotel_stocks),
-    "Tech": [
-      {id: 'AMZN', name: 'Amazon'},
-      {id: 'GOOGL', name: 'Alphabet Inc.'},
-      {id: 'AAPL', name: 'Apple Inc.'}
-    ]
+    "Tech": list(tech_stocks)
   });
 });
 
@@ -72,9 +70,9 @@ router.get('/news/:stock', function(req, res, next) {
 });
 
 function list(stocks){
-  return stocks.map(function(stock) { return {
-    id: stock,
-    name: stock
+  return stocks.map(function(symbol) {return {
+    id: symbol,
+    name: mapping[symbol] || symbol
   }});
 }
 
@@ -84,5 +82,18 @@ function getNews(callback) {
     csv_parse(file_data, {delimiter: '|', comment: '#', quote: false}, callback);
   });
 }
+
+const mapping = {
+  'F': 'Ford',
+  'TSLA': 'Tesla',
+  'FCAU': 'Fiat Chrysler',
+  'TM': 'Toyota',
+  'HMC': 'Honda',
+  'RACE': 'Ferrari NV',
+  'CARZ': 'Glbl Auto Idx',
+  'AMZN': 'Amazon',
+  'GOOGL': 'Alphabet',
+  'AAPL': 'Apple'
+};
 
 module.exports = router;

@@ -10,14 +10,8 @@ body {
 
 .btn-stock.active {
   color: white;
-  background-color: #337ab7;
-  border-color: #122b40;
-}
-
-.btn-stock.active:hover {
-  color: white;
-  background-color: #204d74;
-  border-color: #122b40;
+  background-color: #444444;
+  border-color: #444444;
 }
 
 .btn-client {

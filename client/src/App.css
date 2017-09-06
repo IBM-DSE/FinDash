@@ -58,3 +58,7 @@
 .solid-line {
   border-top-color: lightgray;
 }
+
+.align-left {
+  text-align: left;
+}

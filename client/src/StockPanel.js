@@ -17,7 +17,7 @@ class StockPanel extends Component {
     this.state = {
       stocks: props.stocks || {},
       displayStocks: [],
-      startDate: moment("2017-01-01"),
+      startDate: moment("2016-09-01"),
       endDate: moment("2017-08-15")
     };
   }
@@ -93,7 +93,7 @@ class StockPanel extends Component {
 
   stockList(arr) {
     return (arr.map(elem =>
-      <ToggleButton key={elem.id} value={elem.id} className="btn-stock" onChange={this.toggleCheckbox} block>
+      <ToggleButton key={elem.id} id={'btn-'+elem.id} value={elem.id} className="btn-stock" onChange={this.toggleCheckbox} block>
         {elem.name === elem.id ? elem.name : elem.name+" ("+elem.id+")"}
       </ToggleButton>
     ));

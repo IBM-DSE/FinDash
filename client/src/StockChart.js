@@ -32,7 +32,7 @@ class StockChart extends Component {
 
   render() { return (
     <div id="stock-chart">
-      <div className="checkbox"><label style={{textAlign: 'left'}}>
+      <div className="checkbox align-left"><label style={{textAlign: 'left'}}>
         <input type="checkbox" onChange={this.toggleNormalization} /> Normalize</label>
       </div>
       <Line data={this.state.chartData} />
@@ -114,6 +114,13 @@ class StockChart extends Component {
       // create a new chart dataset for the new stock
       let dataset = JSON.parse(orig_dataset);
       dataset.label = stockName;
+
+      let color = getRandomColor();
+      dataset.backgroundColor = dataset.borderColor = dataset.pointBorderColor =
+        dataset.pointHoverBackgroundColor = dataset.pointHoverBorderColor = color;
+      // console.log("btn-"+stockName);
+      document.getElementById("btn-"+stockName).style["background-color"] = color;
+
       dataset.data = stockData.prices[dataset.label].slice(stockData.startInd, stockData.endInd+1);
       if(stockData.normalized){ dataset = normalizeChartDataset(dataset, stockData); }
 
@@ -180,6 +187,15 @@ const orig_dataset = JSON.stringify({
   pointHitRadius: 10,
   data: [65, 59, 80, 81, 56, 55, 40]
 });
+
+function getRandomColor() {
+  let letters = '0123456789ABCDEF';
+  let color = '#';
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
 
 function arr_diff(arr1, arr2){
   return arr1.filter(x => !arr2.includes(x))[0];
