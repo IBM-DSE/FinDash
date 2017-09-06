@@ -2,5 +2,6 @@ applications:
 - name: FinDash
   buildpack: https://github.com/cloudfoundry/nodejs-buildpack
   command: npm run build_client && npm start
+  timeout: 180
   env:
     NODE_ENV: production

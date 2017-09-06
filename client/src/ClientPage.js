@@ -6,7 +6,8 @@ class ClientPage extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      client_data: {}
+      client_data: {},
+      news: []
     }
   }
 
@@ -14,6 +15,10 @@ class ClientPage extends Component {
     fetch('/api/users/clients/'+this.props.match.params.clientId)
       .then(res => res.json())
       .then(client_data => this.setState({client_data}))
+      .catch((error) => { console.error(error); });
+    fetch('/api/stocks/news/F')
+      .then(res => res.json())
+      .then(news => this.setState({news}))
       .catch((error) => { console.error(error); });
   }
 
@@ -33,8 +38,8 @@ class ClientPage extends Component {
           </div>
 
           <div className="col-md-5">
-            <div className="xl-vals">{client.name}</div>
-            <table className="table table-bordered align-right margin-top">
+            <div className="xx-large">{client.name}</div>
+            <table className="table table-bordered align-right margin-top larger">
               <tbody>
               {attributeRows(client, basicAttrs)}
               </tbody>
@@ -50,15 +55,40 @@ class ClientPage extends Component {
           <div className="col-md-1"></div>
 
           <div className="col-md-10">
-            <table className="table">
+            <table className="table larger">
               <thead>
               <tr className="center-headers">
                 {attributeCols(investorDisplayAttrs)}
               </tr>
               </thead>
               <tbody>
-              <tr className="big-vals">
+              <tr className="">
                 {attributeCols(investorAttrs, client)}
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div className="col-md-1"></div>
+        </div>
+
+        <br/><br/><br/>
+
+        <div className="row">
+          <div className="col-md-2"></div>
+
+          <div className="col-md-8">
+
+            <h3>Predicted Industry Affinity</h3>
+            <table className="table x-large">
+              <thead>
+              <tr className="center-headers">
+                {attributeCols(categories)}
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                {attributeCols(categories, predictions)}
               </tr>
               </tbody>
             </table>
@@ -71,7 +101,13 @@ class ClientPage extends Component {
 
         <h3>Portfolio</h3>
         <hr className="solid-line"/>
-        <StockPanel stocks={stocks} topPanel={true}/>
+        <div className="col-md-8">
+          <StockPanel stocks={stocks} topPanel={true}/>
+        </div>
+        <div className="col-md-4">
+          <h3>News</h3>
+          {newsStories(this.state.news)}
+        </div>
         <br/><br/><br/><br/><br/><br/><br/><br/>
 
       </div>
@@ -101,6 +137,21 @@ function attributeCols(displayAttrs, hash=null) {
   }
 }
 
+function newsStories(news_data) {
+  return news_data.map((story, i) =>
+    <div key={'story-'+i} className="panel panel-default">
+      <div className="panel-heading">
+        <p className="align-left">{(new Date(story['NEWS_DATE'])).toString().slice(4, 16)}</p>
+        <h3 className="panel-title">{story['NEWS_TITLE']}</h3>
+      </div>
+      <div className="panel-body">
+        <p className="align-left">{story['NEWS_TEXT'].slice(0,200)+'...'}</p>
+      </div>
+      <div className="panel-footer"><a href={story['NEWS_URL']} target="_blank">{story['NEWS_URL']}</a></div>
+    </div>
+  );
+}
+
 const basicAttrs = [
   'Gender',
   'Age',
@@ -112,7 +163,16 @@ const basicAttrs = [
 function formatAttrs(key, value){
   if(key === 'Income' || key === 'AccountBalance')
     return stringToCurrency(value);
-  else
+  else if(categories.includes(key)){
+    if(value === '95%')
+      return(<div>
+        {value} <span className="glyphicon glyphicon-arrow-up" style={{color: 'green'}}></span>
+      </div>);
+    else
+      return(<div>
+        {value} <span className="glyphicon glyphicon-arrow-down" style={{color: 'red'}}></span>
+      </div>);
+  } else
     return value;
 }
 
@@ -141,6 +201,15 @@ const stocks = {
     {"id":"AAPL","name":"Apple Inc."}
   ]
 };
+
+const predictions = {
+  'Auto': '95%',
+  'Tech': '84%',
+  'Airlines': '48%',
+  'Hotels': '31%'
+};
+
+const categories = Object.keys(predictions);
 
 function stringToCurrency(str) {
   let num = parseInt(str).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
