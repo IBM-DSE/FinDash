@@ -10,32 +10,49 @@ class StockPanel extends Component {
     super(props);
     this.setDates = this.setDates.bind(this);
     this.stockPanel = this.stockPanel.bind(this);
+    this.stockChart = this.stockChart.bind(this);
     this.stockCategories = this.stockCategories.bind(this);
     this.stockList = this.stockList.bind(this);
     this.toggleCheckbox = this.toggleCheckbox.bind(this);
     this.state = {
-      stocks: {},
+      stocks: props.stocks || {},
       displayStocks: [],
-      startDate: moment("2017-07-01"),
+      startDate: moment("2017-01-01"),
       endDate: moment("2017-08-15")
     };
   }
 
   componentDidMount() {
-    fetch('/api/stocks')
-      .then(res => res.json())
-      .then(stocks => this.setState({ stocks }));
+    if(Object.keys(this.state.stocks).length === 0){
+      fetch('/api/stocks')
+        .then(res => res.json())
+        .then(stocks => this.setState({ stocks }));
+    }
   }
 
   render() {
+    return(
+      <div id="stock-panel">
+
+        {this.props.topPanel && this.stockPanel()}
+
+        {this.stockChart()}
+
+        {this.props.topPanel==null && this.stockPanel()}
+
+      </div>
+    );
+  }
+
+  stockChart() {
+
     let start = this.state.startDate.format('YYYY-MM-DD');
     let end = this.state.endDate.format('YYYY-MM-DD');
     let label = start + ' - ' + end;
     if (start === end) { label = start; }
 
-    return(
-      <div id="stock-panel">
-
+    return (
+      <div>
         <StockChart displayStocks={this.state.displayStocks} startDate={start} endDate={end} />
 
         <label>Date Range:</label>{' '}
@@ -44,10 +61,8 @@ class StockPanel extends Component {
             <div className="pull-left"><Glyphicon glyph="calendar" /> <span>{label}</span> <span className="caret"></span></div>
           </Button>
         </DateRangePicker>
-
-        {this.stockPanel()}
       </div>
-    );
+    )
   }
 
   setDates(event, picker) {
@@ -78,7 +93,9 @@ class StockPanel extends Component {
 
   stockList(arr) {
     return (arr.map(elem =>
-      <ToggleButton key={elem.id} value={elem.id} className="btn-stock" onChange={this.toggleCheckbox} block>{elem.name}</ToggleButton>
+      <ToggleButton key={elem.id} value={elem.id} className="btn-stock" onChange={this.toggleCheckbox} block>
+        {elem.name === elem.id ? elem.name : elem.name+" ("+elem.id+")"}
+      </ToggleButton>
     ));
   }
 

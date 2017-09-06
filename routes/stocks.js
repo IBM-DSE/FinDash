@@ -11,7 +11,11 @@ router.get('/', function(req, res, next) {
     "Auto": list(auto_stocks),
     "Airlines": list(airline_stocks),
     "Hotels": list(hotel_stocks),
-    "Tech": [{id: 'AMZN', name: 'Amazon'}]
+    "Tech": [
+      {id: 'AMZN', name: 'Amazon'},
+      {id: 'GOOGL', name: 'Alphabet Inc.'},
+      {id: 'AAPL', name: 'Apple Inc.'}
+    ]
   });
 });
 
