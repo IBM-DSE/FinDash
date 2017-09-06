@@ -1,6 +1,8 @@
 let express = require('express');
 let router = express.Router();
-require('dotenv').config();
+let fs = require('fs');
+let csv_parse = require('csv-parse');
+let path = require('path');
 
 const auto_stocks = ["F","TSLA","FCAU","TM","HMC","RACE","CARZ"];
 const airline_stocks = ["AAL","DAL","UAL","SKYW","JBLU","ALK","LUV","JETS"];
@@ -52,11 +54,35 @@ router.get('/:stock', function(req, res, next) {
   });
 });
 
+router.get('/news/:stock', function(req, res, next) {
+  getNews(function(err, data) {
+    if(err) console.error(err);
+    let header = data[0];
+    let stock_news = data.filter(function(news) {
+      return news[1] === req.params.stock;
+    });
+    stock_news = stock_news.map(function(news){
+      return news.reduce(function(acc, cur, i) {
+        if(i>0) acc[header[i]] = cur;
+        return acc;
+      }, {});
+    });
+    res.json(stock_news);
+  });
+});
+
 function list(stocks){
   return stocks.map(function(stock) { return {
     id: stock,
     name: stock
   }});
+}
+
+function getNews(callback) {
+  let csvPath = path.join(__dirname, '..', 'data', 'stock_news.csv');
+  fs.readFile(csvPath, 'utf8', function(err, file_data) {
+    csv_parse(file_data, {delimiter: '|', comment: '#', quote: false}, callback);
+  });
 }
 
 module.exports = router;
