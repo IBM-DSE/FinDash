@@ -14,6 +14,9 @@ class StockPanel extends Component {
     this.stockCategories = this.stockCategories.bind(this);
     this.stockList = this.stockList.bind(this);
     this.toggleCheckbox = this.toggleCheckbox.bind(this);
+    this.toggleStock = this.toggleStock.bind(this);
+    this.setStocks = this.setStocks.bind(this);
+
     this.state = {
       stocks: props.stocks || {},
       displayStocks: [],
@@ -27,7 +30,7 @@ class StockPanel extends Component {
       fetch('/api/stocks')
         .then(res => res.json())
         .then(stocks => this.setState({ stocks }));
-    }
+    } else {this.setStocks()}
   }
 
   render() {
@@ -84,24 +87,28 @@ class StockPanel extends Component {
     return (categories.map(category =>
       <div key={"category-"+category} className={"col-md-"+width}>
         <h3>{category}</h3>
-        <ToggleButtonGroup type="checkbox" className="full-width">
           {this.stockList(stocks[category])}
-        </ToggleButtonGroup>
       </div>
     ));
   }
 
   stockList(arr) {
     return (arr.map(elem =>
-      <ToggleButton key={elem.id} id={'btn-'+elem.id} value={elem.id} className="btn-stock" onChange={this.toggleCheckbox} block>
-        {elem.name === elem.id ? elem.name : elem.name+" ("+elem.id+")"}
-      </ToggleButton>
+      <ToggleButtonGroup key={elem.id} type="checkbox" className="full-width" defaultValue={elem.id}>
+        <ToggleButton id={'btn-'+elem.id} value={elem.id} className="btn-stock" onChange={this.toggleCheckbox} block>
+          {elem.name === elem.id ? elem.name : elem.name+" ("+elem.id+")"}
+        </ToggleButton>
+      </ToggleButtonGroup>
     ));
   }
 
   toggleCheckbox(event) {
     let stock = event.target.value;
     let add = event.target.checked;
+    this.toggleStock(stock, add);
+  }
+
+  toggleStock(stock, add) {
     this.setState(function(prevState) {
       let displayStocks = prevState.displayStocks.slice(0);
       if (add) {
@@ -116,6 +123,14 @@ class StockPanel extends Component {
     });
   }
 
+  setStocks() {
+    let displayStocks = [];
+    if(this.props.allSelected){
+      let categories = Object.values(this.state.stocks);
+      displayStocks = categories.reduce(function(a, b) { return a.concat(b); }, []).map(function(s) {return s.id;});
+      this.setState({displayStocks});
+    }
+  }
 }
 
 export default StockPanel;

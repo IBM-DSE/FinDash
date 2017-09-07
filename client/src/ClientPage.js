@@ -68,7 +68,7 @@ class ClientPage extends Component {
           <div className="col-md-1"></div>
         </div>
 
-        <br/><br/><br/>
+        <br/><br/>
 
         <div className="row">
           <div className="col-md-2"></div>
@@ -97,7 +97,7 @@ class ClientPage extends Component {
 
         <h3>Portfolio</h3>
         <hr className="solid-line"/>
-        <StockPanel stocks={stocks} topPanel={true}/>
+        <StockPanel stocks={stocks} topPanel={true} allSelected={true}/>
       </div>
     );
   }

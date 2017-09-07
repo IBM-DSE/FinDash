@@ -42,13 +42,15 @@ class StockChart extends Component {
   // Component will receive new props, either new display stock or new date ranges
   componentWillReceiveProps(nextProps) {
 
-    let new_stock = arr_diff(nextProps.displayStocks, this.props.displayStocks);
-    let del_stock = arr_diff(this.props.displayStocks, nextProps.displayStocks);
-    if (new_stock){
-      fetch('/api/stocks/'+new_stock).then(res => res.json())
-        .then(new_stock_data => this.addStockData(new_stock_data))
-    } else if (del_stock) {
-      this.removeChartData(del_stock);
+    let new_stocks = arr_diff(nextProps.displayStocks, this.props.displayStocks);
+    let del_stocks = arr_diff(this.props.displayStocks, nextProps.displayStocks);
+    if (new_stocks.length>0){
+      new_stocks.forEach(stock =>
+        fetch('/api/stocks/'+stock).then(res => res.json())
+          .then(new_stock_data => this.addStockData(new_stock_data))
+      );
+    } else if (del_stocks.length>0) {
+      this.removeChartData(del_stocks[0]);
     } else if (this.props.startDate !== nextProps.startDate || this.props.endDate !== nextProps.endDate){
       this.updateDateRange(nextProps.startDate, nextProps.endDate);
     }
@@ -197,7 +199,7 @@ function getRandomColor() {
 }
 
 function arr_diff(arr1, arr2){
-  return arr1.filter(x => !arr2.includes(x))[0];
+  return arr1.filter(x => !arr2.includes(x));
 }
 
 // From https://stackoverflow.com/questions/8584902/get-closest-number-out-of-array
