@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Util from './Util'
 
 class ClientList extends Component {
   constructor(props) {
@@ -26,7 +27,11 @@ class ClientList extends Component {
 function clientList(arr){
   return arr.map(client =>
     <a key={'client-'+client.id} href={"/clients/"+client.id} className="btn btn-lg btn-default btn-client">
-      <img src={"/images/"+client.image} alt={'client-'+client.id} className="btn-client-img"/> {client.name}
+      <img src={"/images/"+client.image} alt={'client-'+client.id} className="btn-client-img"/>
+      <div>
+        <strong>{client.name}</strong>
+        <p className="acc-bal">Account Balance: {Util.stringToCurrency(client.acc_bal)}</p>
+      </div>
     </a>
   )
 }

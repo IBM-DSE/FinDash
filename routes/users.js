@@ -1,60 +1,57 @@
 let express = require('express');
 let router = express.Router();
 let fs = require('fs');
-let csv = require('csv');
+let csv_parse = require('csv-parse/lib/sync');
 let path = require('path');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
-  getUsers(function(err, data) {
-    res.json(JSON.parse(data));
-  });
+  res.json(getUsers());
 });
 
-router.get('/clients', function(req, res, next) {
-  getUsers(function(err, data) {
-    res.json(JSON.parse(data)['clients']);
+router.get('/clients', async function(req, res, next) {
+  let clients = getUsers()['clients'];
+  let client_details = await getClients();
+  await clients.forEach(function(client){
+    client['acc_bal'] = client_details[client['id']]['AccountBalance'];
   });
+  res.json(clients);
 });
 
-router.get('/clients/:id', function(req, res, next) {
+router.get('/clients/:id', async function(req, res, next) {
 
-  let client_data = {};
+  let client = getUsers()['clients'].filter(function(client) {
+    return client.id === req.params.id;
+  })[0];
 
-  getUsers(function(err, data) {
-    client_data = JSON.parse(data)['clients'].filter(function(client) {
-      return client.id === req.params.id;
-    })[0];
-    if(client_data.id){
+  if(!client) return res.json({});
 
-      getClients(function(err, data) {
-        let header = data[0];
-        let client_details = data.filter(function(client) {
-          return client[0] === req.params.id;
-        })[0];
-        client_details = client_details.reduce(function(acc, cur, i) {
-          if(i>0) acc[header[i]] = cur;
-          return acc;
-        }, {});
-        Object.assign(client_data, client_data, client_details);
-        res.json(client_data);
+  let client_details = await getClients();
+  Object.assign(client, client, client_details[req.params.id]);
 
-      });
-    }
-  });
-
+  res.json(client);
 });
 
-function getUsers(callback) {
+function getUsers() {
   let jsonPath = path.join(__dirname, '..', 'data', 'users.json');
-  fs.readFile(jsonPath, 'utf8', callback);
+  let fileData = fs.readFileSync(jsonPath, 'utf8');
+  return JSON.parse(fileData);
 }
 
-function getClients(callback) {
+async function getClients() {
   let csvPath = path.join(__dirname, '..', 'data', 'cust_slice.csv');
-  fs.readFile(csvPath, 'utf8', function(err, file_data) {
-    csv.parse(file_data, callback);
+  let file_data = fs.readFileSync(csvPath, 'utf8');
+  let rows = csv_parse(file_data);
+
+  let clients = {};
+  let header = rows[0];
+  await rows.forEach(function(row, i){
+    if(i>0) clients[row[0]] = row.reduce(function(acc, cur, i) {
+      acc[header[i]] = cur;
+      return acc;
+    }, {});;
   });
+  return clients;
 }
 
 module.exports = router;

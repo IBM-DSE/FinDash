@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import StockPanel from './StockPanel';
+import Util from './Util'
 
 class ClientPage extends Component {
 
@@ -162,7 +163,7 @@ const basicAttrs = [
 
 function formatAttrs(key, value){
   if(key === 'Income' || key === 'AccountBalance')
-    return stringToCurrency(value);
+    return Util.stringToCurrency(value);
   else if(categories.includes(key)){
     if(value === '95%')
       return(<div>
@@ -210,10 +211,5 @@ const predictions = {
 };
 
 const categories = Object.keys(predictions);
-
-function stringToCurrency(str) {
-  let num = parseInt(str, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
-  return '$ '+num;
-}
 
 export default ClientPage;
