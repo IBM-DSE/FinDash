@@ -212,7 +212,7 @@ const predictions = {
 const categories = Object.keys(predictions);
 
 function stringToCurrency(str) {
-  let num = parseInt(str).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+  let num = parseInt(str, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
   return '$ '+num;
 }
 

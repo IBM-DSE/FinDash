@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route } from 'react-router-dom'
+import { Glyphicon } from 'react-bootstrap';
 import StockPanel from './StockPanel';
 import ClientList from './ClientList';
 import ClientPage from './ClientPage';
@@ -23,6 +24,22 @@ class App extends Component {
 
 const Home = () => (
   <div className="container">
+
+    <div className="row">
+      <div className="col-sm-4">
+        <h2>S&P 500 2,461.53</h2>
+        <h3 className="red"><Glyphicon glyph="arrow-down"/> 4.01 (0.16%)</h3>
+      </div>
+      <div className="col-sm-4">
+        <h2>DJIA 21,788.65</h2>
+        <h3 className="red"><Glyphicon glyph="arrow-down"/> 18.99 (0.09%)</h3>
+      </div>
+      <div className="col-sm-4">
+        <h2>NASDAQ 6,394.80</h2>
+        <h3 className="green"><Glyphicon glyph="arrow-up"/> 2.15 (0.03%)</h3>
+      </div>
+    </div>
+
     <div className="row">
       <div className="col-md-8">
 
