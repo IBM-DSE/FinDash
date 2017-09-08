@@ -23,7 +23,7 @@ class News extends Component {
 
 function newsStories(news_data) {
   return news_data.map((story, i) =>
-    <div key={'story-' + i} className="col-lg-4">
+    <div key={'story-' + i} className="col-md-4 col-sm-6">
       <div className="panel panel-default">
       <div className="panel-heading">
         <p className="align-left">{(new Date(story['NEWS_DATE'])).toString().slice(4, 16)}</p>

@@ -1,20 +1,22 @@
 import React from 'react';
+import qs from 'query-string'
 
 import StockIndices from './StockIndices';
 import StockPanel from "./StockPanel";
 import News from './News';
 
-const StockMarket = () => (
-  <div className="container">
+const StockMarket = ({ location }) => {
+  const query = qs.parse(location.search);
+  return (<div className="container">
 
-    <StockIndices />
+    <StockIndices/>
 
-    <StockPanel/>
+    <StockPanel displayStocks={query['displayStocks[]']} normalize={query.normalize}/>
 
     <h2>Market News</h2>
-    <News />
+    <News/>
 
-  </div>
-);
+  </div>);
+};
 
 export default StockMarket;

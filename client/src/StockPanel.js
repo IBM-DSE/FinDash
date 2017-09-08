@@ -21,7 +21,7 @@ class StockPanel extends Component {
     this.state = {
       stocks: props.stocks || {},
       displayStocks: [],
-      normalized: props.allSelected || false,
+      normalized: props.normalize || props.allSelected || false,
       startDate: moment("2016-09-01"),
       endDate: moment("2017-08-15")
     };
@@ -31,7 +31,8 @@ class StockPanel extends Component {
     if(Object.keys(this.state.stocks).length === 0){
       fetch('/api/stocks')
         .then(res => res.json())
-        .then(stocks => this.setState({ stocks }));
+        .then(stocks => this.setState({ stocks }))
+        .then(() => this.setStocks());
     } else {this.setStocks()}
   }
 
@@ -137,12 +138,15 @@ class StockPanel extends Component {
 
   setStocks() {
     let displayStocks = [];
+    if (this.props.displayStocks){
+      let displayStocks = this.props.displayStocks;
+      displayStocks.forEach(function(stock) { document.getElementById('btn-'+stock).classList.add('active'); });
+      this.setState({displayStocks});
+    }
     if(this.props.allSelected){
       let categories = Object.values(this.state.stocks);
       displayStocks = categories.reduce(function(a, b) { return a.concat(b); }, []).map(function(s) {return s.id;});
-      displayStocks.forEach(function(stock) {
-        document.getElementById('btn-'+stock).classList.add('active');
-      });
+      displayStocks.forEach(function(stock) { document.getElementById('btn-'+stock).classList.add('active'); });
       this.setState({displayStocks});
     }
   }

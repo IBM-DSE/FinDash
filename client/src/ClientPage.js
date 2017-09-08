@@ -21,6 +21,8 @@ class ClientPage extends Component {
 
   render() {
     let client = this.state.client_data;
+    let queryString = stockTickers.reduce((str, stock, i) => (str += (i===0?'?':'&')+'displayStocks[]='+stock), '');
+    queryString += '&normalize=true';
     return (
       <div className="container">
 
@@ -105,7 +107,7 @@ class ClientPage extends Component {
         <StockPanel stocks={stocks} topPanel={true} allSelected={true}/>
 
         <br/>
-        <Button href="/market"><h4>Compare Against the Market ></h4></Button>
+        <Button href={"/market"+queryString}><h4>Compare Against the Market ></h4></Button>
         <br/><br/>
 
       </div>
@@ -184,6 +186,8 @@ const stocks = {
     {"id":"AAPL","name":"Apple Inc."}
   ]
 };
+
+const stockTickers = ['RACE', 'AMZN', 'GOOGL', 'AAPL'];
 
 const predictions = {
   'Auto': '95%',
