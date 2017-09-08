@@ -9,13 +9,13 @@ class StockChart extends Component {
     this.addStockData = this.addStockData.bind(this);
     this.updateDateRange = this.updateDateRange.bind(this);
     this.updateChartData = this.updateChartData.bind(this);
+    this.normalizeChartData = this.normalizeChartData.bind(this);
     this.removeChartData = this.removeChartData.bind(this);
-    this.toggleNormalization = this.toggleNormalization.bind(this);
     this.state = {
       stockData: {
         dates: [],
         prices: {},
-        normalized: false,
+        normalized: props.normalized,
         startInd: 0,
         endInd: 0
       },
@@ -30,14 +30,7 @@ class StockChart extends Component {
     this.updateDateRange(this.props.startDate, this.props.endDate);
   }
 
-  render() { return (
-    <div id="stock-chart">
-      <div className="checkbox align-left"><label style={{textAlign: 'left'}}>
-        <input type="checkbox" onChange={this.toggleNormalization} /> Normalize</label>
-      </div>
-      <Line data={this.state.chartData} />
-    </div>);
-  }
+  render() { return ( <Line data={this.state.chartData} /> ); }
 
   // Component will receive new props, either new display stock or new date ranges
   componentWillReceiveProps(nextProps) {
@@ -53,6 +46,10 @@ class StockChart extends Component {
       this.removeChartData(del_stocks[0]);
     } else if (this.props.startDate !== nextProps.startDate || this.props.endDate !== nextProps.endDate){
       this.updateDateRange(nextProps.startDate, nextProps.endDate);
+    }
+
+    if(this.props.normalized != nextProps.normalized){
+      this.normalizeChartData(nextProps.normalized);
     }
   }
 
@@ -123,12 +120,21 @@ class StockChart extends Component {
       document.getElementById("btn-"+stockName).style["background-color"] = color;
 
       dataset.data = stockData.prices[dataset.label].slice(stockData.startInd, stockData.endInd+1);
-      if(stockData.normalized){ dataset = normalizeChartDataset(dataset, stockData); }
+      if(stockData.normalized){ dataset = normalizeChartDataset(stockData.normalized, dataset, stockData); }
 
       // add the dataset to the chartData and update the state
       chartData.datasets.push(dataset);
       this.setState({ chartData });
     }
+  }
+
+  normalizeChartData(normalized) {
+    let chartData = this.state.chartData;
+    let stockData = this.state.stockData;
+    chartData.datasets = this.state.chartData.datasets.map(function(dataset) {
+      return normalizeChartDataset(normalized, dataset, stockData);
+    });
+    this.setState({ chartData });
   }
 
   removeChartData(stock) {
@@ -142,22 +148,11 @@ class StockChart extends Component {
     chartData.datasets = newDatasets;
     this.setState({ chartData })
   }
-
-  toggleNormalization(event) {
-    let stockData = this.state.stockData;
-    let chartData = this.state.chartData;
-
-    stockData.normalized = event.target.checked;
-    this.setState({ stockData });
-
-    chartData.datasets.map(function(dataset) { return normalizeChartDataset(dataset, stockData); });
-    this.setState({ chartData });
-  }
 }
 
-function normalizeChartDataset(dataset, stockData) {
+function normalizeChartDataset(normalize, dataset, stockData) {
 
-  if(stockData.normalized){
+  if(normalize){
     let factor = 100.0/dataset.data[0];
     dataset.data = dataset.data.map(function(val) { return factor*val;});
     return dataset;

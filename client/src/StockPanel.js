@@ -14,12 +14,14 @@ class StockPanel extends Component {
     this.stockCategories = this.stockCategories.bind(this);
     this.stockList = this.stockList.bind(this);
     this.toggleCheckbox = this.toggleCheckbox.bind(this);
+    this.toggleNormalization = this.toggleNormalization.bind(this);
     this.toggleStock = this.toggleStock.bind(this);
     this.setStocks = this.setStocks.bind(this);
 
     this.state = {
       stocks: props.stocks || {},
       displayStocks: [],
+      normalized: props.allSelected || false,
       startDate: moment("2016-09-01"),
       endDate: moment("2017-08-15")
     };
@@ -56,7 +58,12 @@ class StockPanel extends Component {
 
     return (
       <div>
-        <StockChart displayStocks={this.state.displayStocks} startDate={start} endDate={end} />
+        <div className="checkbox align-left"><label style={{textAlign: 'left'}}>
+          <input type="checkbox" onChange={this.toggleNormalization} checked={this.state.normalized}/> Relative Performance</label>
+        </div>
+
+        <StockChart displayStocks={this.state.displayStocks}
+                    startDate={start} endDate={end} normalized={this.state.normalized}/>
 
         <label>Date Range:</label>{' '}
         <DateRangePicker startDate={this.state.startDate} endDate={this.state.endDate} onApply={this.setDates}>
@@ -121,6 +128,11 @@ class StockPanel extends Component {
       }
       return {displayStocks: displayStocks};
     });
+  }
+
+  toggleNormalization(event) {
+    let normalized = event.target.checked;
+    this.setState({normalized});
   }
 
   setStocks() {
