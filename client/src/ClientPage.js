@@ -45,6 +45,10 @@ class ClientPage extends Component {
           <div className="col-md-2"></div>
         </div>
 
+        <br/><br/>
+        <h4>
+          <strong>Last Meeting with {this.state.client_data.name}:</strong> October 24th, 2016
+        </h4>
         <br/><br/><br/>
 
         <div className="row">
