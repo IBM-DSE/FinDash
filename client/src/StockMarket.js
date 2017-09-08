@@ -11,10 +11,14 @@ const StockMarket = ({ location }) => {
 
     <StockIndices/>
 
-    <StockPanel displayStocks={query['displayStocks[]']} normalized={query.normalized}/>
-
-    <h2>Market News</h2>
-    <News/>
+    <div className='row'>
+      <div className='col-md-9'>
+        <StockPanel displayStocks={query['displayStocks[]']} normalized={query.normalized}/>
+      </div>
+      <div className='col-md-3'>
+        <News stock='RACE' startDate = '2016-11-01' endDate = '2016-11-15'/>
+      </div>
+    </div>
 
   </div>);
 };

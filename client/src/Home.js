@@ -30,8 +30,7 @@ const Home = () => (
       </div>
     </div>
 
-    <h2>Market News</h2>
-    <News />
+    <News full={true} stock='F'/>
 
   </div>
 );

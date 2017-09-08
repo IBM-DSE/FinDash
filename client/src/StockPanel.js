@@ -43,6 +43,7 @@ class StockPanel extends Component {
 
         {this.props.topPanel && this.stockPanel()}
 
+        <h3>Stock Analysis</h3>
         {this.stockChart(this.state.displayStocks)}
 
         {this.props.topPanel==null && this.stockPanel()}
@@ -98,7 +99,7 @@ class StockPanel extends Component {
         <h3>{category}</h3>
         <ToggleButtonGroup type="checkbox" className="full-width">
           <ToggleButton id={'all-'+category} value={category} onChange={this.selectAllStocks} block>
-            <strong>Select All</strong>
+            <strong><Glyphicon glyph='check'/> Select All</strong>
           </ToggleButton>
         </ToggleButtonGroup>
         {this.stockList(stocks[category], this.state.displayStocks)}
