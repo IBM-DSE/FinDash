@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Button } from 'react-bootstrap';
 import StockPanel from './StockPanel';
 import Util from './Util'
 
@@ -102,6 +103,11 @@ class ClientPage extends Component {
         <h3>Portfolio</h3>
         <hr className="solid-line"/>
         <StockPanel stocks={stocks} topPanel={true} allSelected={true}/>
+
+        <br/>
+        <Button href="/market"><h4>Compare Against the Market ></h4></Button>
+        <br/><br/>
+
       </div>
     );
   }
