@@ -11,7 +11,7 @@ const StockMarket = ({ location }) => {
 
     <StockIndices/>
 
-    <StockPanel displayStocks={query['displayStocks[]']} normalize={query.normalize}/>
+    <StockPanel displayStocks={query['displayStocks[]']} normalized={query.normalized}/>
 
     <h2>Market News</h2>
     <News/>

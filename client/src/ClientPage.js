@@ -22,7 +22,7 @@ class ClientPage extends Component {
   render() {
     let client = this.state.client_data;
     let queryString = stockTickers.reduce((str, stock, i) => (str += (i===0?'?':'&')+'displayStocks[]='+stock), '');
-    queryString += '&normalize=true';
+    queryString += '&normalized=true';
     return (
       <div className="container">
 
@@ -104,7 +104,7 @@ class ClientPage extends Component {
 
         <h3>Portfolio</h3>
         <hr className="solid-line"/>
-        <StockPanel stocks={stocks} topPanel={true} allSelected={true}/>
+        <StockPanel stocks={stocks} topPanel={true} displayStocks={stockTickers} normalized={true}/>
 
         <br/>
         <Button href={"/market"+queryString}><h4>Compare Against the Market ></h4></Button>

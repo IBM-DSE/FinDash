@@ -35,6 +35,10 @@
   margin-top: 18px;
 }
 
+.margin-top-sm {
+  margin-top: 10px;
+}
+
 .center-headers > th {
   text-align: center;
 }

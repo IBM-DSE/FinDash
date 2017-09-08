@@ -14,6 +14,7 @@ class StockPanel extends Component {
     this.stockCategories = this.stockCategories.bind(this);
     this.stockList = this.stockList.bind(this);
     this.toggleCheckbox = this.toggleCheckbox.bind(this);
+    this.selectAllStocks = this.selectAllStocks.bind(this);
     this.toggleNormalization = this.toggleNormalization.bind(this);
     this.toggleStock = this.toggleStock.bind(this);
     this.setStocks = this.setStocks.bind(this);
@@ -21,7 +22,7 @@ class StockPanel extends Component {
     this.state = {
       stocks: props.stocks || {},
       displayStocks: [],
-      normalized: props.normalize || props.allSelected || false,
+      normalized: props.normalized || false,
       startDate: moment("2016-09-01"),
       endDate: moment("2017-08-15")
     };
@@ -42,7 +43,7 @@ class StockPanel extends Component {
 
         {this.props.topPanel && this.stockPanel()}
 
-        {this.stockChart()}
+        {this.stockChart(this.state.displayStocks)}
 
         {this.props.topPanel==null && this.stockPanel()}
 
@@ -50,12 +51,13 @@ class StockPanel extends Component {
     );
   }
 
-  stockChart() {
+  stockChart(displayStocks) {
 
     let start = this.state.startDate.format('YYYY-MM-DD');
     let end = this.state.endDate.format('YYYY-MM-DD');
     let label = start + ' - ' + end;
     if (start === end) { label = start; }
+    let newDisplayStocks = displayStocks.toString().split(','); //copy displayStocks to capture differences
 
     return (
       <div>
@@ -63,8 +65,7 @@ class StockPanel extends Component {
           <input type="checkbox" onChange={this.toggleNormalization} checked={this.state.normalized}/> Relative Performance</label>
         </div>
 
-        <StockChart displayStocks={this.state.displayStocks}
-                    startDate={start} endDate={end} normalized={this.state.normalized}/>
+        <StockChart displayStocks={newDisplayStocks} startDate={start} endDate={end} normalized={this.state.normalized}/>
 
         <label>Date Range:</label>{' '}
         <DateRangePicker startDate={this.state.startDate} endDate={this.state.endDate} onApply={this.setDates}>
@@ -95,6 +96,11 @@ class StockPanel extends Component {
     return (categories.map(category =>
       <div key={"category-"+category} className={"col-md-"+width}>
         <h3>{category}</h3>
+        <ToggleButtonGroup type="checkbox" className="full-width">
+          <ToggleButton id={'all-'+category} value={category} onChange={this.selectAllStocks} block>
+            <strong>Select All</strong>
+          </ToggleButton>
+        </ToggleButtonGroup>
         {this.stockList(stocks[category], this.state.displayStocks)}
       </div>
     ));
@@ -102,7 +108,7 @@ class StockPanel extends Component {
 
   stockList(arr) {
     return (arr.map(elem =>
-      <ToggleButtonGroup key={elem.id} type="checkbox" className="full-width">
+      <ToggleButtonGroup key={elem.id} type="checkbox" className="full-width margin-top-sm">
         <ToggleButton id={'btn-'+elem.id} value={elem.id} onChange={this.toggleCheckbox} block>
           {elem.name === elem.id ? elem.name : elem.name+" ("+elem.id+")"}
         </ToggleButton>
@@ -114,6 +120,15 @@ class StockPanel extends Component {
     let stock = event.target.value;
     let add = event.target.checked;
     this.toggleStock(stock, add);
+  }
+
+  selectAllStocks(event) {
+    let category = event.target.value;
+    let displayStocks = this.state.displayStocks;
+    this.state.stocks[category].forEach((stock) => {
+      if(!displayStocks.includes(stock.id)) displayStocks.push(stock.id)
+    });
+    this.setState({displayStocks});
   }
 
   toggleStock(stock, add) {
@@ -140,13 +155,11 @@ class StockPanel extends Component {
     let displayStocks = [];
     if (this.props.displayStocks){
       let displayStocks = this.props.displayStocks;
-      displayStocks.forEach(function(stock) { document.getElementById('btn-'+stock).classList.add('active'); });
       this.setState({displayStocks});
     }
     if(this.props.allSelected){
       let categories = Object.values(this.state.stocks);
       displayStocks = categories.reduce(function(a, b) { return a.concat(b); }, []).map(function(s) {return s.id;});
-      displayStocks.forEach(function(stock) { document.getElementById('btn-'+stock).classList.add('active'); });
       this.setState({displayStocks});
     }
   }
