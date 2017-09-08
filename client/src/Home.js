@@ -1,8 +1,8 @@
 import React from 'react';
-import { Glyphicon } from 'react-bootstrap';
 import BigCalendar from 'react-big-calendar';
 import moment from 'moment';
 
+import StockIndices from './StockIndices';
 import ClientList from './ClientList';
 import News from './News';
 
@@ -13,20 +13,7 @@ BigCalendar.setLocalizer(
 const Home = () => (
   <div className="container">
 
-    <div className="row">
-      <div className="col-sm-4">
-        <h2><strong>S&P 500</strong>: 2,461.53</h2>
-        <h3 className="red"><Glyphicon glyph="arrow-down"/> 4.01 (0.16%)</h3>
-      </div>
-      <div className="col-sm-4">
-        <h2><strong>DJIA</strong>: 21,788.65</h2>
-        <h3 className="red"><Glyphicon glyph="arrow-down"/> 18.99 (0.09%)</h3>
-      </div>
-      <div className="col-sm-4">
-        <h2><strong>NASDAQ</strong>: 6,394.80</h2>
-        <h3 className="green"><Glyphicon glyph="arrow-up"/> 2.15 (0.03%)</h3>
-      </div>
-    </div>
+    <StockIndices />
 
     <div className="row">
       <div className="col-md-8">

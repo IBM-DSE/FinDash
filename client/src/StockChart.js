@@ -48,7 +48,7 @@ class StockChart extends Component {
       this.updateDateRange(nextProps.startDate, nextProps.endDate);
     }
 
-    if(this.props.normalized != nextProps.normalized){
+    if(this.props.normalized !== nextProps.normalized){
       this.normalizeChartData(nextProps.normalized);
     }
   }

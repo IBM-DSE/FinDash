@@ -94,15 +94,15 @@ class StockPanel extends Component {
     return (categories.map(category =>
       <div key={"category-"+category} className={"col-md-"+width}>
         <h3>{category}</h3>
-          {this.stockList(stocks[category])}
+        {this.stockList(stocks[category], this.state.displayStocks)}
       </div>
     ));
   }
 
   stockList(arr) {
     return (arr.map(elem =>
-      <ToggleButtonGroup key={elem.id} type="checkbox" className="full-width" defaultValue={elem.id}>
-        <ToggleButton id={'btn-'+elem.id} value={elem.id} className="btn-stock" onChange={this.toggleCheckbox} block>
+      <ToggleButtonGroup key={elem.id} type="checkbox" className="full-width">
+        <ToggleButton id={'btn-'+elem.id} value={elem.id} onChange={this.toggleCheckbox} block>
           {elem.name === elem.id ? elem.name : elem.name+" ("+elem.id+")"}
         </ToggleButton>
       </ToggleButtonGroup>
@@ -140,6 +140,9 @@ class StockPanel extends Component {
     if(this.props.allSelected){
       let categories = Object.values(this.state.stocks);
       displayStocks = categories.reduce(function(a, b) { return a.concat(b); }, []).map(function(s) {return s.id;});
+      displayStocks.forEach(function(stock) {
+        document.getElementById('btn-'+stock).classList.add('active');
+      });
       this.setState({displayStocks});
     }
   }
