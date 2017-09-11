@@ -49,10 +49,6 @@ class ClientPage extends Component {
         </div>
 
         <br/><br/>
-        <h4>
-          <strong>Last Meeting with {this.state.client_data.name}:</strong> October 24th, 2016
-        </h4>
-        <br/><br/><br/>
 
         <div className="row">
           <div className="col-md-1"></div>
@@ -76,6 +72,10 @@ class ClientPage extends Component {
         </div>
 
         <br/><br/>
+        <h3>
+          <strong>Last Meeting with {this.state.client_data.name}:</strong> October 24th, 2016
+        </h3>
+        <br/><br/><br/>
 
         <div className="row">
           <div className="col-md-2"></div>
@@ -149,7 +149,7 @@ function formatAttrs(key, value){
   if(key === 'Income' || key === 'AccountBalance')
     return Util.stringToCurrency(value);
   else if(categories.includes(key)){
-    if(value === '95%')
+    if(value >= '90%')
       return(<div>
         {value} <span className="glyphicon glyphicon-arrow-up" style={{color: 'green'}}></span>
       </div>);
@@ -190,7 +190,7 @@ const stocks = {
 const stockTickers = ['RACE', 'AMZN', 'GOOGL', 'AAPL'];
 
 const predictions = {
-  'Auto': '95%',
+  'Auto': '94%',
   'Tech': '84%',
   'Airlines': '48%',
   'Hotels': '31%'

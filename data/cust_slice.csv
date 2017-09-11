@@ -10,11 +10,11 @@ CustID,Gender,Age,Income,Education,Profession,AccountBalance,NumTradesPerYr,Acco
 1000009,F,65+,120288,Masters,Performer,493844,47,Margin,Growth,Trend,Y,N,N,N,N,N,N,N,N,N,N
 1000010,M,55-64,312213,Masters,Executive,322358,60,Margin,Growth,Swing,Y,N,N,N,N,N,N,N,Y,N,N
 1000011,F,65+,192663,Masters,Executive,16856,40,Cash,Growth,Trend,Y,N,N,N,N,N,N,N,N,N,N
-1000012,F,18-24,73017,Bachelors,Architect,5377,6,Cash,Growth,Trend,Y,N,N,N,N,N,N,N,N,N,N
+1000012,F,18-24,73017,Bachelors,Architect,225377,6,Cash,Growth,Trend,Y,N,N,N,N,N,N,N,N,N,N
 1000013,M,55-64,75077,Bachelors,Manager,20514,56,Cash,Growth,Swing,Y,N,N,N,N,N,N,N,N,N,N
 1000014,M,35-44,202901,Masters,Entrepreneur,446490,27,Cash,Growth,Trend,Y,Y,N,N,N,N,N,N,N,N,N
 1000015,M,25-34,106877,Masters,Executive,122471,31,Margin,Growth,Trend,Y,N,N,N,N,N,N,N,N,N,N
-1000016,M,45-54,392655,Masters,Executive,654758,64,Option,Growth,Swing,Y,Y,N,N,N,N,N,N,N,N,N
+1000016,M,45-54,392655,Masters,Executive,654758,6,Option,Growth,Swing,Y,Y,N,N,N,N,N,N,N,N,N
 1000017,F,55-64,340808,Masters,Executive,327699,77,Margin,Value,Swing,N,N,N,N,Y,N,Y,N,Y,N,Y
 1000018,M,35-44,334936,Masters,Entrepreneur,823825,13,Cash,Growth,Trend,Y,Y,N,N,N,N,N,N,N,N,N
 1000019,M,35-44,327452,Masters,Doctor,252961,15,Cash,Growth,Trend,N,Y,N,N,N,Y,N,N,N,N,N
