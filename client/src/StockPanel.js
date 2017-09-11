@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, ToggleButton, ToggleButtonGroup, Glyphicon } from 'react-bootstrap';
+import { Button, DropdownButton, ToggleButton, ToggleButtonGroup, Glyphicon } from 'react-bootstrap';
 import StockChart from './StockChart';
 import './daterangepicker.css';
 let DateRangePicker = require('react-bootstrap-daterangepicker');
@@ -13,6 +13,9 @@ class StockPanel extends Component {
     this.stockChart = this.stockChart.bind(this);
     this.stockCategories = this.stockCategories.bind(this);
     this.stockList = this.stockList.bind(this);
+    this.stockCorrelationList = this.stockCorrelationList.bind(this);
+    this.corrStockSelected = this.corrStockSelected.bind(this);
+    this.onToggle = this.onToggle.bind(this);
     this.toggleCheckbox = this.toggleCheckbox.bind(this);
     this.selectAllStocks = this.selectAllStocks.bind(this);
     this.toggleNormalization = this.toggleNormalization.bind(this);
@@ -24,7 +27,9 @@ class StockPanel extends Component {
       displayStocks: [],
       normalized: props.normalized || false,
       startDate: moment("2016-09-01"),
-      endDate: moment("2017-08-15")
+      endDate: moment("2017-08-15"),
+      corrDropdownExpanded: false,
+      stockCorrs: []
     };
   }
 
@@ -68,6 +73,12 @@ class StockPanel extends Component {
 
         <StockChart displayStocks={newDisplayStocks} startDate={start} endDate={end} normalized={this.state.normalized}/>
 
+        <DropdownButton id='corr-sel' title='Plot Correlation' style={{marginRight: '80px'}} open={this.state.corrDropdownExpanded} onToggle={this.onToggle}>
+          <ToggleButtonGroup type="checkbox">
+          {this.stockCorrelationList(displayStocks)}
+          </ToggleButtonGroup>
+        </DropdownButton>
+
         <label>Date Range:</label>{' '}
         <DateRangePicker startDate={this.state.startDate} endDate={this.state.endDate} onApply={this.setDates}>
           <Button className="selected-date-range-btn">
@@ -102,7 +113,7 @@ class StockPanel extends Component {
             <strong><Glyphicon glyph='check'/> Select All</strong>
           </ToggleButton>
         </ToggleButtonGroup>
-        {this.stockList(stocks[category], this.state.displayStocks)}
+        {this.stockList(stocks[category])}
       </div>
     ));
   }
@@ -111,10 +122,49 @@ class StockPanel extends Component {
     return (arr.map(elem =>
       <ToggleButtonGroup key={elem.id} type="checkbox" className="full-width margin-top-sm">
         <ToggleButton id={'btn-'+elem.id} value={elem.id} onChange={this.toggleCheckbox} block>
-          {elem.name === elem.id ? elem.name : elem.name+" ("+elem.id+")"}
+          {fullStockName(elem)}
         </ToggleButton>
       </ToggleButtonGroup>
     ));
+  }
+
+  stockCorrelationList(arr) {
+    return (arr.map(elem =>
+      <ToggleButton key={'corr-'+elem} id={'corr-'+elem} value={elem} onChange={this.corrStockSelected} block>{elem}</ToggleButton>
+    ));
+  }
+
+  async corrStockSelected(event) {
+    let add = event.target.checked;
+    let stock = event.target.value;
+    if(add){
+      await this.setState(() => {
+        this.state.stockCorrs.push(stock);
+        console.log(this.state.stockCorrs.length);
+      });
+      if(this.state.stockCorrs.length === 2){
+        alert('Plotting Correlation between '+this.state.stockCorrs);
+        this.state.stockCorrs.forEach((stock) => {
+          let cbox = document.getElementById('corr-'+stock);
+          cbox.classList.remove('active');
+        });
+        this.setState({stockCorrs: [], corrDropdownExpanded: false});
+      }
+    } else {
+      this.setState(() => {
+        let index = this.state.stockCorrs.indexOf(stock);
+        if (index > -1)
+          this.state.stockCorrs.splice(index, 1);
+      });
+    }
+  }
+
+  onToggle(open, event, eventDetails){
+    if(eventDetails.source === 'rootClose'){
+      this.setState({corrDropdownExpanded: !this.state.corrDropdownExpanded});
+    } else if(this.state.stockCorrs.length < 2){
+      this.setState({corrDropdownExpanded: true});
+    }
   }
 
   toggleCheckbox(event) {
@@ -165,5 +215,7 @@ class StockPanel extends Component {
     }
   }
 }
+
+const fullStockName = (stock) => (stock.name === stock.id ? stock.name : stock.name+" ("+stock.id+")");
 
 export default StockPanel;
