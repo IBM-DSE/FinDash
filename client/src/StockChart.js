@@ -6,6 +6,7 @@ require('twix');
 class StockChart extends Component {
   constructor(props) {
     super(props);
+    this.currentChartStocks = this.currentChartStocks.bind(this);
     this.addStockData = this.addStockData.bind(this);
     this.updateDateRange = this.updateDateRange.bind(this);
     this.updateChartData = this.updateChartData.bind(this);
@@ -26,17 +27,14 @@ class StockChart extends Component {
     };
   }
 
-  componentDidMount() {
-    this.updateDateRange(this.props.startDate, this.props.endDate);
-  }
-
   render() { return ( <Line data={this.state.chartData} /> ); }
 
-  // Component will receive new props, either new display stock or new date ranges
   componentWillReceiveProps(nextProps) {
+    let currentStocks = this.currentChartStocks();
 
-    let new_stocks = arr_diff(nextProps.displayStocks, this.props.displayStocks);
-    let del_stocks = arr_diff(this.props.displayStocks, nextProps.displayStocks);
+    let new_stocks = arr_diff(nextProps.displayStocks, currentStocks);
+    let del_stocks = arr_diff(currentStocks, nextProps.displayStocks);
+
     if (new_stocks.length>0){
       new_stocks.forEach(stock =>
         fetch('/api/stocks/'+stock).then(res => res.json())
@@ -78,6 +76,10 @@ class StockChart extends Component {
     if(new_stock) this.updateChartData(new_stock);
   }
 
+  currentChartStocks() {
+    return this.state.chartData.datasets.map(dataSet => dataSet.label)
+  }
+
   // Take the new api stock data and add it to the current state
   addStockData(new_stock_data) {
     let stockData = this.state.stockData;
@@ -111,21 +113,20 @@ class StockChart extends Component {
       let chartData = this.state.chartData;
 
       // create a new chart dataset for the new stock
-      let dataset = JSON.parse(orig_dataset);
-      dataset.label = stockName;
+      let dataSet = JSON.parse(origDataSet);
+      dataSet.label = stockName;
 
       let color = getRandomColor();
-      dataset.backgroundColor = dataset.borderColor = dataset.pointBorderColor =
-        dataset.pointHoverBackgroundColor = dataset.pointHoverBorderColor = color;
+      dataSet.backgroundColor = dataSet.borderColor = dataSet.pointBorderColor =
+        dataSet.pointHoverBackgroundColor = dataSet.pointHoverBorderColor = color;
       let stockButton = document.getElementById("btn-"+stockName);
-      stockButton.style["background-color"] = color;
-      stockButton.classList.add('active');
+      if(stockButton) stockButton.style["background-color"] = color;
 
-      dataset.data = stockData.prices[dataset.label].slice(stockData.startInd, stockData.endInd+1);
-      if(stockData.normalized){ dataset = normalizeChartDataset(stockData.normalized, dataset, stockData); }
+      dataSet.data = stockData.prices[dataSet.label].slice(stockData.startInd, stockData.endInd+1);
+      if(stockData.normalized){ dataSet = normalizeChartDataset(stockData.normalized, dataSet, stockData); }
 
       // add the dataset to the chartData and update the state
-      chartData.datasets.push(dataset);
+      chartData.datasets.push(dataSet);
       this.setState({ chartData });
     }
   }
@@ -164,7 +165,7 @@ function normalizeChartDataset(normalize, dataset, stockData) {
   }
 }
 
-const orig_dataset = JSON.stringify({
+const origDataSet = JSON.stringify({
   label: 'Stock Price',
   fill: false,
   lineTension: 0.1,

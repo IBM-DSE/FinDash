@@ -19,11 +19,10 @@ class StockPanel extends Component {
     this.selectAllStocks = this.selectAllStocks.bind(this);
     this.toggleNormalization = this.toggleNormalization.bind(this);
     this.toggleStock = this.toggleStock.bind(this);
-    this.setStocks = this.setStocks.bind(this);
 
     this.state = {
       stocks: props.stocks || {},
-      displayStocks: [],
+      displayStocks: this.props.displayStocks || [],
       normalized: props.normalized || false,
       startDate: moment("2016-09-01"),
       endDate: moment("2017-08-15"),
@@ -36,9 +35,8 @@ class StockPanel extends Component {
     if(Object.keys(this.state.stocks).length === 0){
       fetch('/api/stocks')
         .then(res => res.json())
-        .then(stocks => this.setState({ stocks }))
-        .then(() => this.setStocks());
-    } else {this.setStocks()}
+        .then(stocks => this.setState({stocks}))
+    }
   }
 
   render() {
@@ -50,7 +48,7 @@ class StockPanel extends Component {
         <h3>Stock Analysis</h3>
         {this.stockChart(this.state.displayStocks)}
 
-        {this.props.topPanel==null && this.stockPanel()}
+        {typeof this.props.topPanel === 'undefined' && this.stockPanel()}
 
       </div>
     );
@@ -99,11 +97,11 @@ class StockPanel extends Component {
 
   stockPanel() {
     return <div className="row">
-      {this.stockCategories(this.state.stocks)}
+      {this.stockCategories(this.state.stocks, this.state.displayStocks)}
     </div>
   }
 
-  stockCategories(stocks) {
+  stockCategories(stocks, displayStocks) {
     let categories = Object.keys(stocks);
     let width = Math.floor(12/categories.length).toString();
     return (categories.map(category => {
@@ -115,15 +113,14 @@ class StockPanel extends Component {
             <strong><Glyphicon glyph='check'/> Select All</strong>
           </ToggleButton>
         </ToggleButtonGroup>
-        {this.stockList(stocks[category])}
+        {this.stockList(stocks[category], displayStocks)}
       </div>);
     }));
   }
 
-  stockList(arr) {
+  stockList(arr, displayStocks) {
     return (arr.map((elem) => {
-      let included = elem.id === 'RACE' || elem.id === 'AMZN' || elem.id === 'GOOGL' || elem.id === 'AAPL' ? elem.id : null;
-      // let included = this.state.displayStocks.includes(elem.id) ? elem.id : null;
+      let included = displayStocks.includes(elem.id) ? elem.id : null;
       return (
         <ToggleButtonGroup key={elem.id} type="checkbox" className="full-width margin-top-sm" defaultValue={included}>
           <ToggleButton id={'btn-'+elem.id} value={elem.id} onChange={this.toggleStock} block>
@@ -212,18 +209,6 @@ class StockPanel extends Component {
     this.setState({normalized});
   }
 
-  setStocks() {
-    let displayStocks = [];
-    if (this.props.displayStocks){
-      let displayStocks = this.props.displayStocks;
-      this.setState({displayStocks});
-    }
-    if(this.props.allSelected){
-      let categories = Object.values(this.state.stocks);
-      displayStocks = categories.reduce(function(a, b) { return a.concat(b); }, []).map(function(s) {return s.id;});
-      this.setState({displayStocks});
-    }
-  }
 }
 
 // const fullStockName = (stock) => (stock.name === stock.id ? stock.name : stock.name+" ("+stock.id+")");
