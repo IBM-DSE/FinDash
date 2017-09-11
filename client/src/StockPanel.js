@@ -105,7 +105,7 @@ class StockPanel extends Component {
 
   stockCategories(stocks) {
     let categories = Object.keys(stocks);
-    let width = (12/categories.length).toString();
+    let width = Math.floor(12/categories.length).toString();
     return (categories.map(category => {
       let selected = category === 'Tech' ? category : null;
       return (<div key={"category-"+category} className={"col-md-"+width}>
@@ -226,6 +226,7 @@ class StockPanel extends Component {
   }
 }
 
-const fullStockName = (stock) => (stock.name === stock.id ? stock.name : stock.name+" ("+stock.id+")");
+// const fullStockName = (stock) => (stock.name === stock.id ? stock.name : stock.name+" ("+stock.id+")");
+const fullStockName = (stock) => stock.id;
 
 export default StockPanel;
