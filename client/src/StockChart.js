@@ -7,6 +7,7 @@ class StockChart extends Component {
   constructor(props) {
     super(props);
     this.currentChartStocks = this.currentChartStocks.bind(this);
+    this.currentChartCorrs = this.currentChartCorrs.bind(this);
     this.addStockData = this.addStockData.bind(this);
     this.updateDateRange = this.updateDateRange.bind(this);
     this.updateChartData = this.updateChartData.bind(this);
@@ -53,16 +54,16 @@ class StockChart extends Component {
       if (newStocks.length>0)
         newStocks.forEach(stock =>
           fetch('/api/stocks/' + stock).then(res => res.json())
-            .then(new_stock_data => this.addStockData(new_stock_data)));
+            .then(newStockData => this.addStockData(newStockData)));
       else if (delStocks.length>0)
         this.removeChartStocks(delStocks);
       else {
-        newStocks = arr_diff(nextProps.correlationStocks, currentStocks);
+        newStocks = arr_diff(nextProps.correlationStocks, this.currentChartCorrs());
         if (newStocks.length>0){
           let stocks = newStocks[0].split('v');
           let path = '/api/stocks/corr?stock1=' + stocks[0] + '&stock2=' + stocks[1];
           newStocks.forEach(stock => fetch(path).then(res => res.json())
-            .then(new_stock_data => this.addStockData(new_stock_data, 'correlations')));
+            .then(newStockData => this.addStockData(newStockData, 'correlations')));
         }
       }
     }
@@ -96,9 +97,8 @@ class StockChart extends Component {
     if(newStock) this.updateChartData(newStock);
   }
 
-  currentChartStocks() {
-    return this.state.stockChartData.datasets.map(dataSet => dataSet.label)
-  }
+  currentChartStocks() {return this.state.stockChartData.datasets.map(dataSet => dataSet.label)}
+  currentChartCorrs() {return this.state.corrChartData.datasets.map(dataSet => dataSet.label)}
 
   // Take the new api stock data and add it to the current state
   addStockData(newStockData, metric='prices') {

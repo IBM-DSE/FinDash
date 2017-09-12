@@ -27,8 +27,6 @@ router.get('/', function(req, res, next) {
     "Airlines": list(airline_stocks),
     "Hotels": list(hotel_stocks),
     "Tech": list(tech_stocks),
-    "Currency": list(currencies),
-    "Sector Revenue": list(sectors),
   });
 });
 
