@@ -11,7 +11,7 @@ class StockChart extends Component {
     this.updateDateRange = this.updateDateRange.bind(this);
     this.updateChartData = this.updateChartData.bind(this);
     this.normalizeChartData = this.normalizeChartData.bind(this);
-    this.removeChartData = this.removeChartData.bind(this);
+    this.removeChartStocks = this.removeChartStocks.bind(this);
     this.state = {
       stockData: {
         dates: [],
@@ -32,16 +32,16 @@ class StockChart extends Component {
   componentWillReceiveProps(nextProps) {
     let currentStocks = this.currentChartStocks();
 
-    let new_stocks = arr_diff(nextProps.displayStocks, currentStocks);
-    let del_stocks = arr_diff(currentStocks, nextProps.displayStocks);
+    let newStocks = arr_diff(nextProps.displayStocks, currentStocks);
+    let delStocks = arr_diff(currentStocks, nextProps.displayStocks);
 
-    if (new_stocks.length>0){
-      new_stocks.forEach(stock =>
+    if (newStocks.length>0){
+      newStocks.forEach(stock =>
         fetch('/api/stocks/'+stock).then(res => res.json())
           .then(new_stock_data => this.addStockData(new_stock_data))
       );
-    } else if (del_stocks.length>0) {
-      this.removeChartData(del_stocks[0]);
+    } else if (delStocks.length>0) {
+      this.removeChartStocks(delStocks);
     } else if (this.props.startDate !== nextProps.startDate || this.props.endDate !== nextProps.endDate){
       this.updateDateRange(nextProps.startDate, nextProps.endDate);
     }
@@ -119,7 +119,7 @@ class StockChart extends Component {
       let color = getRandomColor();
       dataSet.backgroundColor = dataSet.borderColor = dataSet.pointBorderColor =
         dataSet.pointHoverBackgroundColor = dataSet.pointHoverBorderColor = color;
-      let stockButton = document.getElementById("btn-"+stockName);
+      let stockButton = document.getElementById("plot-"+stockName);
       if(stockButton) stockButton.style["background-color"] = color;
 
       dataSet.data = stockData.prices[dataSet.label].slice(stockData.startInd, stockData.endInd+1);
@@ -140,14 +140,16 @@ class StockChart extends Component {
     this.setState({ chartData });
   }
 
-  removeChartData(stock) {
+  async removeChartStocks(delStocks) {
+
     let chartData = this.state.chartData;
     let newDatasets = [];
-    for(let i in chartData.datasets){
-      if (chartData.datasets[i]['label'] !== stock){
-        newDatasets.push(chartData.datasets[i]);
-      }
-    }
+
+    await chartData.datasets.forEach((dataSet) => {
+      if (!delStocks.includes(dataSet['label']))
+        newDatasets.push(dataSet);
+    });
+
     chartData.datasets = newDatasets;
     this.setState({ chartData })
   }

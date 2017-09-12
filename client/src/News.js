@@ -32,7 +32,7 @@ class News extends Component {
     return(
       <div className="row">
         <h2>Market News</h2>
-        <DateRangePicker startDate={this.state.startDate} endDate={this.state.endDate} onApply={this.setDates}>
+        <DateRangePicker startDate={this.state.startDate} endDate={this.state.endDate}>
           <Button className="selected-date-range-btn">
             <div className="pull-left"><Glyphicon glyph="calendar" /> <span>{label}</span> <span className="caret"></span></div>
           </Button>
