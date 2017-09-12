@@ -6,16 +6,17 @@ require('twix');
 class StockChart extends Component {
   constructor(props) {
     super(props);
+    this.currentChartStocks = this.currentChartStocks.bind(this);
     this.addStockData = this.addStockData.bind(this);
     this.updateDateRange = this.updateDateRange.bind(this);
     this.updateChartData = this.updateChartData.bind(this);
-    this.removeChartData = this.removeChartData.bind(this);
-    this.toggleNormalization = this.toggleNormalization.bind(this);
+    this.normalizeChartData = this.normalizeChartData.bind(this);
+    this.removeChartStocks = this.removeChartStocks.bind(this);
     this.state = {
       stockData: {
         dates: [],
         prices: {},
-        normalized: false,
+        normalized: props.normalized,
         startInd: 0,
         endInd: 0
       },
@@ -26,31 +27,27 @@ class StockChart extends Component {
     };
   }
 
-  componentDidMount() {
-    this.updateDateRange(this.props.startDate, this.props.endDate);
-  }
+  render() { return ( <Line data={this.state.chartData} /> ); }
 
-  render() { return (
-    <div id="stock-chart">
-      <div className="checkbox align-left"><label style={{textAlign: 'left'}}>
-        <input type="checkbox" onChange={this.toggleNormalization} /> Normalize</label>
-      </div>
-      <Line data={this.state.chartData} />
-    </div>);
-  }
-
-  // Component will receive new props, either new display stock or new date ranges
   componentWillReceiveProps(nextProps) {
+    let currentStocks = this.currentChartStocks();
 
-    let new_stock = arr_diff(nextProps.displayStocks, this.props.displayStocks);
-    let del_stock = arr_diff(this.props.displayStocks, nextProps.displayStocks);
-    if (new_stock){
-      fetch('/api/stocks/'+new_stock).then(res => res.json())
-        .then(new_stock_data => this.addStockData(new_stock_data))
-    } else if (del_stock) {
-      this.removeChartData(del_stock);
+    let newStocks = arr_diff(nextProps.displayStocks, currentStocks);
+    let delStocks = arr_diff(currentStocks, nextProps.displayStocks);
+
+    if (newStocks.length>0){
+      newStocks.forEach(stock =>
+        fetch('/api/stocks/'+stock).then(res => res.json())
+          .then(new_stock_data => this.addStockData(new_stock_data))
+      );
+    } else if (delStocks.length>0) {
+      this.removeChartStocks(delStocks);
     } else if (this.props.startDate !== nextProps.startDate || this.props.endDate !== nextProps.endDate){
       this.updateDateRange(nextProps.startDate, nextProps.endDate);
+    }
+
+    if(this.props.normalized !== nextProps.normalized){
+      this.normalizeChartData(nextProps.normalized);
     }
   }
 
@@ -77,6 +74,10 @@ class StockChart extends Component {
     }
     this.setState({ chartData });
     if(new_stock) this.updateChartData(new_stock);
+  }
+
+  currentChartStocks() {
+    return this.state.chartData.datasets.map(dataSet => dataSet.label)
   }
 
   // Take the new api stock data and add it to the current state
@@ -112,50 +113,51 @@ class StockChart extends Component {
       let chartData = this.state.chartData;
 
       // create a new chart dataset for the new stock
-      let dataset = JSON.parse(orig_dataset);
-      dataset.label = stockName;
+      let dataSet = JSON.parse(origDataSet);
+      dataSet.label = stockName;
 
       let color = getRandomColor();
-      dataset.backgroundColor = dataset.borderColor = dataset.pointBorderColor =
-        dataset.pointHoverBackgroundColor = dataset.pointHoverBorderColor = color;
-      document.getElementById("btn-"+stockName).style["background-color"] = color;
+      dataSet.backgroundColor = dataSet.borderColor = dataSet.pointBorderColor =
+        dataSet.pointHoverBackgroundColor = dataSet.pointHoverBorderColor = color;
+      let stockButton = document.getElementById("plot-"+stockName);
+      if(stockButton) stockButton.style["background-color"] = color;
 
-      dataset.data = stockData.prices[dataset.label].slice(stockData.startInd, stockData.endInd+1);
-      if(stockData.normalized){ dataset = normalizeChartDataset(dataset, stockData); }
+      dataSet.data = stockData.prices[dataSet.label].slice(stockData.startInd, stockData.endInd+1);
+      if(stockData.normalized){ dataSet = normalizeChartDataset(stockData.normalized, dataSet, stockData); }
 
       // add the dataset to the chartData and update the state
-      chartData.datasets.push(dataset);
+      chartData.datasets.push(dataSet);
       this.setState({ chartData });
     }
   }
 
-  removeChartData(stock) {
+  normalizeChartData(normalized) {
+    let chartData = this.state.chartData;
+    let stockData = this.state.stockData;
+    chartData.datasets = this.state.chartData.datasets.map(function(dataset) {
+      return normalizeChartDataset(normalized, dataset, stockData);
+    });
+    this.setState({ chartData });
+  }
+
+  async removeChartStocks(delStocks) {
+
     let chartData = this.state.chartData;
     let newDatasets = [];
-    for(let i in chartData.datasets){
-      if (chartData.datasets[i]['label'] !== stock){
-        newDatasets.push(chartData.datasets[i]);
-      }
-    }
+
+    await chartData.datasets.forEach((dataSet) => {
+      if (!delStocks.includes(dataSet['label']))
+        newDatasets.push(dataSet);
+    });
+
     chartData.datasets = newDatasets;
     this.setState({ chartData })
   }
-
-  toggleNormalization(event) {
-    let stockData = this.state.stockData;
-    let chartData = this.state.chartData;
-
-    stockData.normalized = event.target.checked;
-    this.setState({ stockData });
-
-    chartData.datasets.map(function(dataset) { return normalizeChartDataset(dataset, stockData); });
-    this.setState({ chartData });
-  }
 }
 
-function normalizeChartDataset(dataset, stockData) {
+function normalizeChartDataset(normalize, dataset, stockData) {
 
-  if(stockData.normalized){
+  if(normalize){
     let factor = 100.0/dataset.data[0];
     dataset.data = dataset.data.map(function(val) { return factor*val;});
     return dataset;
@@ -165,7 +167,7 @@ function normalizeChartDataset(dataset, stockData) {
   }
 }
 
-const orig_dataset = JSON.stringify({
+const origDataSet = JSON.stringify({
   label: 'Stock Price',
   fill: false,
   lineTension: 0.1,
@@ -197,7 +199,7 @@ function getRandomColor() {
 }
 
 function arr_diff(arr1, arr2){
-  return arr1.filter(x => !arr2.includes(x))[0];
+  return arr1.filter(x => !arr2.includes(x));
 }
 
 // From https://stackoverflow.com/questions/8584902/get-closest-number-out-of-array

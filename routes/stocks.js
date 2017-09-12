@@ -9,13 +9,17 @@ const auto_stocks = ['F','TSLA','FCAU','TM','HMC','RACE','CARZ'];
 const airline_stocks = ['AAL','DAL','UAL','SKYW','JBLU','ALK','LUV','JETS'];
 const hotel_stocks = ['MAR', 'HLT', 'H', 'MGM', 'LVS', 'WYN', 'WYNN', 'STAY', 'IHG'];
 const tech_stocks = ['AMZN', 'GOOGL', 'AAPL'];
+const currencies = ['EUR', 'CNY', 'JPY'];
+const sectors = ['Auto', 'Airlines', 'Hotels', 'Tech'];
 
 router.get('/', function(req, res, next) {
   res.json({
     "Auto": list(auto_stocks),
     "Airlines": list(airline_stocks),
     "Hotels": list(hotel_stocks),
-    "Tech": list(tech_stocks)
+    "Tech": list(tech_stocks),
+    "Currency": list(currencies),
+    "Sector Revenue": list(sectors),
   });
 });
 

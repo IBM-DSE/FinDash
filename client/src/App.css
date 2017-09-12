@@ -35,6 +35,10 @@
   margin-top: 18px;
 }
 
+.margin-top-sm {
+  margin-top: 10px;
+}
+
 .center-headers > th {
   text-align: center;
 }
@@ -69,4 +73,17 @@
 
 .align-left {
   text-align: left;
+}
+
+.red {
+  color: red;
+}
+
+.green {
+  color: green;
+}
+
+.acc-bal {
+  margin-top: 11px;
+  margin-bottom: 0;
 }

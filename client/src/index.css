@@ -22,4 +22,6 @@ body {
 
 .btn-client-img {
   max-width: 60px;
+  float: left;
+  margin-right: 10px;
 }

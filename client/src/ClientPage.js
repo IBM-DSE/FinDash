@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
+import { Button } from 'react-bootstrap';
 import StockPanel from './StockPanel';
+import Util from './Util'
 
 class ClientPage extends Component {
 
@@ -7,7 +9,6 @@ class ClientPage extends Component {
     super(props);
     this.state = {
       client_data: {},
-      news: []
     }
   }
 
@@ -16,14 +17,12 @@ class ClientPage extends Component {
       .then(res => res.json())
       .then(client_data => this.setState({client_data}))
       .catch((error) => { console.error(error); });
-    fetch('/api/stocks/news/F')
-      .then(res => res.json())
-      .then(news => this.setState({news}))
-      .catch((error) => { console.error(error); });
   }
 
   render() {
     let client = this.state.client_data;
+    let queryString = stockTickers.reduce((str, stock, i) => (str += (i===0?'?':'&')+'displayStocks[]='+stock), '');
+    queryString += '&normalized=true';
     return (
       <div className="container">
 
@@ -49,7 +48,7 @@ class ClientPage extends Component {
           <div className="col-md-2"></div>
         </div>
 
-        <br/><br/><br/>
+        <br/><br/>
 
         <div className="row">
           <div className="col-md-1"></div>
@@ -72,6 +71,10 @@ class ClientPage extends Component {
           <div className="col-md-1"></div>
         </div>
 
+        <br/><br/>
+        <h3>
+          <strong>Last Meeting with {this.state.client_data.name}:</strong> October 24th, 2016
+        </h3>
         <br/><br/><br/>
 
         <div className="row">
@@ -97,18 +100,15 @@ class ClientPage extends Component {
           <div className="col-md-2"></div>
         </div>
 
-        <br/><br/>
+        <br/>
 
         <h3>Portfolio</h3>
         <hr className="solid-line"/>
-        <div className="col-md-8">
-          <StockPanel stocks={stocks} topPanel={true}/>
-        </div>
-        <div className="col-md-4">
-          <h3>News</h3>
-          {newsStories(this.state.news)}
-        </div>
-        <br/><br/><br/><br/><br/><br/><br/><br/>
+        <StockPanel stocks={stocks} topPanel={true} displayStocks={stockTickers} normalized={true}/>
+
+        <br/>
+        <Button href={"/market"+queryString}><h4>Compare Against the Market ></h4></Button>
+        <br/><br/>
 
       </div>
     );
@@ -137,21 +137,6 @@ function attributeCols(displayAttrs, hash=null) {
   }
 }
 
-function newsStories(news_data) {
-  return news_data.map((story, i) =>
-    <div key={'story-'+i} className="panel panel-default">
-      <div className="panel-heading">
-        <p className="align-left">{(new Date(story['NEWS_DATE'])).toString().slice(4, 16)}</p>
-        <h3 className="panel-title">{story['NEWS_TITLE']}</h3>
-      </div>
-      <div className="panel-body">
-        <p className="align-left">{story['NEWS_TEXT'].slice(0,200)+'...'}</p>
-      </div>
-      <div className="panel-footer"><a href={story['NEWS_URL']} target="_blank">{story['NEWS_URL']}</a></div>
-    </div>
-  );
-}
-
 const basicAttrs = [
   'Gender',
   'Age',
@@ -162,9 +147,9 @@ const basicAttrs = [
 
 function formatAttrs(key, value){
   if(key === 'Income' || key === 'AccountBalance')
-    return stringToCurrency(value);
+    return Util.stringToCurrency(value);
   else if(categories.includes(key)){
-    if(value === '95%')
+    if(value >= '90%')
       return(<div>
         {value} <span className="glyphicon glyphicon-arrow-up" style={{color: 'green'}}></span>
       </div>);
@@ -202,18 +187,15 @@ const stocks = {
   ]
 };
 
+const stockTickers = ['RACE', 'AMZN', 'GOOGL', 'AAPL'];
+
 const predictions = {
-  'Auto': '95%',
+  'Auto': '94%',
   'Tech': '84%',
   'Airlines': '48%',
   'Hotels': '31%'
 };
 
 const categories = Object.keys(predictions);
-
-function stringToCurrency(str) {
-  let num = parseInt(str).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
-  return '$ '+num;
-}
 
 export default ClientPage;
