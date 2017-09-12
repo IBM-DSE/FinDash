@@ -16,114 +16,137 @@ class StockChart extends Component {
       stockData: {
         dates: [],
         prices: {},
+        correlations: {},
         normalized: props.normalized,
         startInd: 0,
         endInd: 0
       },
-      chartData: {
+      stockChartData: {
+        labels: [],
+        datasets: []
+      },
+      corrChartData: {
         labels: [],
         datasets: []
       }
     };
   }
 
-  render() { return ( <Line data={this.state.chartData} /> ); }
+  render() { return (
+    <div>
+      <Line data={this.state.stockChartData} />
+      {this.state.corrChartData.datasets.length>0 && <Line data={this.state.corrChartData} />}
+    </div>
+  ); }
 
   componentWillReceiveProps(nextProps) {
-    let currentStocks = this.currentChartStocks();
 
-    let newStocks = arr_diff(nextProps.displayStocks, currentStocks);
-    let delStocks = arr_diff(currentStocks, nextProps.displayStocks);
-
-    if (newStocks.length>0){
-      newStocks.forEach(stock =>
-        fetch('/api/stocks/'+stock).then(res => res.json())
-          .then(new_stock_data => this.addStockData(new_stock_data))
-      );
-    } else if (delStocks.length>0) {
-      this.removeChartStocks(delStocks);
-    } else if (this.props.startDate !== nextProps.startDate || this.props.endDate !== nextProps.endDate){
+    if (this.props.startDate !== nextProps.startDate || this.props.endDate !== nextProps.endDate)
       this.updateDateRange(nextProps.startDate, nextProps.endDate);
-    }
-
-    if(this.props.normalized !== nextProps.normalized){
+    else if(this.props.normalized !== nextProps.normalized)
       this.normalizeChartData(nextProps.normalized);
+    else {
+      let currentStocks = this.currentChartStocks();
+      let newStocks = arr_diff(nextProps.displayStocks, currentStocks);
+      let delStocks = arr_diff(currentStocks, nextProps.displayStocks);
+
+      if (newStocks.length>0)
+        newStocks.forEach(stock =>
+          fetch('/api/stocks/' + stock).then(res => res.json())
+            .then(new_stock_data => this.addStockData(new_stock_data)));
+      else if (delStocks.length>0)
+        this.removeChartStocks(delStocks);
+      else {
+        newStocks = arr_diff(nextProps.correlationStocks, currentStocks);
+        if (newStocks.length>0){
+          let stocks = newStocks[0].split('v');
+          let path = '/api/stocks/corr?stock1=' + stocks[0] + '&stock2=' + stocks[1];
+          newStocks.forEach(stock => fetch(path).then(res => res.json())
+            .then(new_stock_data => this.addStockData(new_stock_data, 'correlations')));
+        }
+      }
     }
   }
 
-  updateDateRange(startDate, endDate, new_stock=null) {
+  updateDateRange(startDate, endDate, newStock=null) {
 
-    let chartData = this.state.chartData;
-    let stockData = this.state.stockData;
+    ['stockChartData', 'corrChartData'].forEach((dataType) => {
+      let chartData = this.state[dataType];
+      let stockData = this.state.stockData;
 
-    if (this.state.stockData.dates.length === 0) {
-      let itr = moment.twix(startDate,endDate).iterate("days");
-      let range=[];
-      while(itr.hasNext()){ range.push(itr.next().format('YYYY-MM-DD')); }
-      chartData.labels = range;
-    } else {
-      let startInd = binSearch(startDate, stockData.dates);
-      let endInd = binSearch(endDate, stockData.dates);
-      stockData.startInd = startInd; stockData.endInd = endInd;
-      this.setState({ stockData });
-      chartData.labels = stockData.dates.slice(startInd, endInd+1);
-      chartData.datasets.map(function(dataset) {
-        dataset.data = stockData.prices[dataset.label].slice(startInd, endInd+1);
-        return dataset;
-      });
-    }
-    this.setState({ chartData });
-    if(new_stock) this.updateChartData(new_stock);
+      if (this.state.stockData.dates.length === 0) {
+        let itr = moment.twix(startDate,endDate).iterate("days");
+        let range=[];
+        while(itr.hasNext()){ range.push(itr.next().format('YYYY-MM-DD')); }
+        chartData.labels = range;
+      } else {
+        let startInd = binSearch(startDate, stockData.dates);
+        let endInd = binSearch(endDate, stockData.dates);
+        stockData.startInd = startInd; stockData.endInd = endInd;
+        this.setState({ stockData });
+        chartData.labels = stockData.dates.slice(startInd, endInd+1);
+        chartData.datasets.map((dataSet) => {
+          dataSet.data = stockData.prices[dataSet.label].slice(startInd, endInd+1);
+          return dataSet;
+        });
+      }
+      this.setState({ chartData });
+    });
+
+    if(newStock) this.updateChartData(newStock);
   }
 
   currentChartStocks() {
-    return this.state.chartData.datasets.map(dataSet => dataSet.label)
+    return this.state.stockChartData.datasets.map(dataSet => dataSet.label)
   }
 
   // Take the new api stock data and add it to the current state
-  addStockData(new_stock_data) {
+  addStockData(newStockData, metric='prices') {
     let stockData = this.state.stockData;
-    let newStockPrices = new_stock_data.prices;
 
     let updateDates = false;
-    if (stockData.dates.length === 0) { // if this is the first stock we are adding
-      stockData.dates = new_stock_data.dates; // update our state with the new stock data dates
-      updateDates = true;                     // then update the date range
+    if (stockData.dates.length === 0) {   // if this is the first stock we are adding
+      stockData.dates = newStockData.dates; // update our state with the new stock data dates
+      updateDates = true;                   // then update the date range
     }
-    else if ( !(stockData.dates[0] === new_stock_data.dates[0] &&  // check that the stock dates are consistent
-                stockData.dates.length === new_stock_data.dates.length &&
-                stockData.dates[stockData.dates.length-1] === new_stock_data.dates[new_stock_data.dates.length - 1]))
+    else if ( !(stockData.dates[0] === newStockData.dates[0] &&  // check that the stock dates are consistent
+                stockData.dates.length === newStockData.dates.length &&
+                stockData.dates[stockData.dates.length-1] === newStockData.dates[newStockData.dates.length - 1]))
       console.error('Stock date ranges are inconsistent!');
 
     // add the new stock prices to our state
-    stockData.prices[new_stock_data.stock] = newStockPrices;
+    let name = metric==='prices' ? newStockData.stock : newStockData.stock1+'v'+newStockData.stock2;
+    stockData[metric][name] = newStockData[metric];
     this.setState({ stockData });
 
     // Update the date range first or directly update the chart data
-    if(updateDates) this.updateDateRange(this.props.startDate, this.props.endDate, new_stock_data);
-    else this.updateChartData(new_stock_data);
+    if(updateDates) this.updateDateRange(this.props.startDate, this.props.endDate, newStockData);
+    else this.updateChartData(newStockData, metric);
   }
 
-  // add the new stock data to the ChartData
-  updateChartData(new_stock_data){
-    let stockName = new_stock_data.stock;
-    let stockPrices = new_stock_data.prices;
-    if(stockPrices.length > 0){  // if we have some stock data
+  // add the new stock data to the stockChartData
+  updateChartData(newStockData, metric='prices'){
+    if(newStockData.dates.length > 0) {   // if we have some stock data
+
       let stockData = this.state.stockData;
-      let chartData = this.state.chartData;
+      let chartData = metric==='prices' ? this.state.stockChartData : this.state.corrChartData;
 
       // create a new chart dataset for the new stock
       let dataSet = JSON.parse(origDataSet);
-      dataSet.label = stockName;
+      if(metric==='prices'){
+        let stockName = newStockData.stock;
+        dataSet.label = stockName;
+        let color = getRandomColor();
+        dataSet.backgroundColor = dataSet.borderColor = dataSet.pointBorderColor =
+          dataSet.pointHoverBackgroundColor = dataSet.pointHoverBorderColor = color;
+        let stockButton = document.getElementById("plot-"+stockName);
+        if(stockButton) stockButton.style["background-color"] = color;
+      } else
+        dataSet.label = newStockData.stock1+'v'+newStockData.stock2;
 
-      let color = getRandomColor();
-      dataSet.backgroundColor = dataSet.borderColor = dataSet.pointBorderColor =
-        dataSet.pointHoverBackgroundColor = dataSet.pointHoverBorderColor = color;
-      let stockButton = document.getElementById("plot-"+stockName);
-      if(stockButton) stockButton.style["background-color"] = color;
-
-      dataSet.data = stockData.prices[dataSet.label].slice(stockData.startInd, stockData.endInd+1);
-      if(stockData.normalized){ dataSet = normalizeChartDataset(stockData.normalized, dataSet, stockData); }
+      dataSet.data = stockData[metric][dataSet.label].slice(stockData.startInd, stockData.endInd+1);
+      if(stockData.normalized && metric==='prices')
+        dataSet = normalizeChartDataset(stockData.normalized, dataSet, stockData);
 
       // add the dataset to the chartData and update the state
       chartData.datasets.push(dataSet);
@@ -132,38 +155,38 @@ class StockChart extends Component {
   }
 
   normalizeChartData(normalized) {
-    let chartData = this.state.chartData;
+    let stockChartData = this.state.stockChartData;
     let stockData = this.state.stockData;
-    chartData.datasets = this.state.chartData.datasets.map(function(dataset) {
-      return normalizeChartDataset(normalized, dataset, stockData);
+    stockChartData.datasets = this.state.stockChartData.datasets.map(function(dataSet) {
+      return normalizeChartDataset(normalized, dataSet, stockData);
     });
-    this.setState({ chartData });
+    this.setState({ stockChartData });
   }
 
   async removeChartStocks(delStocks) {
 
-    let chartData = this.state.chartData;
-    let newDatasets = [];
+    let stockChartData = this.state.stockChartData;
+    let newDataSets = [];
 
-    await chartData.datasets.forEach((dataSet) => {
+    await stockChartData.datasets.forEach((dataSet) => {
       if (!delStocks.includes(dataSet['label']))
-        newDatasets.push(dataSet);
+        newDataSets.push(dataSet);
     });
 
-    chartData.datasets = newDatasets;
-    this.setState({ chartData })
+    stockChartData.datasets = newDataSets;
+    this.setState({ stockChartData })
   }
 }
 
-function normalizeChartDataset(normalize, dataset, stockData) {
+function normalizeChartDataset(normalize, dataSet, stockData) {
 
   if(normalize){
-    let factor = 100.0/dataset.data[0];
-    dataset.data = dataset.data.map(function(val) { return factor*val;});
-    return dataset;
+    let factor = 100.0/dataSet.data[0];
+    dataSet.data = dataSet.data.map(function(val) { return factor*val;});
+    return dataSet;
   } else {
-    dataset.data = stockData.prices[dataset.label].slice(stockData.startInd, stockData.endInd+1);
-    return dataset;
+    dataSet.data = stockData.prices[dataSet.label].slice(stockData.startInd, stockData.endInd+1);
+    return dataSet;
   }
 }
 

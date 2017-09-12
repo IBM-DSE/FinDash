@@ -26,7 +26,8 @@ class StockPanel extends Component {
       startDate: moment("2016-09-01"),
       endDate: moment("2017-08-15"),
       corrDropdownExpanded: false,
-      stockCorrs: []
+      corrSelections: [],
+      correlations: []
     };
   }
 
@@ -57,10 +58,8 @@ class StockPanel extends Component {
           <Checkbox onChange={this.onToggleNormalization} checked={this.state.normalized}>Relative Performance</Checkbox>
         </div>
 
-        <StockChart displayStocks={this.state.displayStocks}
+        <StockChart displayStocks={this.state.displayStocks} correlationStocks={this.state.correlations}
                     startDate={start} endDate={end} normalized={this.state.normalized}/>
-
-        <img id='corrPlot' alt='corrPlot' src={require('./RACEVsHMCv1.JPG')} style={{width: '100%', display: 'none'}}/>
 
         <DropdownButton title='Plot Correlation' id='corr-sel' style={{marginRight: '100px'}}
                         open={this.state.corrDropdownExpanded} onToggle={this.onCorrDropdownToggle}>
@@ -172,30 +171,33 @@ class StockPanel extends Component {
   }
 
   onCorrDropdownToggle(open, event, eventDetails){
-    if(eventDetails.source === 'rootClose'){
+    if(eventDetails.source === 'rootClose')
       this.setState({corrDropdownExpanded: !this.state.corrDropdownExpanded});
-    } else if(this.state.stockCorrs.length < 2){
+    else if(this.state.corrSelections.length < 2)
       this.setState({corrDropdownExpanded: true});
-    }
   }
 
   async onCorrStockSelect(event) {
     let add = event.target.checked;
     let stock = event.target.value;
-    if(add){
+    if(add) {
       await this.setState(() => {
-        this.state.stockCorrs.push(stock);
+        this.state.corrSelections.push(stock);
       });
-      if(this.state.stockCorrs.length === 2){
-        document.getElementById("corrPlot").style.display = "inline";
-        this.state.stockCorrs.forEach((stock) => deselectStock('corr-', stock));
-        this.setState({stockCorrs: [], corrDropdownExpanded: false});
+      if(this.state.corrSelections.length === 2){
+        // document.getElementById("corrPlot").style.display = "inline";
+
+        let label = this.state.corrSelections[0]+'v'+this.state.corrSelections[1];
+        this.state.correlations.push(label);
+
+        this.state.corrSelections.forEach((stock) => deselectStock('corr-', stock));
+        this.setState({corrSelections: [], corrDropdownExpanded: false});
       }
     } else {
       this.setState(() => {
-        let index = this.state.stockCorrs.indexOf(stock);
+        let index = this.state.corrSelections.indexOf(stock);
         if (index > -1)
-          this.state.stockCorrs.splice(index, 1);
+          this.state.corrSelections.splice(index, 1);
       });
     }
   }

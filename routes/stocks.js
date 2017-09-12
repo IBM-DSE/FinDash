@@ -52,13 +52,13 @@ router.get('/corr', function(req, res, next) {
             res.json({
               stock1: stock1, stock2: stock2,
               dates: data.map(function(x){ return x['TRADE_DATE']; }),
-              correlation: data.map(function(x){ return x['CORRELATION']; })
+              correlations: data.map(function(x){ return x['CORRELATION']; })
             });
           } else
-            res.json({ stock1: stock1, stock2: stock2, dates: [], prices: [] });
+            res.json({ stock1: stock1, stock2: stock2, dates: [], correlations: [] });
         });
       } else
-        res.json({ stock1: stock1, stock2: stock2, dates: [], prices: [] });
+        res.json({ stock1: stock1, stock2: stock2, dates: [], correlations: [] });
     });
   });
 
