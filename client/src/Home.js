@@ -11,27 +11,31 @@ BigCalendar.setLocalizer(
 );
 
 const Home = () => (
-  <div className="container">
+  <div>
+    <h1 style={{textAlign: 'left', marginLeft: '40px'}} >Welcome, Susan!</h1>
 
-    <StockIndices />
+    <div className="container">
 
-    <div className="row">
-      <div className="col-md-8">
+      <StockIndices />
 
-        <h1>Calendar</h1>
-        <MyCalendar events={events}/>
+      <div className="row">
+        <div className="col-md-8">
 
+          <h1>Calendar</h1>
+          <MyCalendar events={events}/>
+
+        </div>
+        <div className="col-md-4">
+
+          <h1>Clients</h1>
+          <ClientList />
+
+        </div>
       </div>
-      <div className="col-md-4">
 
-        <h1>Clients</h1>
-        <ClientList />
+      <News full={true} stock='F'/>
 
-      </div>
     </div>
-
-    <News full={true} stock='F'/>
-
   </div>
 );
 
