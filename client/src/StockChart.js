@@ -56,6 +56,7 @@ class StockChart extends Component {
 
       let newStocks = arr_diff(nextProps.correlationStocks, this.currentChartCorrs());
       if (newStocks.length>0){
+
         let path;
         let stocks = newStocks[0].split('v');
         if(stocks[0].indexOf('DEX')>-1)
@@ -64,6 +65,7 @@ class StockChart extends Component {
           path = '/api/stocks/corr/curr?stock=' + stocks[0] + '&currency=' + stocks[1];
         else
           path = '/api/stocks/corr/stocks?stock1=' + stocks[0] + '&stock2=' + stocks[1];
+
         newStocks.forEach(stock => fetch(path).then(res => res.json())
           .then(newStockData => this.addStockData(newStockData, 'correlations')));
       }
@@ -130,7 +132,7 @@ class StockChart extends Component {
       console.error('Stock date ranges are inconsistent!');
 
     // add the new stock prices to our state
-    let name = metric==='prices' ? newStockData.stock : newStockData.stock1+'v'+newStockData.stock2;
+    let name = metric==='prices' ? newStockData.stock : correlationLabel(newStockData);
     stockData[metric][name] = newStockData[metric];
     this.setState({ stockData });
 
@@ -145,19 +147,21 @@ class StockChart extends Component {
 
       let stockData = this.state.stockData;
       let chartData = metric==='prices' ? this.state.stockChartData : this.state.corrChartData;
+      let dataSet = JSON.parse(origDataSet);
+
+      // generate a random color for the new data set
+      let color = getRandomColor();
+      dataSet.backgroundColor = dataSet.borderColor = dataSet.pointBorderColor =
+        dataSet.pointHoverBackgroundColor = dataSet.pointHoverBorderColor = color;
 
       // create a new chart dataset for the new stock
-      let dataSet = JSON.parse(origDataSet);
       if(metric==='prices'){
         let stockName = newStockData.stock;
         dataSet.label = stockName;
-        let color = getRandomColor();
-        dataSet.backgroundColor = dataSet.borderColor = dataSet.pointBorderColor =
-          dataSet.pointHoverBackgroundColor = dataSet.pointHoverBorderColor = color;
         let stockButton = document.getElementById("plot-"+stockName);
         if(stockButton) stockButton.style["background-color"] = color;
       } else
-        dataSet.label = newStockData.stock1+'v'+newStockData.stock2;
+        dataSet.label = correlationLabel(newStockData);
 
       dataSet.data = stockData[metric][dataSet.label].slice(stockData.startInd, stockData.endInd+1);
       if(stockData.normalized && metric==='prices')
@@ -226,6 +230,13 @@ const origDataSet = JSON.stringify({
   pointHitRadius: 10,
   data: [65, 59, 80, 81, 56, 55, 40]
 });
+
+function correlationLabel(stockData){
+  if(stockData.currency)
+    return stockData.stock+'v'+stockData.currency;
+  else
+    return stockData.stock1+'v'+stockData.stock2;
+}
 
 function getRandomColor() {
   let letters = '0123456789ABCDEF';
