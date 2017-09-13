@@ -8,6 +8,7 @@ class StockChart extends Component {
     super(props);
     this.currentChartStocks = this.currentChartStocks.bind(this);
     this.currentChartCorrs = this.currentChartCorrs.bind(this);
+    this.udpateCurrentStocks = this.udpateCurrentStocks.bind(this);
     this.addStockData = this.addStockData.bind(this);
     this.updateDateRange = this.updateDateRange.bind(this);
     this.updateChartData = this.updateChartData.bind(this);
@@ -40,6 +41,10 @@ class StockChart extends Component {
     </div>
   ); }
 
+  componentDidMount() {
+    this.udpateCurrentStocks([], this.props.displayStocks);
+  }
+
   componentWillReceiveProps(nextProps) {
 
     if (this.props.startDate !== nextProps.startDate || this.props.endDate !== nextProps.endDate)
@@ -47,26 +52,36 @@ class StockChart extends Component {
     else if(this.props.normalized !== nextProps.normalized)
       this.normalizeChartData(nextProps.normalized);
     else {
-      let currentStocks = this.currentChartStocks();
-      let newStocks = arr_diff(nextProps.displayStocks, currentStocks);
-      let delStocks = arr_diff(currentStocks, nextProps.displayStocks);
+      this.udpateCurrentStocks(this.props.displayStocks, nextProps.displayStocks);
 
-      if (newStocks.length>0)
-        newStocks.forEach(stock =>
-          fetch('/api/stocks/' + stock).then(res => res.json())
-            .then(newStockData => this.addStockData(newStockData)));
-      else if (delStocks.length>0)
-        this.removeChartStocks(delStocks);
-      else {
-        newStocks = arr_diff(nextProps.correlationStocks, this.currentChartCorrs());
-        if (newStocks.length>0){
-          let stocks = newStocks[0].split('v');
-          let path = '/api/stocks/corr?stock1=' + stocks[0] + '&stock2=' + stocks[1];
-          newStocks.forEach(stock => fetch(path).then(res => res.json())
-            .then(newStockData => this.addStockData(newStockData, 'correlations')));
-        }
+      let newStocks = arr_diff(nextProps.correlationStocks, this.currentChartCorrs());
+      if (newStocks.length>0){
+        let path;
+        let stocks = newStocks[0].split('v');
+        if(stocks[0].indexOf('DEX')>-1)
+          path = '/api/stocks/corr/curr?currency=' + stocks[0] + '&stock=' + stocks[1];
+        else if(stocks[1].indexOf('DEX')>-1)
+          path = '/api/stocks/corr/curr?stock=' + stocks[0] + '&currency=' + stocks[1];
+        else
+          path = '/api/stocks/corr/stocks?stock1=' + stocks[0] + '&stock2=' + stocks[1];
+        newStocks.forEach(stock => fetch(path).then(res => res.json())
+          .then(newStockData => this.addStockData(newStockData, 'correlations')));
       }
     }
+  }
+
+  udpateCurrentStocks(currentStocks, nextStocks) {
+    let newStocks = arr_diff(nextStocks, currentStocks);
+    let delStocks = arr_diff(currentStocks, nextStocks);
+
+    // console.log(newStocks);
+    // console.log(delStocks);
+    if (newStocks.length>0)
+      newStocks.forEach(stock =>
+        fetch('/api/stocks/' + stock).then(res => res.json())
+          .then(newStockData => this.addStockData(newStockData)));
+    else if (delStocks.length>0)
+      this.removeChartStocks(delStocks);
   }
 
   updateDateRange(startDate, endDate, newStock=null) {

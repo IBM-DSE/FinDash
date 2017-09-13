@@ -12,6 +12,7 @@ class StockPanel extends Component {
     this.stockCategories = this.stockCategories.bind(this);
     this.stockList = this.stockList.bind(this);
     this.stockCorrelationList = this.stockCorrelationList.bind(this);
+    this.currencyCorrelationList = this.currencyCorrelationList.bind(this);
     this.onDateSet = this.onDateSet.bind(this);
     this.onToggleStock = this.onToggleStock.bind(this);
     this.onSelectAllStocks = this.onSelectAllStocks.bind(this);
@@ -21,6 +22,7 @@ class StockPanel extends Component {
 
     this.state = {
       stocks: props.stocks || {},
+      currencies: {},
       displayStocks: this.props.displayStocks || [],
       normalized: props.normalized || false,
       startDate: moment("2016-09-01"),
@@ -32,11 +34,11 @@ class StockPanel extends Component {
   }
 
   componentDidMount() {
-    if(Object.keys(this.state.stocks).length === 0){
-      fetch('/api/stocks')
-        .then(res => res.json())
-        .then(stocks => this.setState({stocks}))
-    }
+    if(Object.keys(this.state.stocks).length === 0)
+      fetch('/api/stocks').then(res => res.json()).then(stocks => this.setState({stocks}));
+
+    fetch('/api/stocks/currencies')
+      .then(res => res.json()).then(currencies => this.setState({currencies}));
   }
 
   render() {
@@ -47,6 +49,9 @@ class StockPanel extends Component {
     let label = start + ' - ' + end;
     if (start === end) { label = start; }
 
+    let newDisplayStocks = JSON.parse(JSON.stringify(this.state.displayStocks));
+
+    console.log(this.state.displayStocks);
     return(
       <div id="stock-panel">
 
@@ -58,14 +63,19 @@ class StockPanel extends Component {
           <Checkbox onChange={this.onToggleNormalization} checked={this.state.normalized}>Relative Performance</Checkbox>
         </div>
 
-        <StockChart displayStocks={this.state.displayStocks} correlationStocks={this.state.correlations}
+        <StockChart displayStocks={newDisplayStocks} correlationStocks={this.state.correlations}
                     startDate={start} endDate={end} normalized={this.state.normalized}/>
 
         <DropdownButton title='Plot Correlation' id='corr-sel' style={{marginRight: '100px'}}
                         open={this.state.corrDropdownExpanded} onToggle={this.onCorrDropdownToggle}>
-          <ToggleButtonGroup type="checkbox">
-            {this.stockCorrelationList(this.state.displayStocks)}
-          </ToggleButtonGroup>
+          <div style={{display: 'table'}}>
+            <ToggleButtonGroup type="checkbox" style={{display: 'table-cell'}}>
+              {this.stockCorrelationList(this.state.displayStocks)}
+            </ToggleButtonGroup>
+            <ToggleButtonGroup type="checkbox" style={{display: 'table-cell'}}>
+              {this.currencyCorrelationList(this.state.currencies)}
+            </ToggleButtonGroup>
+          </div>
         </DropdownButton>
 
         <ControlLabel>Date Range:</ControlLabel>{' '}
@@ -120,6 +130,12 @@ class StockPanel extends Component {
   stockCorrelationList(arr) {
     return (arr.map(elem =>
       <ToggleButton key={'corr-'+elem} id={'corr-'+elem} value={elem} onChange={this.onCorrStockSelect} block>{elem}</ToggleButton>
+    ));
+  }
+
+  currencyCorrelationList(hash) {
+    return (Object.keys(hash).map(sym =>
+      <ToggleButton key={'corr-'+sym} id={'corr-'+sym} value={sym} onChange={this.onCorrStockSelect} block>{hash[sym]}</ToggleButton>
     ));
   }
 

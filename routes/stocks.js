@@ -34,6 +34,10 @@ router.get('/', function(req, res, next) {
   });
 });
 
+router.get('/currencies', function(req, res, next) {
+  res.json(currency_mapping);
+});
+
 router.get('/corr/stocks', function(req, res, next) {
 
   let stock1 = req.query.stock1;
@@ -177,6 +181,12 @@ const mapping = {
   'AMZN': 'Amazon',
   'GOOGL': 'Alphabet',
   'AAPL': 'Apple'
+};
+
+const currency_mapping = {
+  'DEXUSEU': 'USD / 1 EUR',
+  'DEXCHUS': 'CNY / 1 USD',
+  'DEXJPUS': 'JPY / 1 USD'
 };
 
 module.exports = router;
