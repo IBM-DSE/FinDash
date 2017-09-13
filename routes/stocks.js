@@ -21,6 +21,10 @@ const corrQueryString = "SELECT * FROM STOCK_ANALYSIS WHERE (\"SYMBOL1\"='X' AND
   posSym1 = corrQueryString.indexOf('X'),
   posSym2 = corrQueryString.indexOf('Z');
 
+const corrCurrQuery = "SELECT * FROM CURRENCY_ANALYSIS WHERE (\"SYMBOL\"='X' AND \"CURRENCY\"='Z');",
+  posSym = corrCurrQuery.indexOf('X'),
+  posCurr = corrCurrQuery.indexOf('Z');
+
 router.get('/', function(req, res, next) {
   res.json({
     "Auto": list(auto_stocks),
@@ -30,7 +34,7 @@ router.get('/', function(req, res, next) {
   });
 });
 
-router.get('/corr', function(req, res, next) {
+router.get('/corr/stocks', function(req, res, next) {
 
   let stock1 = req.query.stock1;
   let stock2 = req.query.stock2;
@@ -46,7 +50,7 @@ router.get('/corr', function(req, res, next) {
           pair['SYMBOL2'] + corrQueryString.slice(posSym2+1);
 
         queryDatabase(query, function(data){
-          if (data.length > 0 && data[0]['SYMBOL'] === req.params.stock) {
+          if (data.length > 0 && data[0]['SYMBOL1'] === pair['SYMBOL1'] && data[0]['SYMBOL2'] === pair['SYMBOL2']) {
             res.json({
               stock1: stock1, stock2: stock2,
               dates: data.map(function(x){ return x['TRADE_DATE']; }),
@@ -58,6 +62,29 @@ router.get('/corr', function(req, res, next) {
       } else
         res.json({ stock1: stock1, stock2: stock2, dates: [], correlations: [] });
     });
+  });
+
+});
+
+router.get('/corr/curr', function(req, res, next) {
+
+  let stock = req.query.stock;
+  let currency = req.query.currency;
+
+  let query  = corrCurrQuery.slice(0, posSym) + stock +
+    corrCurrQuery.slice(posSym+1, posCurr) +
+    currency + corrCurrQuery.slice(posCurr+1);
+
+  queryDatabase(query, function(data){
+
+    if (data.length > 0 && data[0]['SYMBOL'] === req.query.stock) {
+      res.json({
+        stock: stock, currency: currency,
+        dates: data.map(function(x){ return x['TRADE_DATE']; }),
+        correlations: data.map(function(x){ return x['CORRELATION']; })
+      });
+    } else
+    res.json({ stock: stock, currency: currency, dates: [], correlations: [] });
   });
 
 });
