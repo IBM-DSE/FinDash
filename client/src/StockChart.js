@@ -76,8 +76,6 @@ class StockChart extends Component {
     let newStocks = arr_diff(nextStocks, currentStocks);
     let delStocks = arr_diff(currentStocks, nextStocks);
 
-    // console.log(newStocks);
-    // console.log(delStocks);
     if (newStocks.length>0)
       newStocks.forEach(stock =>
         fetch('/api/stocks/' + stock).then(res => res.json())

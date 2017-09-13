@@ -51,7 +51,6 @@ class StockPanel extends Component {
 
     let newDisplayStocks = JSON.parse(JSON.stringify(this.state.displayStocks));
 
-    console.log(this.state.displayStocks);
     return(
       <div id="stock-panel">
 
@@ -201,7 +200,6 @@ class StockPanel extends Component {
         this.state.corrSelections.push(stock);
       });
       if(this.state.corrSelections.length === 2){
-        // document.getElementById("corrPlot").style.display = "inline";
 
         let label = this.state.corrSelections[0]+'v'+this.state.corrSelections[1];
         this.state.correlations.push(label);
