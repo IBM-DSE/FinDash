@@ -27,10 +27,13 @@ const queryCurrencyCorrelation = "SELECT * FROM CURRENCY_ANALYSIS WHERE (\"SYMBO
 
 router.get('/', function(req, res, next) {
   res.json({
-    "Auto": list(auto_stocks),
-    "Airlines": list(airline_stocks),
-    "Hotels": list(hotel_stocks),
-    "Tech": list(tech_stocks),
+    categories: {
+      "Auto": auto_stocks,
+      "Airlines": airline_stocks,
+      "Hotels": hotel_stocks,
+      "Tech": tech_stocks,
+    },
+    name: mapping
   });
 });
 

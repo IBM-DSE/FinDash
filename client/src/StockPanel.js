@@ -12,6 +12,7 @@ class StockPanel extends Component {
     this.stockCategories = this.stockCategories.bind(this);
     this.stockList = this.stockList.bind(this);
     this.stockCorrelationList = this.stockCorrelationList.bind(this);
+    this.stockName = this.stockName.bind(this);
     this.currencyCorrelationList = this.currencyCorrelationList.bind(this);
     this.onDateSet = this.onDateSet.bind(this);
     this.onToggleStock = this.onToggleStock.bind(this);
@@ -108,16 +109,16 @@ class StockPanel extends Component {
 
   stockSelection() {
     return <div className="row">
-      {this.stockCategories(this.state.stocks, this.state.displayStocks)}
+      {this.state.stocks.categories && this.stockCategories(this.state.stocks, this.state.displayStocks)}
     </div>
   }
 
   stockCategories(stocks, displayStocks) {
-    let categories = Object.keys(stocks);
+    let categories = Object.keys(stocks.categories);
     let width = Math.floor(12/categories.length).toString();
     return (categories.map(category => {
 
-      let selected = stocks[category].map(stock => stock.id).every(stock => displayStocks.includes(stock));
+      let selected = stocks.categories[category].map(stock => stock).every(stock => displayStocks.includes(stock));
 
       return (<div key={"category-"+category} className={"col-md-"+width}>
 
@@ -129,7 +130,7 @@ class StockPanel extends Component {
           </ToggleButton>
         </ToggleButtonGroup>
 
-        {this.stockList(stocks[category], displayStocks)}
+        {this.stockList(stocks.categories[category], displayStocks)}
 
       </div>);
     }));
@@ -138,10 +139,10 @@ class StockPanel extends Component {
   stockList(arr, displayStocks) {
     return (arr.map((elem) => {
       return (
-        <ToggleButtonGroup key={elem.id} type="checkbox" className="full-width margin-top-sm">
-          <ToggleButton id={'plot-'+elem.id} value={elem.id} className='btn-stock'
-                        checked={displayStocks.includes(elem.id)} onChange={this.onToggleStock} block>
-            {fullStockName(elem)}
+        <ToggleButtonGroup key={elem} type="checkbox" className="full-width margin-top-sm">
+          <ToggleButton id={'plot-'+elem} value={elem} className='btn-stock'
+                        checked={displayStocks.includes(elem)} onChange={this.onToggleStock} block>
+            {this.stockName(elem)}
           </ToggleButton>
         </ToggleButtonGroup>
       );
@@ -150,10 +151,16 @@ class StockPanel extends Component {
 
   stockCorrelationList(arr) {
     return (arr.map(elem =>
-      <ToggleButton key={'corr-'+elem} id={'corr-'+elem} value={elem}
+      <ToggleButton key={'corr-'+elem} id={'corr-'+elem} value={elem} className='btn-stock'
                     checked={this.state.corrSelections.includes(elem)}
-                    onChange={this.onCorrStockSelect} block>{elem}</ToggleButton>
+                    onChange={this.onCorrStockSelect} block>
+        {this.stockName(elem)}
+      </ToggleButton>
     ));
+  }
+
+  stockName(ticker) {
+    return this.state.stocks.name ? this.state.stocks.name[ticker]+' ('+ticker+')' : ticker;
   }
 
   currencyCorrelationList(hash) {
@@ -193,18 +200,18 @@ class StockPanel extends Component {
     let add = event.target.checked;
     let displayStocks = this.state.displayStocks;
     if(add){
-      await this.state.stocks[category].forEach((stock) => {
-        if(!displayStocks.includes(stock.id)){
-          displayStocks.push(stock.id);
-          selectStock('plot-', stock.id);
+      await this.state.stocks.categories[category].forEach((stock) => {
+        if(!displayStocks.includes(stock)){
+          displayStocks.push(stock);
+          selectStock('plot-', stock);
         }
       });
     } else {
-      await this.state.stocks[category].forEach((stock) => {
-        let index = displayStocks.indexOf(stock.id);
+      await this.state.stocks.categories[category].forEach((stock) => {
+        let index = displayStocks.indexOf(stock);
         if (index > -1){
           displayStocks.splice(index, 1);
-          deselectStock('plot-', stock.id);
+          deselectStock('plot-', stock);
         }
       });
     }
@@ -222,6 +229,10 @@ class StockPanel extends Component {
     let add = event.target.checked;
     let stock = event.target.value;
     if(add) {
+      let stockButton = document.getElementById("plot-"+stock);
+      if(stockButton && stockButton.style["background-color"])
+        document.getElementById("corr-"+stock).style["background-color"] = stockButton.style["background-color"];
+
       await this.setState(() => {
         this.state.corrSelections.push(stock);
       });
