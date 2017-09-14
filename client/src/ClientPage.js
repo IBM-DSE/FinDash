@@ -119,7 +119,7 @@ class ClientPage extends Component {
 function attributeRows(hash, displayAttrs) {
   return displayAttrs.map(key =>
     <tr key={key}>
-      <th>{key}</th>
+      <th>{key === 'Income' ? 'Annual Income' : key}</th>
       <td>{formatAttrs(key, hash[key])}</td>
     </tr>
   );
