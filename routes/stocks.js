@@ -176,6 +176,26 @@ const mapping = {
   'HMC': 'Honda',
   'RACE': 'Ferrari NV',
   'CARZ': 'Glbl Auto Idx',
+
+  'AAL': 'American Airlines',
+  'DAL': 'Delta Air Lines',
+  'UAL': 'United Continental',
+  'SKYW': 'SkyWest',
+  'JBLU': 'JetBlue Airways',
+  'ALK': 'Alaska Air',
+  'LUV': 'Southwest Airlines',
+  'JETS': 'US Global Jets ETF',
+
+  'MAR': 'Marriott',
+  'HLT': 'Hilton',
+  'H': 'Hyatt',
+  'MGM': 'MGM Resorts',
+  'LVS': 'Las Vegas Sands',
+  'WYN': 'Wyndham Worldwide',
+  'WYNN': 'Wynn Resorts',
+  'STAY': 'Extended Stay America',
+  'IHG': 'InterContinental Hotels Group',
+
   'AMZN': 'Amazon',
   'GOOGL': 'Alphabet',
   'AAPL': 'Apple'
