@@ -315,7 +315,7 @@ function getRandomColor() {
   let bestColor = {minDist: 0, color: ''};
   let iterations = 20;
   let i = 0;
-  while(i < iterations && bestColor.minDist < 200) {
+  while(i < iterations && (bestColor.minDist < 200 || colorLightness(bestColor.color) > 0.85)) {
     let newColor = generateColor();
     let newDist = getMinDist(newColor);
     if(newDist > bestColor.minDist){
@@ -361,6 +361,14 @@ function colorDistance(triplet1, triplet2){
   let diffG = Math.abs(triplet1[1] - triplet2[1]);
   let diffB = Math.abs(triplet1[2] - triplet2[2]);
   return diffR + diffG + diffB;
+}
+
+function colorLightness(color){
+  let vals = tripletValues(color);
+  let r=vals[0], g=vals[1], b=vals[2];
+  r /= 255; g /= 255; b /= 255;
+  let max = Math.max(r, g, b), min = Math.min(r, g, b);
+  return (max + min) / 2;
 }
 
 function arr_diff(arr1, arr2){
