@@ -37,7 +37,8 @@ class StockChart extends Component {
   render() {
 
     let corrData = this.state.corrChartData.datasets.length > 0;
-    let options = corrData ? Object.assign({}, dollarOptions, hideXAxisLabels) : dollarOptions;
+    let stockOptions = this.state.stockData.normalized ? percentOptions : dollarOptions;
+    let options = corrData ? Object.assign({}, stockOptions, hideXAxisLabels) : stockOptions;
 
     return (
       <div>
@@ -46,7 +47,9 @@ class StockChart extends Component {
         <Line data={this.state.stockChartData} options={options}/>
 
         {/*Correlation Line Chart*/}
-        {corrData && <div style={{marginTop: '-70px'}}><Line data={this.state.corrChartData}/></div>}
+        {corrData && <div style={{marginTop: '-70px'}}>
+          <Line data={this.state.corrChartData} options={corrOptions}/>
+        </div>}
 
       </div>);
   }
@@ -187,6 +190,8 @@ class StockChart extends Component {
     stockChartData.datasets = this.state.stockChartData.datasets.map(function(dataSet) {
       return normalizeChartDataset(normalized, dataSet, stockData);
     });
+    stockData.normalized = normalized;
+    this.setState({ stockData });
     this.setState({ stockChartData });
   }
 
@@ -242,8 +247,28 @@ const origDataSet = JSON.stringify({
 const dollarOptions = {
   scales: {
     yAxes: [{
+      scaleLabel: {
+        display: true,
+        labelString: 'Stock Price',
+        fontSize: 14
+      },
       ticks: {
         callback: value => '$' + value // Include a dollar sign in the ticks
+      }
+    }]
+  }
+};
+
+const percentOptions = {
+  scales: {
+    yAxes: [{
+      scaleLabel: {
+        display: true,
+        labelString: 'Stock Performance',
+        fontSize: 14
+      },
+      ticks: {
+        callback: value => value+'%' // Include a dollar sign in the ticks
       }
     }]
   }
@@ -253,6 +278,18 @@ const hideXAxisLabels = {
   scales: {
     xAxes: [{
       ticks: {fontColor: '#FFF'}
+    }]
+  }
+};
+
+const corrOptions = {
+  scales: {
+    yAxes: [{
+      scaleLabel: {
+        display: true,
+        labelString: 'Correlation',
+        fontSize: 14
+      }
     }]
   }
 };
