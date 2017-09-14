@@ -269,6 +269,4 @@ function selectStock(prefix, stock) {
   stockButton.classList.add('active');
 }
 
-const fullStockName = (stock) => (stock.name === stock.id ? stock.name : stock.name+" ("+stock.id+")");
-
 export default StockPanel;

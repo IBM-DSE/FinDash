@@ -9,6 +9,7 @@ class ClientPage extends Component {
     super(props);
     this.state = {
       client_data: {},
+      stocks: {}
     }
   }
 
@@ -17,6 +18,11 @@ class ClientPage extends Component {
       .then(res => res.json())
       .then(client_data => this.setState({client_data}))
       .catch((error) => { console.error(error); });
+    if(Object.keys(this.state.stocks).length === 0)
+      fetch('/api/stocks').then(res => res.json()).then(stocks => {
+        stocks.categories = clientStocks;
+        this.setState({stocks})
+      });
   }
 
   render() {
@@ -104,7 +110,7 @@ class ClientPage extends Component {
 
         <h3>Portfolio</h3>
         <hr className="solid-line"/>
-        <StockPanel stocks={stocks} topPanel={true} displayStocks={stockTickers} normalized={true}/>
+        {this.state.stocks.categories && <StockPanel stocks={this.state.stocks} topPanel={true} displayStocks={stockTickers} normalized={true}/>}
 
         <br/>
         <Button href={"/market"+queryString}><h4>Compare Against the Market ></h4></Button>
@@ -177,14 +183,9 @@ const investorDisplayAttrs = [
   'Trading Style',
 ];
 
-const stocks = {
-  "Auto":[
-    {"id":"RACE","name":"Ferrari N.V."}
-  ],"Tech":[
-    {"id":"AMZN","name":"Amazon.com, Inc."},
-    {"id":"GOOGL","name":"Alphabet Inc Class A"},
-    {"id":"AAPL","name":"Apple Inc."}
-  ]
+const clientStocks = {
+  "Auto":["RACE"],
+  "Tech":["AMZN","GOOGL","AAPL"]
 };
 
 const stockTickers = ['RACE', 'AMZN', 'GOOGL', 'AAPL'];
