@@ -160,19 +160,26 @@ class StockChart extends Component {
       let chartData = metric==='prices' ? this.state.stockChartData : this.state.corrChartData;
       let dataSet = JSON.parse(origDataSet);
 
-      // generate a random color for the new data set
-      let color = getRandomColor();
-      dataSet.backgroundColor = dataSet.borderColor = dataSet.pointBorderColor =
-        dataSet.pointHoverBackgroundColor = dataSet.pointHoverBorderColor = color;
 
       // create a new chart dataset for the new stock
+      let color;
       if(metric==='prices'){
         let stockName = newStockData.stock;
         dataSet.label = stockName;
         let stockButton = document.getElementById("plot-"+stockName);
-        if(stockButton) stockButton.style["background-color"] = color;
-      } else
+        if(stockButton && stockButton.style["background-color"])
+          color = stockButton.style["background-color"];
+        else{
+          color = getRandomColor(); // generate a random color for the new data set
+          stockButton.style["background-color"] = color;
+        }
+      } else {
+        color = getRandomColor(); // generate a random color for the new data set
         dataSet.label = correlationLabel(newStockData);
+      }
+
+      dataSet.backgroundColor = dataSet.borderColor = dataSet.pointBorderColor = dataSet.pointBackgroundColor =
+        dataSet.pointHoverBackgroundColor = dataSet.pointHoverBorderColor = color;
 
       dataSet.data = stockData[metric][dataSet.label].slice(stockData.startInd, stockData.endInd+1);
       if(stockData.normalized && metric==='prices')
@@ -301,13 +308,68 @@ function correlationLabel(stockData){
     return stockData.stock1+'v'+stockData.stock2;
 }
 
+let colors = [];
+
 function getRandomColor() {
-  let letters = '0123456789ABCDEF';
-  let color = '#';
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
+
+  let bestColor = {minDist: 0, color: '', lightness: 1};
+  let iterations = 50;
+  let i = 0;
+  while(i < iterations && (bestColor.minDist < 200 || bestColor.lightness > 0.85)) {
+    let newColor = generateColor();
+    let newDist = getMinDist(newColor);
+    let newLightness = colorLightness(bestColor.color);
+    if((newDist > 200 && newLightness < bestColor.lightness) || newDist > bestColor.minDist){
+      bestColor.minDist = newDist;
+      bestColor.color = newColor;
+    }
+    i++;
   }
-  return color;
+  colors.push(bestColor.color);
+  return bestColor.color;
+}
+
+function generateColor() {
+  let letters = '0123456789ABCDEF';
+  let newColor = '#';
+  for (let i = 0; i < 6; i++) {
+    newColor += letters[Math.floor(Math.random() * 16)];
+  }
+  return newColor;
+}
+
+function getMinDist(newColor) {
+  let minDist = 1000;
+  let newTriplet = tripletValues(newColor);
+  for(let oldColor of colors){
+    let oldTriplet = tripletValues(oldColor);
+    let dist = colorDistance(newTriplet, oldTriplet);
+    if(dist < minDist)
+      minDist = dist;
+  }
+  return minDist;
+}
+
+function tripletValues(color){
+  let r = parseInt(color.slice(1, 3), 16);
+  let g = parseInt(color.slice(3, 5), 16);
+  let b = parseInt(color.slice(5, 7), 16);
+  return [r,g,b];
+}
+
+function colorDistance(triplet1, triplet2){
+  let diffR = Math.abs(triplet1[0] - triplet2[0]);
+  let diffG = Math.abs(triplet1[1] - triplet2[1]);
+  let diffB = Math.abs(triplet1[2] - triplet2[2]);
+  return diffR + diffG + diffB;
+}
+
+function colorLightness(color){
+  let vals = tripletValues(color);
+  let r=vals[0], g=vals[1], b=vals[2];
+  r /= 255; g /= 255; b /= 255;
+  let max = Math.max(r, g, b), min = Math.min(r, g, b);
+  return (max + min) / 2;
 }
 
 function arr_diff(arr1, arr2){
