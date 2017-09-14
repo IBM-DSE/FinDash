@@ -8,10 +8,20 @@ body {
   width: 100%;
 }
 
+.btn-stock:not(.active):hover {
+  background-color: #e0e0e0 !important;
+}
+
 .btn-stock.active {
   color: white;
-  background-color: #444444;
-  border-color: #444444;
+  text-shadow:
+          0 0 3px rgba(0,0,0,0.4),
+          0 0 13px rgba(0,0,0,0.1),
+          0 0 23px rgba(0,0,0,0.1);
+}
+
+.btn-stock.active:hover {
+  color: lightgrey;
 }
 
 .btn-client {

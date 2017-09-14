@@ -312,13 +312,14 @@ let colors = [];
 
 function getRandomColor() {
 
-  let bestColor = {minDist: 0, color: ''};
-  let iterations = 20;
+  let bestColor = {minDist: 0, color: '', lightness: 1};
+  let iterations = 50;
   let i = 0;
-  while(i < iterations && (bestColor.minDist < 200 || colorLightness(bestColor.color) > 0.85)) {
+  while(i < iterations && (bestColor.minDist < 200 || bestColor.lightness > 0.85)) {
     let newColor = generateColor();
     let newDist = getMinDist(newColor);
-    if(newDist > bestColor.minDist){
+    let newLightness = colorLightness(bestColor.color);
+    if((newDist > 200 && newLightness < bestColor.lightness) || newDist > bestColor.minDist){
       bestColor.minDist = newDist;
       bestColor.color = newColor;
     }
