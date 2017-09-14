@@ -160,19 +160,26 @@ class StockChart extends Component {
       let chartData = metric==='prices' ? this.state.stockChartData : this.state.corrChartData;
       let dataSet = JSON.parse(origDataSet);
 
-      // generate a random color for the new data set
-      let color = getRandomColor();
-      dataSet.backgroundColor = dataSet.borderColor = dataSet.pointBorderColor =
-        dataSet.pointHoverBackgroundColor = dataSet.pointHoverBorderColor = color;
 
       // create a new chart dataset for the new stock
+      let color;
       if(metric==='prices'){
         let stockName = newStockData.stock;
         dataSet.label = stockName;
         let stockButton = document.getElementById("plot-"+stockName);
-        if(stockButton) stockButton.style["background-color"] = color;
-      } else
+        if(stockButton && stockButton.style["background-color"])
+          color = stockButton.style["background-color"];
+        else{
+          color = getRandomColor(); // generate a random color for the new data set
+          stockButton.style["background-color"] = color;
+        }
+      } else {
+        color = getRandomColor(); // generate a random color for the new data set
         dataSet.label = correlationLabel(newStockData);
+      }
+
+      dataSet.backgroundColor = dataSet.borderColor = dataSet.pointBorderColor =
+        dataSet.pointHoverBackgroundColor = dataSet.pointHoverBorderColor = color;
 
       dataSet.data = stockData[metric][dataSet.label].slice(stockData.startInd, stockData.endInd+1);
       if(stockData.normalized && metric==='prices')
