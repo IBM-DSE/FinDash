@@ -34,12 +34,22 @@ class StockChart extends Component {
     };
   }
 
-  render() { return (
-    <div>
-      <Line data={this.state.stockChartData} />
-      {this.state.corrChartData.datasets.length>0 && <Line data={this.state.corrChartData} />}
-    </div>
-  ); }
+  render() {
+
+    let corrData = this.state.corrChartData.datasets.length > 0;
+    let options = corrData ? Object.assign({}, dollarOptions, hideXAxisLabels) : dollarOptions;
+
+    return (
+      <div>
+
+        {/*Stock Line Chart*/}
+        <Line data={this.state.stockChartData} options={options}/>
+
+        {/*Correlation Line Chart*/}
+        {corrData && <div style={{marginTop: '-70px'}}><Line data={this.state.corrChartData}/></div>}
+
+      </div>);
+  }
 
   componentDidMount() {
     this.udpateCurrentStocks([], this.props.displayStocks);
@@ -228,6 +238,24 @@ const origDataSet = JSON.stringify({
   pointHitRadius: 10,
   data: [65, 59, 80, 81, 56, 55, 40]
 });
+
+const dollarOptions = {
+  scales: {
+    yAxes: [{
+      ticks: {
+        callback: value => '$' + value // Include a dollar sign in the ticks
+      }
+    }]
+  }
+};
+
+const hideXAxisLabels = {
+  scales: {
+    xAxes: [{
+      ticks: {fontColor: '#FFF'}
+    }]
+  }
+};
 
 function correlationLabel(stockData){
   if(stockData.currency)

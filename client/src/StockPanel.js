@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Glyphicon, ControlLabel, Checkbox, Button, DropdownButton, ToggleButton, ToggleButtonGroup } from 'react-bootstrap';
+import { Row, Col, Glyphicon, ControlLabel, Checkbox, Button, DropdownButton, ToggleButton, ToggleButtonGroup } from 'react-bootstrap';
 import StockChart from './StockChart';
 import './daterangepicker.css';
 let DateRangePicker = require('react-bootstrap-daterangepicker');
@@ -56,33 +56,49 @@ class StockPanel extends Component {
 
         {this.props.topPanel && this.stockSelection()}
 
-        <h3>Stock Analysis</h3>
+        <Row className="equal">
 
-        <div className="checkbox align-left">
-          <Checkbox onChange={this.onToggleNormalization} checked={this.state.normalized}>Relative Performance</Checkbox>
-        </div>
+          <Col sm={4} className="flex-col">
+            <div className="align-bottom">
+              <Checkbox className="align-left larger" checked={this.state.normalized} onChange={this.onToggleNormalization}>
+                Relative Performance
+              </Checkbox>
+            </div>
+          </Col>
+
+          <Col sm={4}>
+            <h2>Stock Analysis</h2>
+          </Col>
+
+        </Row>
 
         <StockChart displayStocks={newDisplayStocks} correlationStocks={this.state.correlations}
                     startDate={start} endDate={end} normalized={this.state.normalized}/>
 
-        <DropdownButton title='Plot Correlation' id='corr-sel' style={{marginRight: '100px'}}
-                        open={this.state.corrDropdownExpanded} onToggle={this.onCorrDropdownToggle}>
-          <div style={{display: 'table'}}>
-            <ToggleButtonGroup type="checkbox" style={{display: 'table-cell'}}>
-              {this.stockCorrelationList(this.state.displayStocks)}
-            </ToggleButtonGroup>
-            <ToggleButtonGroup type="checkbox" style={{display: 'table-cell'}}>
-              {this.currencyCorrelationList(this.state.currencies)}
-            </ToggleButtonGroup>
-          </div>
-        </DropdownButton>
+        <Row>
 
-        <ControlLabel>Date Range:</ControlLabel>{' '}
-        <DateRangePicker startDate={this.state.startDate} endDate={this.state.endDate} onApply={this.onDateSet}>
-          <Button className="selected-date-range-btn">
-            <div><Glyphicon glyph="calendar" /> <span>{label}</span> <span className="caret"/></div>
-          </Button>
-        </DateRangePicker>
+          <DropdownButton title='Plot Correlation' id='corr-sel' className="larger" style={{marginRight: '100px'}}
+                          open={this.state.corrDropdownExpanded} onToggle={this.onCorrDropdownToggle}>
+            <div style={{display: 'table'}}>
+              <ToggleButtonGroup type="checkbox" style={{display: 'table-cell'}}>
+                {this.stockCorrelationList(this.state.displayStocks)}
+              </ToggleButtonGroup>
+              <ToggleButtonGroup type="checkbox" style={{display: 'table-cell'}}>
+                {this.currencyCorrelationList(this.state.currencies)}
+              </ToggleButtonGroup>
+            </div>
+          </DropdownButton>
+
+          <ControlLabel className="larger" >Date Range:</ControlLabel>{' '}
+          <DateRangePicker startDate={this.state.startDate} endDate={this.state.endDate} onApply={this.onDateSet}>
+            <Button className="selected-date-range-btn">
+              <div className="larger" ><Glyphicon glyph="calendar" /> <span>{label}</span> <span className="caret"/></div>
+            </Button>
+          </DateRangePicker>
+
+        </Row>
+
+        <br/>
 
         {typeof this.props.topPanel === 'undefined' && this.stockSelection()}
 

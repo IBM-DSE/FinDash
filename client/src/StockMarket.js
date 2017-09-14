@@ -11,6 +11,8 @@ const StockMarket = ({ location }) => {
 
     <StockIndices/>
 
+    <br/>
+
     <div className='row'>
       <div className='col-md-9'>
         <StockPanel displayStocks={query['displayStocks[]']} normalized={query.normalized==='true'}/>
