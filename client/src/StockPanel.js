@@ -100,25 +100,31 @@ class StockPanel extends Component {
     let categories = Object.keys(stocks);
     let width = Math.floor(12/categories.length).toString();
     return (categories.map(category => {
-      let selected = category === 'Tech' ? category : null;
+
+      let selected = stocks[category].map(stock => stock.id).every(stock => displayStocks.includes(stock));
+
       return (<div key={"category-"+category} className={"col-md-"+width}>
+
         <h3>{category}</h3>
-        <ToggleButtonGroup type="checkbox" className="full-width" defaultValue={selected}>
-          <ToggleButton id={'all-'+category} value={category} onChange={this.onSelectAllStocks} block>
+
+        <ToggleButtonGroup type="checkbox" className="full-width">
+          <ToggleButton id={'all-'+category} value={category} checked={selected} onChange={this.onSelectAllStocks} block>
             <strong><Glyphicon glyph='check'/> Select All</strong>
           </ToggleButton>
         </ToggleButtonGroup>
+
         {this.stockList(stocks[category], displayStocks)}
+
       </div>);
     }));
   }
 
   stockList(arr, displayStocks) {
     return (arr.map((elem) => {
-      let included = displayStocks.includes(elem.id) ? elem.id : null;
       return (
-        <ToggleButtonGroup key={elem.id} type="checkbox" className="full-width margin-top-sm" defaultValue={included}>
-          <ToggleButton id={'plot-'+elem.id} value={elem.id} onChange={this.onToggleStock} block>
+        <ToggleButtonGroup key={elem.id} type="checkbox" className="full-width margin-top-sm">
+          <ToggleButton id={'plot-'+elem.id} value={elem.id}
+                        checked={displayStocks.includes(elem.id)} onChange={this.onToggleStock} block>
             {fullStockName(elem)}
           </ToggleButton>
         </ToggleButtonGroup>
@@ -128,13 +134,15 @@ class StockPanel extends Component {
 
   stockCorrelationList(arr) {
     return (arr.map(elem =>
-      <ToggleButton key={'corr-'+elem} id={'corr-'+elem} value={elem} onChange={this.onCorrStockSelect} block>{elem}</ToggleButton>
+      <ToggleButton key={'corr-'+elem} id={'corr-'+elem} value={elem} checked={this.state.corrSelections.includes(elem)}
+                    onChange={this.onCorrStockSelect} block>{elem}</ToggleButton>
     ));
   }
 
   currencyCorrelationList(hash) {
     return (Object.keys(hash).map(sym =>
-      <ToggleButton key={'corr-'+sym} id={'corr-'+sym} value={sym} onChange={this.onCorrStockSelect} block>{hash[sym]}</ToggleButton>
+      <ToggleButton key={'corr-'+sym} id={'corr-'+sym} value={sym} checked={this.state.corrSelections.includes(sym)}
+                    onChange={this.onCorrStockSelect} block>{hash[sym]}</ToggleButton>
     ));
   }
 
@@ -204,7 +212,6 @@ class StockPanel extends Component {
         let label = this.state.corrSelections[0]+'v'+this.state.corrSelections[1];
         this.state.correlations.push(label);
 
-        this.state.corrSelections.forEach((stock) => deselectStock('corr-', stock));
         this.setState({corrSelections: [], corrDropdownExpanded: false});
       }
     } else {
