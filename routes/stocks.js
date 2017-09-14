@@ -2,9 +2,9 @@ require('dotenv').config();
 let express = require('express');
 let router = express.Router();
 let fs = require('fs');
-let csv_parse = require('csv-parse');
 let path = require('path');
-let ibmdb = require("ibm_db");
+let csv_parse = require('csv-parse');
+let ibmDB = require("ibm_db");
 
 // dashDB query
 const connString = ";HOSTNAME="+process.env.DB_HOST+";PORT="+process.env.DB_PORT+
@@ -135,7 +135,7 @@ function queryDatabase(statement, callback){
        process.env.DB_USER && process.env.DB_PASS && process.env.DB_BASE))
     return console.error('Missing Database ');
 
-  ibmdb.open(connString, function (err, conn) {
+  ibmDB.open(connString, function (err, conn) {
     if (err) return console.error(err);
 
     conn.query(statement, function (err, data) {
@@ -167,7 +167,6 @@ const auto_stocks = ['F','TSLA','FCAU','TM','HMC','RACE','CARZ'];
 const airline_stocks = ['AAL','DAL','UAL','SKYW','JBLU','ALK','LUV','JETS'];
 const hotel_stocks = ['MAR', 'HLT', 'H', 'MGM', 'LVS', 'WYN', 'WYNN', 'STAY', 'IHG'];
 const tech_stocks = ['AMZN', 'GOOGL', 'AAPL'];
-const currencies = ['EUR', 'CNY', 'JPY'];
 
 const mapping = {
   'F': 'Ford',
