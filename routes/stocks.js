@@ -39,8 +39,8 @@ router.get('/', function(req, res, next) {
 
 router.get('/news/', function(req, res, next) {
 
-  let startDate = new Date(req.query.startDate);
-  let endDate = new Date(req.query.endDate);
+  let startDate = req.query.startDate && new Date(req.query.startDate);
+  let endDate = req.query.endDate && new Date(req.query.endDate);
 
   getNews(function(err, data) {
     if(err) console.error(err);

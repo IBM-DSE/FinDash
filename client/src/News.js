@@ -8,15 +8,16 @@ class News extends Component {
 
   constructor(props) {
     super(props);
+    this.onDateSet = this.onDateSet.bind(this);
     this.state = {
       news: [],
-      startDate: moment(props.startDate || "2017-08-01"),
-      endDate: moment(props.endDate || "2017-08-15")
+      startDate: props.startDate || "2017-07-15",
+      endDate: props.endDate || "2017-08-15"
     }
   }
 
   componentDidMount() {
-    fetch('/api/stocks/news/'+this.props.stock)
+    fetch('/api/stocks/news?startDate='+this.state.startDate+'&endDate='+this.state.endDate)
       .then(res => res.json())
       .then(news => this.setState({news}))
       .catch((error) => { console.error(error); });
@@ -27,8 +28,8 @@ class News extends Component {
     let label;
     let dateSel = this.props.dateSel;
     if(dateSel){
-      let start = this.state.startDate.format('YYYY-MM-DD');
-      let end = this.state.endDate.format('YYYY-MM-DD');
+      let start = this.state.startDate;
+      let end = this.state.endDate;
       label = start + ' - ' + end;
       if (start === end) label = start;
     }
@@ -37,7 +38,7 @@ class News extends Component {
       <div className="row">
         <h2>{dateSel || 'Recent '}Market News</h2>
         {dateSel && <div>
-          <DateRangePicker startDate={this.state.startDate} endDate={this.state.endDate}>
+          <DateRangePicker startDate={moment(this.state.startDate)} endDate={moment(this.state.endDate)}>
             <Button className="selected-date-range-btn">
               <div className="pull-left"><Glyphicon glyph="calendar" /> <span>{label}</span> <span className="caret"></span></div>
             </Button>
@@ -48,6 +49,13 @@ class News extends Component {
         {newsStories(this.state.news, this.props.full)}
       </div>
     );
+  }
+
+  onDateSet(event, picker) {
+    this.setState({
+      startDate: picker.startDate,
+      endDate:   picker.endDate
+    });
   }
 }
 
