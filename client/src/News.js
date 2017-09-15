@@ -8,18 +8,17 @@ class News extends Component {
 
   constructor(props) {
     super(props);
+    this.fetchNews = this.fetchNews.bind(this);
+    this.onDateSet = this.onDateSet.bind(this);
     this.state = {
       news: [],
-      startDate: moment(props.startDate || "2017-08-01"),
-      endDate: moment(props.endDate || "2017-08-15")
+      startDate: props.startDate || '2017-06-19',
+      endDate: props.endDate || '2017-07-19'
     }
   }
 
   componentDidMount() {
-    fetch('/api/stocks/news/'+this.props.stock)
-      .then(res => res.json())
-      .then(news => this.setState({news}))
-      .catch((error) => { console.error(error); });
+    this.fetchNews();
   }
 
   render() {
@@ -27,8 +26,8 @@ class News extends Component {
     let label;
     let dateSel = this.props.dateSel;
     if(dateSel){
-      let start = this.state.startDate.format('YYYY-MM-DD');
-      let end = this.state.endDate.format('YYYY-MM-DD');
+      let start = this.state.startDate;
+      let end = this.state.endDate;
       label = start + ' - ' + end;
       if (start === end) label = start;
     }
@@ -37,7 +36,7 @@ class News extends Component {
       <div className="row">
         <h2>{dateSel || 'Recent '}Market News</h2>
         {dateSel && <div>
-          <DateRangePicker startDate={this.state.startDate} endDate={this.state.endDate}>
+          <DateRangePicker startDate={moment(this.state.startDate)} endDate={moment(this.state.endDate)} onApply={this.onDateSet}>
             <Button className="selected-date-range-btn">
               <div className="pull-left"><Glyphicon glyph="calendar" /> <span>{label}</span> <span className="caret"></span></div>
             </Button>
@@ -48,6 +47,24 @@ class News extends Component {
         {newsStories(this.state.news, this.props.full)}
       </div>
     );
+  }
+
+  async onDateSet(event, picker) {
+    await this.setState({
+      startDate: picker.startDate.format('YYYY-MM-DD'),
+      endDate:   picker.endDate.format('YYYY-MM-DD')
+    });
+    this.fetchNews();
+  }
+
+  fetchNews() {
+    let startDateParam = this.state.startDate ? 'startDate='+this.state.startDate : '';
+    let endDateParam = this.state.endDate ? 'endDate='+this.state.endDate : '';
+    let maxParam = this.props.max ? 'max='+this.props.max : '';
+    fetch('/api/stocks/news?'+startDateParam+'&'+endDateParam+'&'+maxParam)
+      .then(res => res.json())
+      .then(news => this.setState({news}))
+      .catch((error) => { console.error(error); });
   }
 }
 

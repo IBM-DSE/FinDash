@@ -11,17 +11,21 @@ const connString = ";HOSTNAME="+process.env.DB_HOST+";PORT="+process.env.DB_PORT
                    ";UID="     +process.env.DB_USER+";PWD=" +process.env.DB_PASS+
                    ";DATABASE="+process.env.DB_BASE+";PROTOCOL=TCPIP";
 
-const queryStockPrices = "SELECT SYMBOL,TRADE_DATE,CLOSE_PRICE from STOCK_TRADES WHERE (\"SYMBOL\"='X' " +
-  "AND TRADE_DATE >= '2015-12-31' AND TRADE_DATE <= '2017-08-15') ORDER BY TRADE_DATE",
+const timeFrame = "AND TRADE_DATE >= '2016-09-01' AND TRADE_DATE <= '2017-07-19'";
+
+const queryStockPrices = "SELECT DISTINCT SYMBOL,TRADE_DATE,CLOSE_PRICE from STOCK_TRADES WHERE (\"SYMBOL\"='X' " +
+  timeFrame+") ORDER BY TRADE_DATE",
   pos = queryStockPrices.indexOf('X');
 
 const queryStocks = "SELECT DISTINCT SYMBOL1, SYMBOL2 from STOCK_ANALYSIS;";
 
-const queryStockCorrelation = "SELECT * FROM STOCK_ANALYSIS WHERE (\"SYMBOL1\"='X' AND \"SYMBOL2\"='Z') ORDER BY TRADE_DATE",
+const queryStockCorrelation = "SELECT * FROM STOCK_ANALYSIS WHERE (\"SYMBOL1\"='X' AND \"SYMBOL2\"='Z'" +
+  timeFrame+") ORDER BY TRADE_DATE",
   posSym1 = queryStockCorrelation.indexOf('X'),
   posSym2 = queryStockCorrelation.indexOf('Z');
 
-const queryCurrencyCorrelation = "SELECT * FROM CURRENCY_ANALYSIS WHERE (\"SYMBOL\"='X' AND \"CURRENCY\"='Z') ORDER BY TRADE_DATE",
+const queryCurrencyCorrelation = "SELECT * FROM CURRENCY_ANALYSIS WHERE (\"SYMBOL\"='X' AND \"CURRENCY\"='Z'" +
+  timeFrame+") ORDER BY TRADE_DATE",
   posSym = queryCurrencyCorrelation.indexOf('X'),
   posCurr = queryCurrencyCorrelation.indexOf('Z');
 
@@ -35,6 +39,35 @@ router.get('/', function(req, res, next) {
     },
     name: mapping
   });
+});
+
+router.get('/news/', function(req, res, next) {
+
+  let startDate = req.query.startDate && new Date(req.query.startDate);
+  let endDate = req.query.endDate && new Date(req.query.endDate);
+  if (endDate) endDate.setDate (endDate.getDate() + 1);
+
+  getNews(function(err, data) {
+    if(err) console.error(err);
+    let header = data[0];
+    let stock_news = data.slice(1);
+    if(startDate || endDate){
+      let date;
+      stock_news = stock_news.filter(news => {
+        date = new Date(news[2]);
+        return (!startDate || date >= startDate) && (!endDate || date <= endDate);
+      });
+    }
+    let max = req.query.max ? (parseInt(req.query.max)) : data.length;
+    stock_news = stock_news.slice(0,max).map(function(news){
+      return news.reduce(function(acc, cur, i) {
+        if(i>0) acc[header[i]] = cur;
+        return acc;
+      }, {});
+    });
+    res.json(stock_news);
+  });
+
 });
 
 router.get('/currencies', function(req, res, next) {
@@ -114,24 +147,6 @@ router.get('/:stock', function(req, res, next) {
 
 });
 
-router.get('/news/:stock', function(req, res, next) {
-  getNews(function(err, data) {
-    if(err) console.error(err);
-    let header = data[0];
-    let stock_news = data.filter(function(news) {
-      return news[1] === req.params.stock;
-    });
-    stock_news = stock_news.map(function(news){
-      return news.reduce(function(acc, cur, i) {
-        if(i>0) acc[header[i]] = cur;
-        return acc;
-      }, {});
-    });
-    res.json(stock_news);
-  });
-
-});
-
 function queryDatabase(statement, callback){
 
   if(!(process.env.DB_HOST && process.env.DB_PORT &&
@@ -143,11 +158,11 @@ function queryDatabase(statement, callback){
 
     conn.query(statement, function (err, data) {
       if (err)
-        console.log(err);
+        console.error(err);
       else{
         callback(data);
       }
-      conn.close(function () { console.log('done'); });
+      conn.close();
     });
   });
 }
@@ -167,7 +182,7 @@ function getNews(callback) {
 }
 
 const auto_stocks = ['F','TSLA','FCAU','TM','HMC','RACE','CARZ'];
-const airline_stocks = ['AAL','DAL','UAL','SKYW','JBLU','ALK','LUV','JETS'];
+const airline_stocks = ['AAL','DAL','UAL','SKYW','JBLU','ALK','JETS'];//'LUV',
 const hotel_stocks = ['MAR', 'HLT', 'H', 'MGM', 'LVS', 'WYN', 'WYNN', 'STAY', 'IHG'];
 const tech_stocks = ['AMZN', 'GOOGL', 'AAPL'];
 
