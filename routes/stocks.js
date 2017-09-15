@@ -11,8 +11,8 @@ const connString = ";HOSTNAME="+process.env.DB_HOST+";PORT="+process.env.DB_PORT
                    ";UID="     +process.env.DB_USER+";PWD=" +process.env.DB_PASS+
                    ";DATABASE="+process.env.DB_BASE+";PROTOCOL=TCPIP";
 
-const queryStockPrices = "SELECT SYMBOL,TRADE_DATE,CLOSE_PRICE from STOCK_TRADES WHERE (\"SYMBOL\"='X' " +
-  "AND TRADE_DATE >= '2015-12-31' AND TRADE_DATE <= '2017-08-15') ORDER BY TRADE_DATE",
+const queryStockPrices = "SELECT DISTINCT SYMBOL,TRADE_DATE,CLOSE_PRICE from STOCK_TRADES WHERE (\"SYMBOL\"='X' " +
+  "AND TRADE_DATE >= '2016-09-01' AND TRADE_DATE <= '2017-07-19') ORDER BY TRADE_DATE",
   pos = queryStockPrices.indexOf('X');
 
 const queryStocks = "SELECT DISTINCT SYMBOL1, SYMBOL2 from STOCK_ANALYSIS;";
@@ -152,7 +152,7 @@ function queryDatabase(statement, callback){
 
     conn.query(statement, function (err, data) {
       if (err)
-        console.log(err);
+        console.error(err);
       else{
         callback(data);
       }
@@ -176,7 +176,7 @@ function getNews(callback) {
 }
 
 const auto_stocks = ['F','TSLA','FCAU','TM','HMC','RACE','CARZ'];
-const airline_stocks = ['AAL','DAL','UAL','SKYW','JBLU','ALK','LUV','JETS'];
+const airline_stocks = ['AAL','DAL','UAL','SKYW','JBLU','ALK','JETS'];//'LUV',
 const hotel_stocks = ['MAR', 'HLT', 'H', 'MGM', 'LVS', 'WYN', 'WYNN', 'STAY', 'IHG'];
 const tech_stocks = ['AMZN', 'GOOGL', 'AAPL'];
 

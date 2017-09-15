@@ -140,7 +140,7 @@ class StockChart extends Component {
     else if ( !(stockData.dates[0] === newStockData.dates[0] &&  // check that the stock dates are consistent
                 stockData.dates.length === newStockData.dates.length &&
                 stockData.dates[stockData.dates.length-1] === newStockData.dates[newStockData.dates.length - 1]))
-      console.error('Stock date ranges are inconsistent!');
+      return console.error(newStockData.stock+' stock date ranges are inconsistent!');
 
     // add the new stock prices to our state
     let name = metric==='prices' ? newStockData.stock : correlationLabel(newStockData);

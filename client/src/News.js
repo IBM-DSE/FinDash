@@ -8,19 +8,17 @@ class News extends Component {
 
   constructor(props) {
     super(props);
+    this.fetchNews = this.fetchNews.bind(this);
     this.onDateSet = this.onDateSet.bind(this);
     this.state = {
       news: [],
-      startDate: props.startDate || "2017-07-15",
-      endDate: props.endDate || "2017-08-15"
+      startDate: props.startDate || "2017-06-19",
+      endDate: props.endDate || "2017-07-19"
     }
   }
 
   componentDidMount() {
-    fetch('/api/stocks/news?startDate='+this.state.startDate+'&endDate='+this.state.endDate)
-      .then(res => res.json())
-      .then(news => this.setState({news}))
-      .catch((error) => { console.error(error); });
+    this.fetchNews();
   }
 
   render() {
@@ -38,7 +36,7 @@ class News extends Component {
       <div className="row">
         <h2>{dateSel || 'Recent '}Market News</h2>
         {dateSel && <div>
-          <DateRangePicker startDate={moment(this.state.startDate)} endDate={moment(this.state.endDate)}>
+          <DateRangePicker startDate={moment(this.state.startDate)} endDate={moment(this.state.endDate)} onApply={this.onDateSet}>
             <Button className="selected-date-range-btn">
               <div className="pull-left"><Glyphicon glyph="calendar" /> <span>{label}</span> <span className="caret"></span></div>
             </Button>
@@ -51,11 +49,19 @@ class News extends Component {
     );
   }
 
-  onDateSet(event, picker) {
-    this.setState({
-      startDate: picker.startDate,
-      endDate:   picker.endDate
+  async onDateSet(event, picker) {
+    await this.setState({
+      startDate: picker.startDate.format('YYYY-MM-DD'),
+      endDate:   picker.endDate.format('YYYY-MM-DD')
     });
+    this.fetchNews();
+  }
+
+  fetchNews() {
+    fetch('/api/stocks/news?startDate='+this.state.startDate+'&endDate='+this.state.endDate)
+      .then(res => res.json())
+      .then(news => this.setState({news}))
+      .catch((error) => { console.error(error); });
   }
 }
 
