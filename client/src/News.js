@@ -12,8 +12,8 @@ class News extends Component {
     this.onDateSet = this.onDateSet.bind(this);
     this.state = {
       news: [],
-      startDate: props.startDate || "2017-06-19",
-      endDate: props.endDate || "2017-07-19"
+      startDate: props.startDate || '2017-06-19',
+      endDate: props.endDate || '2017-07-19'
     }
   }
 
@@ -58,7 +58,10 @@ class News extends Component {
   }
 
   fetchNews() {
-    fetch('/api/stocks/news?startDate='+this.state.startDate+'&endDate='+this.state.endDate)
+    let startDateParam = this.state.startDate ? 'startDate='+this.state.startDate : '';
+    let endDateParam = this.state.endDate ? 'endDate='+this.state.endDate : '';
+    let maxParam = this.props.max ? 'max='+this.props.max : '';
+    fetch('/api/stocks/news?'+startDateParam+'&'+endDateParam+'&'+maxParam)
       .then(res => res.json())
       .then(news => this.setState({news}))
       .catch((error) => { console.error(error); });

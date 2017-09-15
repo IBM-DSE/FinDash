@@ -41,19 +41,21 @@ router.get('/news/', function(req, res, next) {
 
   let startDate = req.query.startDate && new Date(req.query.startDate);
   let endDate = req.query.endDate && new Date(req.query.endDate);
+  if (endDate) endDate.setDate (endDate.getDate() + 1);
 
   getNews(function(err, data) {
     if(err) console.error(err);
     let header = data[0];
     let stock_news = data.slice(1);
-    if(startDate && endDate){
+    if(startDate || endDate){
       let date;
       stock_news = stock_news.filter(news => {
         date = new Date(news[2]);
-        return date > startDate && date < endDate;
+        return (!startDate || date >= startDate) && (!endDate || date <= endDate);
       });
     }
-    stock_news = stock_news.map(function(news){
+    let max = req.query.max ? (parseInt(req.query.max)) : data.length;
+    stock_news = stock_news.slice(0,max).map(function(news){
       return news.reduce(function(acc, cur, i) {
         if(i>0) acc[header[i]] = cur;
         return acc;
@@ -156,7 +158,7 @@ function queryDatabase(statement, callback){
       else{
         callback(data);
       }
-      conn.close(function () { console.log('done'); });
+      conn.close();
     });
   });
 }

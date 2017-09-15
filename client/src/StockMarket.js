@@ -18,7 +18,7 @@ const StockMarket = ({ location }) => {
         <StockPanel displayStocks={query['displayStocks[]']} normalized={query.normalized==='true'}/>
       </div>
       <div className='col-md-3'>
-        <News stock='RACE' dateSel={true} startDate='2016-09-01' endDate='2017-07-19'/>
+        <News stock='RACE' dateSel={true} startDate='2016-09-01' max={4}/>
       </div>
     </div>
 
