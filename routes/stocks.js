@@ -37,6 +37,33 @@ router.get('/', function(req, res, next) {
   });
 });
 
+router.get('/news/', function(req, res, next) {
+
+  let startDate = new Date(req.query.startDate);
+  let endDate = new Date(req.query.endDate);
+
+  getNews(function(err, data) {
+    if(err) console.error(err);
+    let header = data[0];
+    let stock_news = data.slice(1);
+    if(startDate && endDate){
+      let date;
+      stock_news = stock_news.filter(news => {
+        date = new Date(news[2]);
+        return date > startDate && date < endDate;
+      });
+    }
+    stock_news = stock_news.map(function(news){
+      return news.reduce(function(acc, cur, i) {
+        if(i>0) acc[header[i]] = cur;
+        return acc;
+      }, {});
+    });
+    res.json(stock_news);
+  });
+
+});
+
 router.get('/currencies', function(req, res, next) {
   res.json(currency_mapping);
 });
@@ -110,24 +137,6 @@ router.get('/:stock', function(req, res, next) {
     } else {
       res.json({ stock: req.params.stock, dates: [], prices: [] });
     }
-  });
-
-});
-
-router.get('/news/:stock', function(req, res, next) {
-  getNews(function(err, data) {
-    if(err) console.error(err);
-    let header = data[0];
-    let stock_news = data.filter(function(news) {
-      return news[1] === req.params.stock;
-    });
-    stock_news = stock_news.map(function(news){
-      return news.reduce(function(acc, cur, i) {
-        if(i>0) acc[header[i]] = cur;
-        return acc;
-      }, {});
-    });
-    res.json(stock_news);
   });
 
 });
