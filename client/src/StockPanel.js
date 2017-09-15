@@ -27,7 +27,7 @@ class StockPanel extends Component {
       displayStocks: this.props.displayStocks || [],
       normalized: props.normalized || false,
       startDate: moment("2016-09-01"),
-      endDate: moment("2017-08-15"),
+      endDate: moment("2017-07-19"),
       corrDropdownExpanded: false,
       corrSelections: [],
       correlations: []
