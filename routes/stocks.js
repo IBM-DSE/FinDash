@@ -11,17 +11,21 @@ const connString = ";HOSTNAME="+process.env.DB_HOST+";PORT="+process.env.DB_PORT
                    ";UID="     +process.env.DB_USER+";PWD=" +process.env.DB_PASS+
                    ";DATABASE="+process.env.DB_BASE+";PROTOCOL=TCPIP";
 
+const timeFrame = "AND TRADE_DATE >= '2016-09-01' AND TRADE_DATE <= '2017-07-19'";
+
 const queryStockPrices = "SELECT DISTINCT SYMBOL,TRADE_DATE,CLOSE_PRICE from STOCK_TRADES WHERE (\"SYMBOL\"='X' " +
-  "AND TRADE_DATE >= '2016-09-01' AND TRADE_DATE <= '2017-07-19') ORDER BY TRADE_DATE",
+  timeFrame+") ORDER BY TRADE_DATE",
   pos = queryStockPrices.indexOf('X');
 
 const queryStocks = "SELECT DISTINCT SYMBOL1, SYMBOL2 from STOCK_ANALYSIS;";
 
-const queryStockCorrelation = "SELECT * FROM STOCK_ANALYSIS WHERE (\"SYMBOL1\"='X' AND \"SYMBOL2\"='Z') ORDER BY TRADE_DATE",
+const queryStockCorrelation = "SELECT * FROM STOCK_ANALYSIS WHERE (\"SYMBOL1\"='X' AND \"SYMBOL2\"='Z'" +
+  timeFrame+") ORDER BY TRADE_DATE",
   posSym1 = queryStockCorrelation.indexOf('X'),
   posSym2 = queryStockCorrelation.indexOf('Z');
 
-const queryCurrencyCorrelation = "SELECT * FROM CURRENCY_ANALYSIS WHERE (\"SYMBOL\"='X' AND \"CURRENCY\"='Z') ORDER BY TRADE_DATE",
+const queryCurrencyCorrelation = "SELECT * FROM CURRENCY_ANALYSIS WHERE (\"SYMBOL\"='X' AND \"CURRENCY\"='Z'" +
+  timeFrame+") ORDER BY TRADE_DATE",
   posSym = queryCurrencyCorrelation.indexOf('X'),
   posCurr = queryCurrencyCorrelation.indexOf('Z');
 
