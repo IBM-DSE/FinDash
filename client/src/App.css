@@ -103,3 +103,7 @@
     flex-wrap: wrap;
   }
 }
+
+.btn {
+  white-space: normal;
+}

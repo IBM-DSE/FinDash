@@ -44,9 +44,9 @@ const MyCalendar = props => (
     <BigCalendar
       events={props.events}
       step={15}
-      min={new Date(2017, 8, 26, 9, 0, 0, 0)}
-      max={new Date(2017, 8, 26, 17, 0, 0, 0)}
-      defaultDate={new Date(2017, 8, 26)}
+      min={new Date(2017, 8, 19, 9, 0, 0, 0)}
+      max={new Date(2017, 8, 19, 17, 0, 0, 0)}
+      defaultDate={new Date(2017, 6, 19)}
       defaultView='day'
       components={{
         event: Event
@@ -67,24 +67,24 @@ function Event({ event }) {
 const events = [
   {
     'title': 'Prep for Leo Rakes Meeting',
-    'start': new Date(2017, 8, 26, 9, 30, 0, 0),
-    'end': new Date(2017, 8, 26, 10, 0, 0, 0),
+    'start': new Date(2017, 6, 19, 9, 30, 0, 0),
+    'end': new Date(2017, 6, 19, 10, 0, 0, 0),
   },
   {
     'title': 'Annual Review with Leo Rakes',
-    'start': new Date(2017, 8, 26, 11, 0, 0, 0),
-    'end': new Date(2017, 8, 26, 12, 0, 0, 0),
+    'start': new Date(2017, 6, 19, 11, 0, 0, 0),
+    'end': new Date(2017, 6, 19, 12, 0, 0, 0),
     'desc': 'Zoom URL: https://zoom.us/j/7682934458'
   },
   {
     'title': 'Prep for Frieda Freya Matthews Meeting',
-    'start': new Date(2017, 8, 26, 13, 30, 0, 0),
-    'end': new Date(2017, 8, 26, 14, 0, 0, 0),
+    'start': new Date(2017, 6, 19, 13, 30, 0, 0),
+    'end': new Date(2017, 6, 19, 14, 0, 0, 0),
   },
   {
     'title': 'Annual Review with Frieda Freya Matthews',
-    'start': new Date(2017, 8, 26, 15, 0, 0, 0),
-    'end': new Date(2017, 8, 26, 16, 0, 0, 0),
+    'start': new Date(2017, 6, 19, 15, 0, 0, 0),
+    'end': new Date(2017, 6, 19, 16, 0, 0, 0),
     'desc': 'Zoom URL: https://zoom.us/j/5983594782'
   },
 ];
