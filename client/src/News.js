@@ -36,23 +36,19 @@ class News extends Component {
     return(
       <div className="row">
         <h2>{dateSel || 'Recent '}Market News</h2>
-        {dateSel && NewsRange(this.state.startDate, this.state.startDate, label)}
+        {dateSel && <div>
+          <DateRangePicker startDate={this.state.startDate} endDate={this.state.endDate}>
+            <Button className="selected-date-range-btn">
+              <div className="pull-left"><Glyphicon glyph="calendar" /> <span>{label}</span> <span className="caret"></span></div>
+            </Button>
+          </DateRangePicker>
+          <br/>
+        </div>}
         <br/>
         {newsStories(this.state.news, this.props.full)}
       </div>
     );
   }
-}
-
-function NewsRange(startDate, endDate, label) {
-  return (<div>
-    <DateRangePicker startDate={startDate} endDate={endDate}>
-      <Button className="selected-date-range-btn">
-        <div className="pull-left"><Glyphicon glyph="calendar" /> <span>{label}</span> <span className="caret"></span></div>
-      </Button>
-    </DateRangePicker>
-    <br/>
-  </div>);
 }
 
 function newsStories(news_data, full) {
