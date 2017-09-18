@@ -1,15 +1,9 @@
-require('dotenv').config();
 let express = require('express');
 let router = express.Router();
 let fs = require('fs');
 let path = require('path');
 let csv_parse = require('csv-parse');
-let ibmDB = require("ibm_db");
-
-// dashDB query
-const connString = ";HOSTNAME="+process.env.DB_HOST+";PORT="+process.env.DB_PORT+
-                   ";UID="     +process.env.DB_USER+";PWD=" +process.env.DB_PASS+
-                   ";DATABASE="+process.env.DB_BASE+";PROTOCOL=TCPIP";
+let ibmDB = require('../data/ibm-db');
 
 const timeFrame = "AND TRADE_DATE >= '2016-09-01' AND TRADE_DATE <= '2017-07-19'";
 
@@ -79,7 +73,7 @@ router.get('/corr/stocks', function(req, res, next) {
   let stock1 = req.query.stock1;
   let stock2 = req.query.stock2;
 
-  queryDatabase(queryStocks, function(pairs){
+  ibmDB.queryDatabase(queryStocks, function(pairs){
     let stocks;
     pairs.forEach((pair) => {
       stocks = Object.values(pair);
@@ -89,7 +83,7 @@ router.get('/corr/stocks', function(req, res, next) {
           pair['SYMBOL1'] + queryStockCorrelation.slice(posSym1+1, posSym2) +
           pair['SYMBOL2'] + queryStockCorrelation.slice(posSym2+1);
 
-        queryDatabase(query, function(data){
+        ibmDB.queryDatabase(query, function(data){
           if (data.length > 0 && data[0]['SYMBOL1'] === pair['SYMBOL1'] && data[0]['SYMBOL2'] === pair['SYMBOL2']) {
             res.json({
               stock1: stock1, stock2: stock2,
@@ -115,7 +109,7 @@ router.get('/corr/curr', function(req, res, next) {
     queryCurrencyCorrelation.slice(posSym+1, posCurr) +
     currency + queryCurrencyCorrelation.slice(posCurr+1);
 
-  queryDatabase(query, function(data){
+  ibmDB.queryDatabase(query, function(data){
 
     if (data.length > 0 && data[0]['SYMBOL'] === req.query.stock) {
       res.json({
@@ -133,7 +127,7 @@ router.get('/:stock', function(req, res, next) {
 
   let query = queryStockPrices.slice(0, pos) + req.params.stock + queryStockPrices.slice(pos+1);
 
-  queryDatabase(query, function(data){
+  ibmDB.queryDatabase(query, function(data){
     if (data.length > 0 && data[0]['SYMBOL'] === req.params.stock) {
       res.json({
         stock: req.params.stock,
@@ -146,26 +140,6 @@ router.get('/:stock', function(req, res, next) {
   });
 
 });
-
-function queryDatabase(statement, callback){
-
-  if(!(process.env.DB_HOST && process.env.DB_PORT &&
-       process.env.DB_USER && process.env.DB_PASS && process.env.DB_BASE))
-    return console.error('Missing Database ');
-
-  ibmDB.open(connString, function (err, conn) {
-    if (err) return console.error(err);
-
-    conn.query(statement, function (err, data) {
-      if (err)
-        console.error(err);
-      else{
-        callback(data);
-      }
-      conn.close();
-    });
-  });
-}
 
 function list(stocks){
   return stocks.map(function(symbol) {return {
