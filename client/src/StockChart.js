@@ -132,6 +132,9 @@ class StockChart extends Component {
 
   // Take the new api stock data and add it to the current state
   addStockData(newStockData, metric='prices') {
+    if(newStockData.dates.length===0)
+      return this.props.noCorrData(newStockData);
+
     let stockData = this.state.stockData;
 
     let updateDates = false;
