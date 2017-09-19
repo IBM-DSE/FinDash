@@ -1,15 +1,9 @@
-require('dotenv').config();
 let express = require('express');
 let router = express.Router();
 let fs = require('fs');
 let path = require('path');
 let csv_parse = require('csv-parse');
-let ibmDB = require("ibm_db");
-
-// dashDB query
-const connString = ";HOSTNAME="+process.env.DB_HOST+";PORT="+process.env.DB_PORT+
-                   ";UID="     +process.env.DB_USER+";PWD=" +process.env.DB_PASS+
-                   ";DATABASE="+process.env.DB_BASE+";PROTOCOL=TCPIP";
+let ibmDB = require('../db/ibm-db');
 
 const timeFrame = "AND TRADE_DATE >= '2016-09-01' AND TRADE_DATE <= '2017-07-19'";
 
@@ -41,33 +35,44 @@ router.get('/', function(req, res, next) {
   });
 });
 
+const newsQueryStart = "SELECT MIN(NEWS_DATE) AS NEWS_DATE, MIN(NEWS_SRC) AS NEWS_SRC, MIN(NEWS_URL) AS NEWS_URL, " +
+                              "NEWS_TITLE, MIN(NEWS_TEXT) AS NEWS_TEXT\n" +
+                       "FROM BLUADMIN.STOCKNEWS\n",
+
+  startDateClause = "NEWS_DATE >= '<START_DATE> 00:00:00.000000000'",
+  indexOfStartDate = startDateClause.indexOf('<START_DATE>'),
+  offsetStartDate = indexOfStartDate+'<START_DATE>'.length,
+
+  endDateClause = "NEWS_DATE <= '<END_DATE> 05:40:00.000000000'",
+  indexOfEndDate = endDateClause.indexOf('<END_DATE>'),
+  offsetEndDate = indexOfEndDate+'<END_DATE>'.length,
+
+  newsQueryEnd =  "GROUP BY NEWS_TITLE\n" +
+                  "ORDER BY NEWS_DATE DESC, NEWS_TITLE DESC\n" +
+                  "FETCH FIRST <MAX> ROWS ONLY;",
+  indexOfMax = newsQueryEnd.indexOf('<MAX>'),
+  offsetMax = indexOfMax+'<MAX>'.length;
+
 router.get('/news/', function(req, res, next) {
 
-  let startDate = req.query.startDate && new Date(req.query.startDate);
-  let endDate = req.query.endDate && new Date(req.query.endDate);
-  if (endDate) endDate.setDate (endDate.getDate() + 1);
+  let startDate = req.query.startDate;
+  let endDate = req.query.endDate;
+  let maxRows = req.query.max || 6;
 
-  getNews(function(err, data) {
-    if(err) console.error(err);
-    let header = data[0];
-    let stock_news = data.slice(1);
-    if(startDate || endDate){
-      let date;
-      stock_news = stock_news.filter(news => {
-        date = new Date(news[2]);
-        return (!startDate || date >= startDate) && (!endDate || date <= endDate);
-      });
+  let newsQuery = newsQueryStart;
+  if(startDate || endDate){
+    newsQuery += "WHERE (";
+    if(startDate)
+      newsQuery += startDateClause.slice(0, indexOfStartDate) + startDate + startDateClause.slice(offsetStartDate);
+    if(endDate){
+      if(startDate) newsQuery += " AND ";
+      newsQuery += endDateClause.slice(0, indexOfEndDate) + endDate + endDateClause.slice(offsetEndDate);
     }
-    let max = req.query.max ? (parseInt(req.query.max)) : data.length;
-    stock_news = stock_news.slice(0,max).map(function(news){
-      return news.reduce(function(acc, cur, i) {
-        if(i>0) acc[header[i]] = cur;
-        return acc;
-      }, {});
-    });
-    res.json(stock_news);
-  });
+    newsQuery += ")\n";
+  }
+  newsQuery += newsQueryEnd.slice(0, indexOfMax) + maxRows + newsQueryEnd.slice(offsetMax);
 
+  ibmDB.queryDatabase(newsQuery, stockNews => res.json(stockNews));
 });
 
 router.get('/currencies', function(req, res, next) {
@@ -79,7 +84,7 @@ router.get('/corr/stocks', function(req, res, next) {
   let stock1 = req.query.stock1;
   let stock2 = req.query.stock2;
 
-  queryDatabase(queryStocks, function(pairs){
+  ibmDB.queryDatabase(queryStocks, function(pairs){
     let stocks;
     pairs.forEach((pair) => {
       stocks = Object.values(pair);
@@ -89,7 +94,7 @@ router.get('/corr/stocks', function(req, res, next) {
           pair['SYMBOL1'] + queryStockCorrelation.slice(posSym1+1, posSym2) +
           pair['SYMBOL2'] + queryStockCorrelation.slice(posSym2+1);
 
-        queryDatabase(query, function(data){
+        ibmDB.queryDatabase(query, function(data){
           if (data.length > 0 && data[0]['SYMBOL1'] === pair['SYMBOL1'] && data[0]['SYMBOL2'] === pair['SYMBOL2']) {
             res.json({
               stock1: stock1, stock2: stock2,
@@ -115,7 +120,7 @@ router.get('/corr/curr', function(req, res, next) {
     queryCurrencyCorrelation.slice(posSym+1, posCurr) +
     currency + queryCurrencyCorrelation.slice(posCurr+1);
 
-  queryDatabase(query, function(data){
+  ibmDB.queryDatabase(query, function(data){
 
     if (data.length > 0 && data[0]['SYMBOL'] === req.query.stock) {
       res.json({
@@ -133,7 +138,7 @@ router.get('/:stock', function(req, res, next) {
 
   let query = queryStockPrices.slice(0, pos) + req.params.stock + queryStockPrices.slice(pos+1);
 
-  queryDatabase(query, function(data){
+  ibmDB.queryDatabase(query, function(data){
     if (data.length > 0 && data[0]['SYMBOL'] === req.params.stock) {
       res.json({
         stock: req.params.stock,
@@ -146,26 +151,6 @@ router.get('/:stock', function(req, res, next) {
   });
 
 });
-
-function queryDatabase(statement, callback){
-
-  if(!(process.env.DB_HOST && process.env.DB_PORT &&
-       process.env.DB_USER && process.env.DB_PASS && process.env.DB_BASE))
-    return console.error('Missing Database ');
-
-  ibmDB.open(connString, function (err, conn) {
-    if (err) return console.error(err);
-
-    conn.query(statement, function (err, data) {
-      if (err)
-        console.error(err);
-      else{
-        callback(data);
-      }
-      conn.close();
-    });
-  });
-}
 
 function list(stocks){
   return stocks.map(function(symbol) {return {
