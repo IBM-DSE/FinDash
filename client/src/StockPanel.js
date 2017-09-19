@@ -19,6 +19,7 @@ class StockPanel extends Component {
     this.onSelectAllStocks = this.onSelectAllStocks.bind(this);
     this.onCorrDropdownToggle = this.onCorrDropdownToggle.bind(this);
     this.onCorrStockSelect = this.onCorrStockSelect.bind(this);
+    this.noCorrData = this.noCorrData.bind(this);
     this.onToggleNormalization = this.onToggleNormalization.bind(this);
 
     this.state = {
@@ -73,7 +74,8 @@ class StockPanel extends Component {
 
         </Row>
 
-        <StockChart displayStocks={newDisplayStocks} correlationStocks={this.state.correlations}
+        <StockChart displayStocks={newDisplayStocks}
+                    correlationStocks={this.state.correlations} noCorrData={this.noCorrData}
                     startDate={start} endDate={end} normalized={this.state.normalized}/>
 
         <Row>
@@ -250,6 +252,15 @@ class StockPanel extends Component {
           this.state.corrSelections.splice(index, 1);
       });
     }
+  }
+
+  noCorrData(badCorr){
+    alert("Sorry, I don't have any correlation data between "+badCorr.stock1+" and "+badCorr.stock2);
+    let badCorrCombined = badCorr.stock1+'v'+badCorr.stock2;
+    this.setState(prevState => {
+      let corrs = prevState.correlations;
+      corrs.splice(corrs.indexOf(badCorrCombined), 1);
+    });
   }
 
   onToggleNormalization(event) {
