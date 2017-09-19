@@ -3,7 +3,7 @@ let router = express.Router();
 let fs = require('fs');
 let csv_parse = require('csv-parse/lib/sync');
 let path = require('path');
-let ibmDB = require('../data/ibm-db');
+let ibmDB = require('../db/ibm-db');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -41,7 +41,7 @@ router.get('/clients/:id', async function(req, res, next) {
 });
 
 function getUsers() {
-  let jsonPath = path.join(__dirname, '..', 'data', 'users.json');
+  let jsonPath = path.join(__dirname, '..', 'db', 'users.json');
   let fileData = fs.readFileSync(jsonPath, 'utf8');
   return JSON.parse(fileData);
 }

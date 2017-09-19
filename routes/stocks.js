@@ -3,7 +3,7 @@ let router = express.Router();
 let fs = require('fs');
 let path = require('path');
 let csv_parse = require('csv-parse');
-let ibmDB = require('../data/ibm-db');
+let ibmDB = require('../db/ibm-db');
 
 const timeFrame = "AND TRADE_DATE >= '2016-09-01' AND TRADE_DATE <= '2017-07-19'";
 
