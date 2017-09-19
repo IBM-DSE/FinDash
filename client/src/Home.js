@@ -33,7 +33,7 @@ const Home = () => (
         </div>
       </div>
 
-      <News full={true} startDate='2017-07-12' />
+      <News full={true}/>
 
     </div>
   </div>

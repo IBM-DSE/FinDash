@@ -18,9 +18,9 @@ module.exports.queryDatabase = function (statement, callback){
     conn.query(statement, function (err, data) {
       if (err)
         console.error(err);
-      else{
+      else
         callback(data);
-      }
+
       conn.close();
     });
   });

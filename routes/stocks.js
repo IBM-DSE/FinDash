@@ -35,33 +35,44 @@ router.get('/', function(req, res, next) {
   });
 });
 
+const newsQueryStart = "SELECT MIN(NEWS_DATE) AS NEWS_DATE, MIN(NEWS_SRC) AS NEWS_SRC, MIN(NEWS_URL) AS NEWS_URL, " +
+                              "NEWS_TITLE, MIN(NEWS_TEXT) AS NEWS_TEXT\n" +
+                       "FROM BLUADMIN.STOCKNEWS\n",
+
+  startDateClause = "NEWS_DATE >= '<START_DATE> 00:00:00.000000000'",
+  indexOfStartDate = startDateClause.indexOf('<START_DATE>'),
+  offsetStartDate = indexOfStartDate+'<START_DATE>'.length,
+
+  endDateClause = "NEWS_DATE <= '<END_DATE> 05:40:00.000000000'",
+  indexOfEndDate = endDateClause.indexOf('<END_DATE>'),
+  offsetEndDate = indexOfEndDate+'<END_DATE>'.length,
+
+  newsQueryEnd =  "GROUP BY NEWS_TITLE\n" +
+                  "ORDER BY NEWS_DATE DESC, NEWS_TITLE DESC\n" +
+                  "FETCH FIRST <MAX> ROWS ONLY;",
+  indexOfMax = newsQueryEnd.indexOf('<MAX>'),
+  offsetMax = indexOfMax+'<MAX>'.length;
+
 router.get('/news/', function(req, res, next) {
 
-  let startDate = req.query.startDate && new Date(req.query.startDate);
-  let endDate = req.query.endDate && new Date(req.query.endDate);
-  if (endDate) endDate.setDate (endDate.getDate() + 1);
+  let startDate = req.query.startDate;
+  let endDate = req.query.endDate;
+  let maxRows = req.query.max || 6;
 
-  getNews(function(err, data) {
-    if(err) console.error(err);
-    let header = data[0];
-    let stock_news = data.slice(1);
-    if(startDate || endDate){
-      let date;
-      stock_news = stock_news.filter(news => {
-        date = new Date(news[2]);
-        return (!startDate || date >= startDate) && (!endDate || date <= endDate);
-      });
+  let newsQuery = newsQueryStart;
+  if(startDate || endDate){
+    newsQuery += "WHERE (";
+    if(startDate)
+      newsQuery += startDateClause.slice(0, indexOfStartDate) + startDate + startDateClause.slice(offsetStartDate);
+    if(endDate){
+      if(startDate) newsQuery += " AND ";
+      newsQuery += endDateClause.slice(0, indexOfEndDate) + endDate + endDateClause.slice(offsetEndDate);
     }
-    let max = req.query.max ? (parseInt(req.query.max)) : data.length;
-    stock_news = stock_news.slice(0,max).map(function(news){
-      return news.reduce(function(acc, cur, i) {
-        if(i>0) acc[header[i]] = cur;
-        return acc;
-      }, {});
-    });
-    res.json(stock_news);
-  });
+    newsQuery += ")\n";
+  }
+  newsQuery += newsQueryEnd.slice(0, indexOfMax) + maxRows + newsQueryEnd.slice(offsetMax);
 
+  ibmDB.queryDatabase(newsQuery, stockNews => res.json(stockNews));
 });
 
 router.get('/currencies', function(req, res, next) {
