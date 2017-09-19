@@ -8,7 +8,7 @@ class StockChart extends Component {
     super(props);
     this.currentChartStocks = this.currentChartStocks.bind(this);
     this.currentChartCorrs = this.currentChartCorrs.bind(this);
-    this.udpateCurrentStocks = this.udpateCurrentStocks.bind(this);
+    this.updateCurrentStocks = this.updateCurrentStocks.bind(this);
     this.addStockData = this.addStockData.bind(this);
     this.updateDateRange = this.updateDateRange.bind(this);
     this.updateChartData = this.updateChartData.bind(this);
@@ -38,13 +38,15 @@ class StockChart extends Component {
 
     let corrData = this.state.corrChartData.datasets.length > 0;
     let stockOptions = this.state.stockData.normalized ? percentOptions : dollarOptions;
-    let options = corrData ? Object.assign({}, stockOptions, hideXAxisLabels) : stockOptions;
-
+    stockOptions = JSON.parse(JSON.stringify(stockOptions));
+    stockOptions.scales.yAxes[0].ticks.callback = this.state.stockData.normalized ? percentCallback : dollarCallback;
+    if(corrData)
+      Object.assign(stockOptions.scales, hideXAxisLabels);
     return (
       <div>
 
         {/*Stock Line Chart*/}
-        <Line data={this.state.stockChartData} options={options}/>
+        <Line data={this.state.stockChartData} options={stockOptions}/>
 
         {/*Correlation Line Chart*/}
         {corrData && <div style={{marginTop: '-70px'}}>
@@ -55,7 +57,7 @@ class StockChart extends Component {
   }
 
   componentDidMount() {
-    this.udpateCurrentStocks([], this.props.displayStocks);
+    this.updateCurrentStocks([], this.props.displayStocks);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -65,7 +67,7 @@ class StockChart extends Component {
     else if(this.props.normalized !== nextProps.normalized)
       this.normalizeChartData(nextProps.normalized);
     else {
-      this.udpateCurrentStocks(this.props.displayStocks, nextProps.displayStocks);
+      this.updateCurrentStocks(this.props.displayStocks, nextProps.displayStocks);
 
       let newStocks = arr_diff(nextProps.correlationStocks, this.currentChartCorrs());
       if (newStocks.length>0){
@@ -85,7 +87,7 @@ class StockChart extends Component {
     }
   }
 
-  udpateCurrentStocks(currentStocks, nextStocks) {
+  updateCurrentStocks(currentStocks, nextStocks) {
     let newStocks = arr_diff(nextStocks, currentStocks);
     let delStocks = arr_diff(currentStocks, nextStocks);
 
@@ -259,12 +261,12 @@ const dollarOptions = {
         labelString: 'Stock Price',
         fontSize: 14
       },
-      ticks: {
-        callback: value => '$' + value // Include a dollar sign in the ticks
-      }
+      ticks: {}
     }]
   }
 };
+
+const dollarCallback = value => '$' + value; // Include a dollar sign in the ticks
 
 const percentOptions = {
   scales: {
@@ -274,19 +276,17 @@ const percentOptions = {
         labelString: 'Stock Performance',
         fontSize: 14
       },
-      ticks: {
-        callback: value => value+'%' // Include a dollar sign in the ticks
-      }
+      ticks: {}
     }]
   }
 };
 
+const percentCallback = value => value+'%'; // Include a dollar sign in the ticks
+
 const hideXAxisLabels = {
-  scales: {
-    xAxes: [{
-      ticks: {fontColor: '#FFF'}
-    }]
-  }
+  xAxes: [{
+    ticks: {fontColor: '#FFF'}
+  }]
 };
 
 const corrOptions = {
