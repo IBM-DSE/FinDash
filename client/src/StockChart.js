@@ -14,6 +14,8 @@ class StockChart extends Component {
     this.updateChartData = this.updateChartData.bind(this);
     this.normalizeChartData = this.normalizeChartData.bind(this);
     this.removeChartStocks = this.removeChartStocks.bind(this);
+    this.tooltipStock = this.tooltipStock.bind(this);
+
     this.state = {
       stockData: {
         dates: [],
@@ -38,10 +40,15 @@ class StockChart extends Component {
 
     let corrData = this.state.corrChartData.datasets.length > 0;
     let stockOptions = this.state.stockData.normalized ? percentOptions : dollarOptions;
-    stockOptions = JSON.parse(JSON.stringify(stockOptions));
+    stockOptions = copy(stockOptions);
     stockOptions.scales.yAxes[0].ticks.callback = this.state.stockData.normalized ? percentCallback : dollarCallback;
+    stockOptions.tooltips.callbacks.title = () => null;
+    stockOptions.tooltips.callbacks.label = this.tooltipStock;
+    stockOptions.tooltips.callbacks.beforeFooter = (tooltipItem, data) => 'Date: '+tooltipItem[0].xLabel;
+    stockOptions.tooltips.callbacks.afterFooter = this.state.stockData.normalized ? percentTooltip : dollarTooltip;
     if(corrData)
-      Object.assign(stockOptions.scales, hideXAxisLabels);
+      stockOptions.scales.xAxes[0].ticks.fontColor = '#FFF';
+
     return (
       <div>
 
@@ -73,7 +80,7 @@ class StockChart extends Component {
       if (newStocks.length>0){
 
         let path;
-        let stocks = newStocks[0].split('v');
+        let stocks = newStocks[0].slice(8,newStocks[0].indexOf(' )')).split(' , ');
         if(stocks[0].indexOf('DEX')>-1)
           path = '/api/stocks/corr/curr?currency=' + stocks[0] + '&stock=' + stocks[1];
         else if(stocks[1].indexOf('DEX')>-1)
@@ -220,6 +227,12 @@ class StockChart extends Component {
     stockChartData.datasets = newDataSets;
     this.setState({ stockChartData })
   }
+
+  tooltipStock(tooltipItem, data) {
+    let ticker = data.datasets[tooltipItem.datasetIndex].label;
+    let name = this.props.stockName[ticker];
+    return name+' ('+ticker+')';
+  }
 }
 
 function normalizeChartDataset(normalize, dataSet, stockData) {
@@ -256,73 +269,84 @@ const origDataSet = JSON.stringify({
   data: [65, 59, 80, 81, 56, 55, 40]
 });
 
-const dollarOptions = {
+// Chart Configuration Options
+
+const baseOptions = {
   scales: {
     yAxes: [{
       scaleLabel: {
         display: true,
-        labelString: 'Stock Price',
         fontSize: 14
       },
-      ticks: {}
-    }]
-  }
+      ticks: {},
+      // offset: true
+    }],
+    xAxes: [{ticks: {}}]
+  },
+  tooltips: {
+    position: 'nearest',
+    bodyFontSize: 14,
+    footerFontStyle: 'normal',
+    footerFontSize: 14,
+    callbacks: {}
+  },
+  layout: {padding: {}}
 };
+
+let baseOptionsCopy = copy(baseOptions);
+baseOptionsCopy.scales.yAxes[0].scaleLabel.labelString = 'Stock Price';
+const dollarOptions = baseOptionsCopy;
 
 const dollarCallback = value => '$' + value; // Include a dollar sign in the ticks
 
-const percentOptions = {
-  scales: {
-    yAxes: [{
-      scaleLabel: {
-        display: true,
-        labelString: 'Stock Performance',
-        fontSize: 14
-      },
-      ticks: {}
-    }]
-  }
+const dollarTooltip = (tooltipItem, data) => 'Price: $ '+parseFloat(tooltipItem[0].yLabel).toFixed(2);
+
+baseOptionsCopy = copy(baseOptions);
+baseOptionsCopy.scales.yAxes[0].scaleLabel.labelString = 'Stock Performance';
+const percentOptions = baseOptionsCopy;
+
+const percentCallback = value => value+' %'; // Include a dollar sign in the ticks
+
+const percentTooltip = (tooltipItem, data) => {
+  let val = parseFloat(tooltipItem[0].yLabel).toFixed(1);
+  return 'Gain: '+val+'%';
 };
 
-const percentCallback = value => value+'%'; // Include a dollar sign in the ticks
-
-const hideXAxisLabels = {
-  xAxes: [{
-    ticks: {fontColor: '#FFF'}
-  }]
-};
-
-const corrOptions = {
-  scales: {
-    yAxes: [{
-      scaleLabel: {
-        display: true,
-        labelString: 'Correlation',
-        fontSize: 14
-      }
-    }]
-  }
-};
+baseOptionsCopy = copy(baseOptions);
+baseOptionsCopy.scales.yAxes[0].scaleLabel.labelString = 'Correlation Coefficient';
+baseOptionsCopy.tooltips.callbacks.title = () => null;
+baseOptionsCopy.tooltips.callbacks.label = (tooltipItem, data) => data.datasets[tooltipItem.datasetIndex].label;
+baseOptionsCopy.tooltips.callbacks.beforeFooter = (tooltipItem, data) => 'Date: ' + tooltipItem[0].xLabel;
+baseOptionsCopy.tooltips.callbacks.afterFooter = (tooltipItem, data) => 'Corr: '+parseFloat(tooltipItem[0].yLabel).toFixed(2);
+baseOptionsCopy.layout.padding.left = 15;
+const corrOptions = baseOptionsCopy;
 
 function correlationLabel(stockData){
+  let dataSets;
   if(stockData.currency)
-    return stockData.stock+'v'+stockData.currency;
+    dataSets = stockData.stock+' , '+stockData.currency;
   else
-    return stockData.stock1+'v'+stockData.stock2;
+    dataSets = stockData.stock1+' , '+stockData.stock2;
+  return ' Corr ( '+dataSets+' )';
 }
 
+// Color Generation
+
 let colors = [];
+const lightThreshold = 0.8;
+const distThreshold = 200;
+const iterations = 50;
 
 function getRandomColor() {
 
   let bestColor = {minDist: 0, color: '', lightness: 1};
-  let iterations = 50;
   let i = 0;
-  while(i < iterations && (bestColor.minDist < 200 || bestColor.lightness > 0.85)) {
+  while(i < iterations && (bestColor.minDist < distThreshold || bestColor.lightness >= lightThreshold)) {
     let newColor = generateColor();
     let newDist = getMinDist(newColor);
-    let newLightness = colorLightness(bestColor.color);
-    if((newDist > 200 && newLightness < bestColor.lightness) || newDist > bestColor.minDist){
+    let newLightness = colorLightness(newColor);
+    if((newLightness < lightThreshold) &&
+      ((newLightness < bestColor.lightness && newDist > distThreshold) || (newDist > bestColor.minDist))){
       bestColor.minDist = newDist;
       bestColor.color = newColor;
     }
@@ -375,6 +399,8 @@ function colorLightness(color){
   return (max + min) / 2;
 }
 
+// Miscellaneous
+
 function arr_diff(arr1, arr2){
   return arr1.filter(x => !arr2.includes(x));
 }
@@ -396,6 +422,10 @@ function binSearch(num, arr) {
     return arr[lo];
   }
   return hi;
+}
+
+function copy(obj){
+  return JSON.parse(JSON.stringify(obj))
 }
 
 export default StockChart;

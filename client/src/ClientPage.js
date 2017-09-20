@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Button } from 'react-bootstrap';
 import StockPanel from './StockPanel';
 import Util from './Util'
+let Fetching = Util.Fetching;
 
 class ClientPage extends Component {
 
@@ -9,14 +10,16 @@ class ClientPage extends Component {
     super(props);
     this.state = {
       client_data: {},
-      stocks: {}
+      stocks: {},
+      fetching: false
     }
   }
 
   componentDidMount() {
+    this.setState({fetching: true});
     fetch('/api/users/clients/'+this.props.match.params.clientId)
       .then(res => res.json())
-      .then(client_data => this.setState({client_data}))
+      .then(client_data => this.setState({client_data: client_data, fetching: false}))
       .catch((error) => { console.error(error); });
     if(Object.keys(this.state.stocks).length === 0)
       fetch('/api/stocks').then(res => res.json()).then(stocks => {
@@ -26,6 +29,12 @@ class ClientPage extends Component {
   }
 
   render() {
+    if(this.state.fetching)
+      return (
+        <div className="container">
+          <h2>Client Profile</h2><br/>
+          <Fetching resource='Client Data'/>
+        </div>);
     let client = this.state.client_data;
     let queryString = stockTickers.reduce((str, stock, i) => (str += (i===0?'?':'&')+'displayStocks[]='+stock), '');
     queryString += '&normalized=true';
@@ -152,19 +161,21 @@ const basicAttrs = [
 ];
 
 function formatAttrs(key, value){
-  if(key === 'Income' || key === 'AccountBalance')
-    return Util.stringToCurrency(value);
-  else if(categories.includes(key)){
-    if(value >= '90%')
-      return(<div>
-        {value} <span className="glyphicon glyphicon-arrow-up" style={{color: 'green'}}></span>
-      </div>);
-    else
-      return(<div>
-        {value} <span className="glyphicon glyphicon-arrow-down" style={{color: 'red'}}></span>
-      </div>);
-  } else
-    return value;
+  if(value){
+    if(key === 'Income' || key === 'AccountBalance')
+      return Util.stringToCurrency(value);
+    else if(categories.includes(key)){
+      if(value >= '90%')
+        return(<div>
+          {value} <span className="glyphicon glyphicon-arrow-up" style={{color: 'green'}}></span>
+        </div>);
+      else
+        return(<div>
+          {value} <span className="glyphicon glyphicon-arrow-down" style={{color: 'red'}}></span>
+        </div>);
+    } else
+      return value;
+  }
 }
 
 const investorAttrs = [

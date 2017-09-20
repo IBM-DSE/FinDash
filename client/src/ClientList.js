@@ -1,26 +1,27 @@
 import React, { Component } from 'react';
 import Util from './Util'
+let Fetching = Util.Fetching;
 
 class ClientList extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      clients: []
+      clients: [],
+      fetching: false
     }
   }
 
   componentDidMount() {
+    this.setState({fetching: true});
     fetch('/api/users/clients')
       .then(res => res.json())
-      .then(clients => this.setState({clients}));
+      .then(clients => this.setState({clients: clients, fetching: false}));
   }
 
   render() {
-    return (
-      <div>
-        {clientList(this.state.clients)}
-      </div>
-    );
+    if(this.state.fetching)
+      return (<Fetching resource='Clients'/>);
+    return (<div>{clientList(this.state.clients)}</div>);
   }
 }
 

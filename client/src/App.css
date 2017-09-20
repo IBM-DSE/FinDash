@@ -27,6 +27,14 @@
   to { transform: rotate(360deg); }
 }
 
+.full-width {
+  width: 100%;
+}
+
+.center {
+  margin: auto;
+}
+
 .big-img {
   width: 100%;
 }
