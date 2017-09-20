@@ -1,21 +1,29 @@
 import React, { Component } from 'react';
 import Util from './Util'
+let Spinner = require('react-spinkit');
 
 class ClientList extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      clients: []
+      clients: [],
+      fetching: false
     }
   }
 
   componentDidMount() {
+    this.setState({fetching: true});
     fetch('/api/users/clients')
       .then(res => res.json())
-      .then(clients => this.setState({clients}));
+      .then(clients => this.setState({clients: clients, fetching: false}));
   }
 
   render() {
+    if(this.state.fetching)
+      return (<div>
+        <h3>Fetching Clients...</h3>
+        <div className='full-width'><Spinner name="circle" fadeIn="none" className='center'/></div>
+      </div>);
     return (
       <div>
         {clientList(this.state.clients)}

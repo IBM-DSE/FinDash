@@ -3,6 +3,7 @@ import { Button, Glyphicon } from 'react-bootstrap';
 import './daterangepicker.css';
 let DateRangePicker = require('react-bootstrap-daterangepicker');
 let moment = require('moment');
+let Spinner = require('react-spinkit');
 
 class News extends Component {
 
@@ -13,7 +14,8 @@ class News extends Component {
     this.state = {
       news: [],
       startDate: props.startDate,
-      endDate: props.endDate || '2017-07-19'
+      endDate: props.endDate || '2017-07-19',
+      fetching: false
     }
   }
 
@@ -44,7 +46,10 @@ class News extends Component {
           <br/>
         </div>}
         <br/>
-        {newsStories(this.state.news, this.props.full)}
+        {this.state.fetching ? (<div>
+          <h3>Fetching News...</h3>
+          <div className='full-width'><Spinner name="circle" fadeIn="none" className='center'/></div>
+        </div>) : newsStories(this.state.news, this.props.full)}
       </div>
     );
   }
@@ -58,13 +63,14 @@ class News extends Component {
   }
 
   fetchNews() {
+    this.setState({fetching: true});
     let startDateParam = this.state.startDate ? 'startDate='+this.state.startDate : '';
     let endDateParam = this.state.endDate ? 'endDate='+this.state.endDate : '';
     let maxParam = this.props.max ? 'max='+this.props.max : '';
     let newsApiUrl = '/api/stocks/news?'+startDateParam+'&'+endDateParam+'&'+maxParam;
     fetch(newsApiUrl)
       .then(res => res.json())
-      .then(news => this.setState({news}))
+      .then(news => this.setState({news: news, fetching: false}))
       .catch((error) => { console.error(error); });
   }
 }
