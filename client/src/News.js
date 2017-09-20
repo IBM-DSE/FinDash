@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { Button, Glyphicon } from 'react-bootstrap';
 import './daterangepicker.css';
+import Util from './Util'
 let DateRangePicker = require('react-bootstrap-daterangepicker');
 let moment = require('moment');
-let Spinner = require('react-spinkit');
+const Fetching = Util.Fetching;
 
 class News extends Component {
 
@@ -46,10 +47,7 @@ class News extends Component {
           <br/>
         </div>}
         <br/>
-        {this.state.fetching ? (<div>
-          <h3>Fetching News...</h3>
-          <div className='full-width'><Spinner name="circle" fadeIn="none" className='center'/></div>
-        </div>) : newsStories(this.state.news, this.props.full)}
+        {this.state.fetching ? (<Fetching resource='News'/>) : newsStories(this.state.news, this.props.full)}
       </div>
     );
   }

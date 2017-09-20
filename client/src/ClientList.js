@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import Util from './Util'
-let Spinner = require('react-spinkit');
+let Fetching = Util.Fetching;
 
 class ClientList extends Component {
   constructor(props) {
@@ -20,15 +20,8 @@ class ClientList extends Component {
 
   render() {
     if(this.state.fetching)
-      return (<div>
-        <h3>Fetching Clients...</h3>
-        <div className='full-width'><Spinner name="circle" fadeIn="none" className='center'/></div>
-      </div>);
-    return (
-      <div>
-        {clientList(this.state.clients)}
-      </div>
-    );
+      return (<Fetching resource='Clients'/>);
+    return (<div>{clientList(this.state.clients)}</div>);
   }
 }
 
