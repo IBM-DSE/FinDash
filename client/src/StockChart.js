@@ -46,8 +46,13 @@ class StockChart extends Component {
     stockOptions.tooltips.callbacks.label = this.tooltipStock;
     stockOptions.tooltips.callbacks.beforeFooter = (tooltipItem, data) => 'Date: '+tooltipItem[0].xLabel;
     stockOptions.tooltips.callbacks.afterFooter = this.state.stockData.normalized ? percentTooltip : dollarTooltip;
-    if(corrData)
+    if(corrData) {
       Object.assign(stockOptions.scales, hideXAxisLabels);
+      corrOptions.tooltips.callbacks.title = () => null;
+      corrOptions.tooltips.callbacks.label = (tooltipItem, data) => data.datasets[tooltipItem.datasetIndex].label;
+      corrOptions.tooltips.callbacks.beforeFooter = (tooltipItem, data) => 'Date: ' + tooltipItem[0].xLabel;
+      corrOptions.tooltips.callbacks.afterFooter = (tooltipItem, data) => 'Corr: '+parseFloat(tooltipItem[0].yLabel).toFixed(2);
+    }
     return (
       <div>
 
@@ -294,7 +299,7 @@ const dollarOptions = {
 
 const dollarCallback = value => '$' + value; // Include a dollar sign in the ticks
 
-const dollarTooltip = (tooltipItem, data) => 'Price: $ '+tooltipItem[0].yLabel;
+const dollarTooltip = (tooltipItem, data) => 'Price: $ '+parseFloat(tooltipItem[0].yLabel).toFixed(2);
 
 const percentOptions = {
   scales: {
@@ -313,8 +318,8 @@ const percentOptions = {
 const percentCallback = value => value+' %'; // Include a dollar sign in the ticks
 
 const percentTooltip = (tooltipItem, data) => {
-  let val = parseFloat(tooltipItem[0].yLabel);
-  return 'Gain: '+round(val,1)+'%';
+  let val = parseFloat(tooltipItem[0].yLabel).toFixed(1);
+  return 'Gain: '+val+'%';
 };
 
 const hideXAxisLabels = {
@@ -323,23 +328,26 @@ const hideXAxisLabels = {
   }]
 };
 
-const corrOptions = {
+let corrOptions = {
   scales: {
     yAxes: [{
       scaleLabel: {
         display: true,
-        labelString: 'Correlation',
+        labelString: 'Correlation Coefficient',
         fontSize: 14
       }
     }]
-  }
+  },
+  tooltips: tooltipOptions
 };
 
 function correlationLabel(stockData){
+  let dataSets;
   if(stockData.currency)
-    return stockData.stock+'v'+stockData.currency;
+    dataSets = stockData.stock+' , '+stockData.currency;
   else
-    return stockData.stock1+'v'+stockData.stock2;
+    dataSets = stockData.stock1+' , '+stockData.stock2;
+  return ' Corr ( '+dataSets+' )';
 }
 
 // Color Generation
