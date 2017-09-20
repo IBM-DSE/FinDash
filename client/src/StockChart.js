@@ -338,17 +338,20 @@ function correlationLabel(stockData){
 // Color Generation
 
 let colors = [];
+const lightThreshold = 0.8;
+const distThreshold = 200;
+const iterations = 50;
 
 function getRandomColor() {
 
   let bestColor = {minDist: 0, color: '', lightness: 1};
-  let iterations = 50;
   let i = 0;
-  while(i < iterations && (bestColor.minDist < 200 || bestColor.lightness > 0.85)) {
+  while(i < iterations && (bestColor.minDist < distThreshold || bestColor.lightness >= lightThreshold)) {
     let newColor = generateColor();
     let newDist = getMinDist(newColor);
-    let newLightness = colorLightness(bestColor.color);
-    if((newDist > 200 && newLightness < bestColor.lightness) || newDist > bestColor.minDist){
+    let newLightness = colorLightness(newColor);
+    if((newLightness < lightThreshold) &&
+      ((newLightness < bestColor.lightness && newDist > distThreshold) || (newDist > bestColor.minDist))){
       bestColor.minDist = newDist;
       bestColor.color = newColor;
     }
