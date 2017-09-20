@@ -14,6 +14,8 @@ class StockChart extends Component {
     this.updateChartData = this.updateChartData.bind(this);
     this.normalizeChartData = this.normalizeChartData.bind(this);
     this.removeChartStocks = this.removeChartStocks.bind(this);
+    this.tooltipStock = this.tooltipStock.bind(this);
+
     this.state = {
       stockData: {
         dates: [],
@@ -40,6 +42,10 @@ class StockChart extends Component {
     let stockOptions = this.state.stockData.normalized ? percentOptions : dollarOptions;
     stockOptions = JSON.parse(JSON.stringify(stockOptions));
     stockOptions.scales.yAxes[0].ticks.callback = this.state.stockData.normalized ? percentCallback : dollarCallback;
+    stockOptions.tooltips.callbacks.title = () => null;
+    stockOptions.tooltips.callbacks.label = this.tooltipStock;
+    stockOptions.tooltips.callbacks.beforeFooter = (tooltipItem, data) => 'Date: '+tooltipItem[0].xLabel;
+    stockOptions.tooltips.callbacks.afterFooter = this.state.stockData.normalized ? percentTooltip : dollarTooltip;
     if(corrData)
       Object.assign(stockOptions.scales, hideXAxisLabels);
     return (
@@ -220,6 +226,12 @@ class StockChart extends Component {
     stockChartData.datasets = newDataSets;
     this.setState({ stockChartData })
   }
+
+  tooltipStock(tooltipItem, data) {
+    let ticker = data.datasets[tooltipItem.datasetIndex].label;
+    let name = this.props.stockName[ticker];
+    return name+' ('+ticker+')';
+  }
 }
 
 function normalizeChartDataset(normalize, dataSet, stockData) {
@@ -256,6 +268,16 @@ const origDataSet = JSON.stringify({
   data: [65, 59, 80, 81, 56, 55, 40]
 });
 
+// Chart Configuration Options
+
+const tooltipOptions = {
+  position: 'nearest',
+  bodyFontSize: 14,
+  footerFontStyle: 'normal',
+  footerFontSize: 14,
+  callbacks: {}
+};
+
 const dollarOptions = {
   scales: {
     yAxes: [{
@@ -266,10 +288,13 @@ const dollarOptions = {
       },
       ticks: {}
     }]
-  }
+  },
+  tooltips: tooltipOptions
 };
 
 const dollarCallback = value => '$' + value; // Include a dollar sign in the ticks
+
+const dollarTooltip = (tooltipItem, data) => 'Price: $ '+tooltipItem[0].yLabel;
 
 const percentOptions = {
   scales: {
@@ -281,10 +306,16 @@ const percentOptions = {
       },
       ticks: {}
     }]
-  }
+  },
+  tooltips: tooltipOptions
 };
 
-const percentCallback = value => value+'%'; // Include a dollar sign in the ticks
+const percentCallback = value => value+' %'; // Include a dollar sign in the ticks
+
+const percentTooltip = (tooltipItem, data) => {
+  let val = parseFloat(tooltipItem[0].yLabel);
+  return 'Gain: '+round(val,1)+'%';
+};
 
 const hideXAxisLabels = {
   xAxes: [{
@@ -310,6 +341,8 @@ function correlationLabel(stockData){
   else
     return stockData.stock1+'v'+stockData.stock2;
 }
+
+// Color Generation
 
 let colors = [];
 
@@ -375,6 +408,8 @@ function colorLightness(color){
   return (max + min) / 2;
 }
 
+// Miscellaneous
+
 function arr_diff(arr1, arr2){
   return arr1.filter(x => !arr2.includes(x));
 }
@@ -396,6 +431,13 @@ function binSearch(num, arr) {
     return arr[lo];
   }
   return hi;
+}
+
+function round(number, precision) {
+  let factor = Math.pow(10, precision);
+  let tempNumber = number * factor;
+  let roundedTempNumber = Math.round(tempNumber);
+  return roundedTempNumber / factor;
 }
 
 export default StockChart;

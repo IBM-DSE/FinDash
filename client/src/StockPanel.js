@@ -74,7 +74,7 @@ class StockPanel extends Component {
 
         </Row>
 
-        <StockChart displayStocks={newDisplayStocks}
+        <StockChart displayStocks={newDisplayStocks} stockName={this.state.stocks.name}
                     correlationStocks={this.state.correlations} noCorrData={this.noCorrData}
                     startDate={start} endDate={end} normalized={this.state.normalized}/>
 
