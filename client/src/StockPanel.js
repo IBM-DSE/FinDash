@@ -240,7 +240,7 @@ class StockPanel extends Component {
       });
       if(this.state.corrSelections.length === 2){
 
-        let label = this.state.corrSelections[0]+'v'+this.state.corrSelections[1];
+        let label = correlationLabel(this.state.corrSelections[0] , this.state.corrSelections[1]);
         this.state.correlations.push(label);
 
         this.setState({corrSelections: [], corrDropdownExpanded: false});
@@ -256,7 +256,7 @@ class StockPanel extends Component {
 
   noCorrData(badCorr){
     alert("Sorry, I don't have any correlation data between "+badCorr.stock1+" and "+badCorr.stock2);
-    let badCorrCombined = badCorr.stock1+'v'+badCorr.stock2;
+    let badCorrCombined = correlationLabel(badCorr.stock1 , badCorr.stock2);
     this.setState(prevState => {
       let corrs = prevState.correlations;
       corrs.splice(corrs.indexOf(badCorrCombined), 1);
@@ -268,6 +268,10 @@ class StockPanel extends Component {
     this.setState({normalized});
   }
 
+}
+
+function correlationLabel(var1, var2){
+  return ' Corr ( ' + var1+' , '+var2 + ' )';
 }
 
 function deselectStock(prefix, stock) {

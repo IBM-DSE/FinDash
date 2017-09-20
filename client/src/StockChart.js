@@ -46,9 +46,9 @@ class StockChart extends Component {
     stockOptions.tooltips.callbacks.label = this.tooltipStock;
     stockOptions.tooltips.callbacks.beforeFooter = (tooltipItem, data) => 'Date: '+tooltipItem[0].xLabel;
     stockOptions.tooltips.callbacks.afterFooter = this.state.stockData.normalized ? percentTooltip : dollarTooltip;
-    if(corrData) {
-      Object.assign(stockOptions.scales, hideXAxisLabels);
-    }
+    if(corrData)
+      stockOptions.scales.xAxes[0].ticks.fontColor = '#FFF';
+
     return (
       <div>
 
@@ -80,7 +80,7 @@ class StockChart extends Component {
       if (newStocks.length>0){
 
         let path;
-        let stocks = newStocks[0].split('v');
+        let stocks = newStocks[0].slice(8,newStocks[0].indexOf(' )')).split(' , ');
         if(stocks[0].indexOf('DEX')>-1)
           path = '/api/stocks/corr/curr?currency=' + stocks[0] + '&stock=' + stocks[1];
         else if(stocks[1].indexOf('DEX')>-1)
@@ -280,7 +280,8 @@ const baseOptions = {
       },
       ticks: {},
       // offset: true
-    }]
+    }],
+    xAxes: [{ticks: {}}]
   },
   tooltips: {
     position: 'nearest',
@@ -309,12 +310,6 @@ const percentCallback = value => value+' %'; // Include a dollar sign in the tic
 const percentTooltip = (tooltipItem, data) => {
   let val = parseFloat(tooltipItem[0].yLabel).toFixed(1);
   return 'Gain: '+val+'%';
-};
-
-const hideXAxisLabels = {
-  xAxes: [{
-    ticks: {fontColor: '#FFF'}
-  }]
 };
 
 baseOptionsCopy = copy(baseOptions);
