@@ -40,7 +40,7 @@ class StockChart extends Component {
 
     let corrData = this.state.corrChartData.datasets.length > 0;
     let stockOptions = this.state.stockData.normalized ? percentOptions : dollarOptions;
-    stockOptions = JSON.parse(JSON.stringify(stockOptions));
+    stockOptions = copy(stockOptions);
     stockOptions.scales.yAxes[0].ticks.callback = this.state.stockData.normalized ? percentCallback : dollarCallback;
     stockOptions.tooltips.callbacks.title = () => null;
     stockOptions.tooltips.callbacks.label = this.tooltipStock;
@@ -48,10 +48,6 @@ class StockChart extends Component {
     stockOptions.tooltips.callbacks.afterFooter = this.state.stockData.normalized ? percentTooltip : dollarTooltip;
     if(corrData) {
       Object.assign(stockOptions.scales, hideXAxisLabels);
-      corrOptions.tooltips.callbacks.title = () => null;
-      corrOptions.tooltips.callbacks.label = (tooltipItem, data) => data.datasets[tooltipItem.datasetIndex].label;
-      corrOptions.tooltips.callbacks.beforeFooter = (tooltipItem, data) => 'Date: ' + tooltipItem[0].xLabel;
-      corrOptions.tooltips.callbacks.afterFooter = (tooltipItem, data) => 'Corr: '+parseFloat(tooltipItem[0].yLabel).toFixed(2);
     }
     return (
       <div>
@@ -275,45 +271,38 @@ const origDataSet = JSON.stringify({
 
 // Chart Configuration Options
 
-const tooltipOptions = {
-  position: 'nearest',
-  bodyFontSize: 14,
-  footerFontStyle: 'normal',
-  footerFontSize: 14,
-  callbacks: {}
-};
-
-const dollarOptions = {
+const baseOptions = {
   scales: {
     yAxes: [{
       scaleLabel: {
         display: true,
-        labelString: 'Stock Price',
         fontSize: 14
       },
-      ticks: {}
+      ticks: {},
+      // offset: true
     }]
   },
-  tooltips: tooltipOptions
+  tooltips: {
+    position: 'nearest',
+    bodyFontSize: 14,
+    footerFontStyle: 'normal',
+    footerFontSize: 14,
+    callbacks: {}
+  },
+  layout: {padding: {}}
 };
+
+let baseOptionsCopy = copy(baseOptions);
+baseOptionsCopy.scales.yAxes[0].scaleLabel.labelString = 'Stock Price';
+const dollarOptions = baseOptionsCopy;
 
 const dollarCallback = value => '$' + value; // Include a dollar sign in the ticks
 
 const dollarTooltip = (tooltipItem, data) => 'Price: $ '+parseFloat(tooltipItem[0].yLabel).toFixed(2);
 
-const percentOptions = {
-  scales: {
-    yAxes: [{
-      scaleLabel: {
-        display: true,
-        labelString: 'Stock Performance',
-        fontSize: 14
-      },
-      ticks: {}
-    }]
-  },
-  tooltips: tooltipOptions
-};
+baseOptionsCopy = copy(baseOptions);
+baseOptionsCopy.scales.yAxes[0].scaleLabel.labelString = 'Stock Performance';
+const percentOptions = baseOptionsCopy;
 
 const percentCallback = value => value+' %'; // Include a dollar sign in the ticks
 
@@ -328,18 +317,14 @@ const hideXAxisLabels = {
   }]
 };
 
-let corrOptions = {
-  scales: {
-    yAxes: [{
-      scaleLabel: {
-        display: true,
-        labelString: 'Correlation Coefficient',
-        fontSize: 14
-      }
-    }]
-  },
-  tooltips: tooltipOptions
-};
+baseOptionsCopy = copy(baseOptions);
+baseOptionsCopy.scales.yAxes[0].scaleLabel.labelString = 'Correlation Coefficient';
+baseOptionsCopy.tooltips.callbacks.title = () => null;
+baseOptionsCopy.tooltips.callbacks.label = (tooltipItem, data) => data.datasets[tooltipItem.datasetIndex].label;
+baseOptionsCopy.tooltips.callbacks.beforeFooter = (tooltipItem, data) => 'Date: ' + tooltipItem[0].xLabel;
+baseOptionsCopy.tooltips.callbacks.afterFooter = (tooltipItem, data) => 'Corr: '+parseFloat(tooltipItem[0].yLabel).toFixed(2);
+baseOptionsCopy.layout.padding.left = 15;
+const corrOptions = baseOptionsCopy;
 
 function correlationLabel(stockData){
   let dataSets;
@@ -441,11 +426,8 @@ function binSearch(num, arr) {
   return hi;
 }
 
-function round(number, precision) {
-  let factor = Math.pow(10, precision);
-  let tempNumber = number * factor;
-  let roundedTempNumber = Math.round(tempNumber);
-  return roundedTempNumber / factor;
+function copy(obj){
+  return JSON.parse(JSON.stringify(obj))
 }
 
 export default StockChart;
