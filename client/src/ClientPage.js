@@ -30,7 +30,11 @@ class ClientPage extends Component {
 
   render() {
     if(this.state.fetching)
-      return (<Fetching resource='Client Data'/>);
+      return (
+        <div className="container">
+          <h2>Client Profile</h2><br/>
+          <Fetching resource='Client Data'/>
+        </div>);
     let client = this.state.client_data;
     let queryString = stockTickers.reduce((str, stock, i) => (str += (i===0?'?':'&')+'displayStocks[]='+stock), '');
     queryString += '&normalized=true';

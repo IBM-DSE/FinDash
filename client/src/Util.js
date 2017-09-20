@@ -10,7 +10,7 @@ const Util = {
 
   Fetching: (props) => {
     return (<div>
-      <h3>Fetching {props.resource}...</h3>
+      <h3 style={{marginBottom: '20px'}}>Fetching {props.resource}...</h3>
       <div className='full-width'><Spinner name="circle" fadeIn="none" className='center'/></div>
     </div>);
   }
