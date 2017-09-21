@@ -8,6 +8,7 @@
   },
   "scripts": {
     "start": "node ./bin/www",
+    "test": "wdio test/wdio.conf.js",
     "build_client": "cd client && react-scripts build"
   },
   "dependencies": {
@@ -36,6 +37,12 @@
     "twix": "^1.2.0"
   },
   "devDependencies": {
-    "dotenv": "latest"
+    "dotenv": "latest",
+    "mocha": "^3.5.3",
+    "should": "^13.1.0",
+    "wdio-mocha-framework": "^0.5.11",
+    "wdio-phantomjs-service": "^0.2.2",
+    "wdio-spec-reporter": "^0.1.2",
+    "webdriverio": "^4.8.0"
   }
 }
