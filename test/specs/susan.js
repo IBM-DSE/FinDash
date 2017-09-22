@@ -55,14 +55,40 @@ describe('Susan prepares for her meeting with Leo Rakes', () => {
     leoLink.getText().should.containEql('Leo Rakes');
     leoLink.click();
 
+    // Arrive at Leo Rakes Client Profile
     browser.getText('h2=Client Profile');
-
     browser.waitForExist('div.xx-large=Leo Rakes');
+
+    // See Client Details
     $('tr*=Gender').getText().should.be.exactly('Gender M');
     $('tr*=Age').getText().should.be.exactly('Age 45-54');
     $('tr*=Annual Income').getText().should.be.exactly('Annual Income $ 392,655.00');
     $('tr*=Education').getText().should.be.exactly('Education Masters');
     $('tr*=Profession').getText().should.be.exactly('Profession Executive');
+
+    $('tr*=Account Type').getText().should.be.exactly('Account Balance Trades per Year Account Type Trading Strategy Trading Style');
+    $('tr*=Option').getText().should.be.exactly('$ 654,758.00 6 Option Growth Swing');
+
+    browser.getText('h3=Last Meeting with Leo Rakes: October 24th, 2016');
+
+    // See Industry Affinity
+    browser.getText('h3=Predicted Industry Affinity');
+    $('thead*=Auto').getText().should.be.exactly('Auto Tech Airlines Hotels');
+    $('tbody*=94%').getText().should.be.exactly('94%\n84%\n48%\n31%');
+    $('tbody*=94%').$$('span.glyphicon').map(span => span.getAttribute('class')).should.deepEqual(
+      ['glyphicon glyphicon-arrow-up',
+      'glyphicon glyphicon-arrow-down',
+      'glyphicon glyphicon-arrow-down',
+      'glyphicon glyphicon-arrow-down']);
+
+    // See Portfolio
+    browser.getText('h3=Portfolio');
+    let stockPanel = $('div#stock-panel');
+    stockPanel.$('div*=Auto').getText().should.equal('Auto\nSelect All\nFerrari NV (RACE)\n' +
+      'Tech\nSelect All\nAmazon (AMZN)\nAlphabet (GOOGL)\nApple (AAPL)')
+
+    browser.getText('h2=Stock Analysis');
+    $('div.checkbox=Relative Performance').$('input').isSelected().should.be.true();
   });
 
 });
