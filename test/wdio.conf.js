@@ -2,14 +2,10 @@
 
 exports.config = {
   capabilities: [
-    { browserName: 'phantomjs' }
-    // If you want to use other browsers,
-    // you may need local Selenium standalone server.
+    { browserName: 'chrome' }
   ],
-  services: ['phantomjs'],
-  specs: [
-    './test/specs/*.js'
-  ],
+  services: ['selenium-standalone'],
+  specs: ['./test/specs/*.js'],
   exclude: [],
   maxInstances: 2,
   sync: true,
@@ -23,5 +19,11 @@ exports.config = {
   mochaOpts: {
     ui: 'bdd',
     timeout: 30000
+  },
+  seleniumArgs: {
+    version: '3.0.1'
+  },
+  seleniumInstallArgs: {
+    version: '3.0.1'
   }
 };
