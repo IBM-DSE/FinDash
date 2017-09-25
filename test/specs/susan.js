@@ -121,6 +121,49 @@ describe('Susan prepares for her meeting with Leo Rakes', () => {
     shouldBeSelected('#plot-HMC');
     shouldBeSelected('#plot-RACE');
     shouldBeSelected('#plot-CARZ');
+
+    // Filter relevant market news from early November
+    $('#news-panel').click('button*=2016-09-01 - 2017-07-19');
+    $('div*=Oct 2016').click('.glyphicon-chevron-right');
+    let nov = $$('div*=Nov 2016');
+    nov.last().click('td=1');
+    nov.last().click('td=12');
+    nov.first().click('button=Apply');
+    browser.waitForText('h3.panel-title=Donald Trump and the Stock Market: Did You Miss These Moves?');
+
+    // Click article about impact of the election on the stock market
+    $('div.panel*=Donald Trump and the Stock Market: Did You Miss These Moves?').click('a');
+    browser.switchTab(browser.windowHandles().value[1]);
+    browser.pause(2000);
+    browser.getText("h1=Donald Trump and the Stock Market: Did You Miss These Moves?");
+    browser.getText("h2=Fiat Chrysler's Trump card");
+    browser.getText("p*=The belief is that the emissions").should.equal(
+      "The story is simple: Trump plans to complete a comprehensive review of all federal regulations, " +
+      "especially the fuel economy and emissions standards. The belief is that the emissions standards, " +
+      "set to require fleets to average 54.5 miles per gallon by 2025, will be relaxed significantly.");
+    browser.getText('p*=Fiat Chrysler Automobiles').should.equal(
+      "That's also why Fiat Chrysler Automobiles (NYSE: FCAU) jumped the highest this week. " +
+      "It benefited the most since it was drastically behind the industry in terms of developing " +
+      "electric vehicles or hybrids and still heavily relies on Jeep and Ram Truck for profits.");
+
+    // Switch back to FinDash
+    browser.switchTab();
+    browser.getText('a=Financial Advisor Dashboard');
+
+    // Toggle off all Auto stocks
+    categoryAuto.click('div=Select All');
+    shouldBeDeselected('#plot-F');
+    shouldBeDeselected('#plot-TSLA');
+    shouldBeDeselected('#plot-FCAU');
+    shouldBeDeselected('#plot-TM');
+    shouldBeDeselected('#plot-HMC');
+    shouldBeDeselected('#plot-RACE');
+    shouldBeDeselected('#plot-CARZ');
+
+    categoryAuto.click('div=Ferrari NV (RACE)');
+    categoryAuto.click('div=Honda (HMC)');
+    shouldBeSelected('#plot-HMC');
+    shouldBeSelected('#plot-RACE');
   });
 
 });
@@ -161,4 +204,16 @@ function shouldBeSelected(id) {
 function shouldBeDeselected(id) {
   $(id+' > input').isSelected().should.be.false();
   $(id).getAttribute('class').should.not.containEql('active');
+}
+
+if (!Array.prototype.first) {
+  Array.prototype.first = function() {
+    return this[0];
+  }
+}
+
+if (!Array.prototype.last) {
+  Array.prototype.last = function() {
+    return this[this.length-1];
+  };
 }

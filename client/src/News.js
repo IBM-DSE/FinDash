@@ -36,7 +36,7 @@ class News extends Component {
     }
 
     return(
-      <div className="row">
+      <div id="news-panel" className="row">
         <h2>{dateSel || 'Recent '}Market News</h2>
         {dateSel && <div>
           <DateRangePicker startDate={moment(this.state.startDate)} endDate={moment(this.state.endDate)} onApply={this.onDateSet}>
