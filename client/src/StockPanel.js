@@ -122,7 +122,7 @@ class StockPanel extends Component {
 
       let selected = stocks.categories[category].map(stock => stock).every(stock => displayStocks.includes(stock));
 
-      return (<div key={"category-"+category} className={"col-md-"+width}>
+      return (<div key={"category-"+category} className={"category col-md-"+width}>
 
         <h3>{category}</h3>
 
