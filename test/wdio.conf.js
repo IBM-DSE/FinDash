@@ -2,7 +2,12 @@
 
 exports.config = {
   capabilities: [
-    { browserName: 'chrome' }
+    {
+      browserName: 'chrome',
+      chromeOptions: {
+        args: ['window-size=1200,800']
+      }
+    }
   ],
   services: ['selenium-standalone'],
   specs: ['./test/specs/*.js'],
@@ -12,7 +17,7 @@ exports.config = {
   logLevel: 'error',
   coloredLogs: true,
   waitforTimeout: 20000,
-  connectionRetryTimeout: 90000,
+  connectionRetryTimeout: 10000,
   connectionRetryCount: 3,
   framework: 'mocha',
   reporters: ['spec'],
