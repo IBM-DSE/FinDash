@@ -42,7 +42,6 @@
     "mocha-steps": "^1.1.0",
     "should": "^13.1.0",
     "wdio-mocha-framework": "^0.5.11",
-    "wdio-phantomjs-service": "^0.2.2",
     "wdio-selenium-standalone-service": "0.0.9",
     "wdio-spec-reporter": "^0.1.2",
     "webdriverio": "^4.8.0"
