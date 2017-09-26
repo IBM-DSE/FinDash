@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 let express = require('express');
 let path = require('path');
 let favicon = require('serve-favicon');
@@ -37,7 +39,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/users', users);
 app.use('/api/stocks', stocks);
 
-if (process.env.NODE_ENV === 'production') {
+if ((process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'test')) {
   app.use(express.static(path.join(__dirname, 'client/build')));
   app.use('/*', function (req, res) {
     res.sendFile(path.join(__dirname, 'client/build', 'index.html'));

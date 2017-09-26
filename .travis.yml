@@ -2,8 +2,9 @@ language: node_js
 node_js:
   - "8"
 env:
-  - CXX=g++-4.8
-  - NODE_ENV=production
+  global:
+    - CXX=g++-4.8
+    - NODE_ENV=test
 addons:
   apt:
     sources:
