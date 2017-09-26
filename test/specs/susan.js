@@ -6,6 +6,7 @@ require('mocha-steps');
 require('dotenv').config();
 
 const url = process.env.TEST_URL || 'http://localhost:3000/';
+console.log("Testing Against "+url);
 
 describe('Susan prepares for her meeting with Leo Rakes', () => {
 
