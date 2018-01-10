@@ -1,4 +1,3 @@
-require('dotenv').config();
 let ibmDB = require("ibm_db");
 
 const connString =

@@ -56,7 +56,7 @@ class StockChart extends Component {
         <Line data={this.state.stockChartData} options={stockOptions}/>
 
         {/*Correlation Line Chart*/}
-        {corrData && <div style={{marginTop: '-70px'}}>
+        {corrData && <div id='corr-plot' style={{marginTop: '-70px'}}>
           <Line data={this.state.corrChartData} options={corrOptions}/>
         </div>}
 

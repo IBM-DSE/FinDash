@@ -1,4 +1,5 @@
 # Financial Advisor Dashboard
+[![Build Status](https://travis-ci.org/IBM-DSE/FinDash.svg?branch=master)](https://travis-ci.org/IBM-DSE/FinDash)
 
 Demo Web Application for Financial Advisor to review list of clients, news, and stocks from a single interface
 
