@@ -12,7 +12,7 @@ exports.config = {
   services: ['selenium-standalone'],
   specs: ['./test/specs/*.js'],
   exclude: [],
-  maxInstances: 2,
+  maxInstances: 1,
   sync: true,
   logLevel: 'error',
   coloredLogs: true,
@@ -26,9 +26,9 @@ exports.config = {
     timeout: 30000
   },
   seleniumArgs: {
-    version: '3.0.1'
+    version: '3.10.0'
   },
   seleniumInstallArgs: {
-    version: '3.0.1'
+    version: '3.10.0'
   }
 };
