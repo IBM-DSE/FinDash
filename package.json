@@ -8,42 +8,42 @@
   },
   "scripts": {
     "start": "node ./bin/www",
-    "test": "wdio test/wdio.conf.js",
+    "test": "./node_modules/.bin/wdio test/wdio.conf.js",
     "build_client": "cd client && react-scripts build"
   },
   "dependencies": {
     "body-parser": "~1.17.1",
     "bootstrap": "^3.3.7",
-    "chart.js": "^2.5.0",
+    "chart.js": "^2.7.2",
     "cookie-parser": "~1.4.3",
-    "csv-parse": "^1.2.1",
-    "debug": "~2.6.3",
-    "express": "~4.15.2",
+    "csv-parse": "^1.3.3",
+    "debug": "^2.6.9",
+    "express": "^4.15.5",
     "ibm_db": "^2.2.1",
     "jade": "~1.11.0",
     "moment": "^2.21.0",
     "morgan": "~1.8.1",
     "node-sass-middleware": "0.9.8",
-    "react": "^15.6.1",
+    "react": "^15.6.2",
     "react-big-calendar": "^0.15.0",
     "react-bootstrap": "github:dtom90/react-bootstrap",
     "react-bootstrap-daterangepicker": "^3.4.1",
-    "react-chartjs-2": "^2.6.2",
-    "react-dom": "^15.6.1",
+    "react-chartjs-2": "^2.7.0",
+    "react-dom": "^15.6.2",
     "react-router-dom": "^4.2.2",
-    "react-scripts": "1.0.11",
+    "react-scripts": "^1.1.1",
     "react-spinkit": "^3.0.0",
-    "serve-favicon": "~2.4.2",
-    "twix": "^1.2.0"
+    "serve-favicon": "^2.4.5",
+    "twix": "^1.2.1"
   },
   "devDependencies": {
     "dotenv": "latest",
     "mocha": "^3.5.3",
     "mocha-steps": "^1.1.0",
-    "should": "^13.1.0",
-    "wdio-mocha-framework": "^0.5.11",
+    "should": "^13.2.1",
+    "wdio-mocha-framework": "^0.5.13",
     "wdio-selenium-standalone-service": "0.0.9",
-    "wdio-spec-reporter": "^0.1.2",
-    "webdriverio": "^4.8.0"
+    "wdio-spec-reporter": "^0.1.4",
+    "webdriverio": "^4.12.0"
   }
 }
