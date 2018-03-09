@@ -37,6 +37,7 @@
     "twix": "^1.2.1"
   },
   "devDependencies": {
+    "chromedriver": "^2.36.0",
     "dotenv": "latest",
     "mocha": "^3.5.3",
     "mocha-steps": "^1.1.0",
