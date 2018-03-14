@@ -40,7 +40,7 @@ Built with Node.js + React.js and connects to Db2 system using [IBM Common SQL E
 
 From GitHub: 
 ```
-docker build -t findash https://github.com/IBM-DSE/CyberShop
+docker build -t findash https://github.com/IBM-DSE/FinDash
 ```
 
 From Local Source:
