@@ -4,7 +4,7 @@
   "private": true,
   "engines": {
     "node": "8.9.x",
-    "npm": "5.7.x"
+    "npm": "6.2.x"
   },
   "scripts": {
     "start": "node ./bin/www",
@@ -12,7 +12,7 @@
     "build_client": "cd client && react-scripts build"
   },
   "dependencies": {
-    "body-parser": "~1.17.1",
+    "body-parser": "^1.18.3",
     "bootstrap": "^3.3.7",
     "chart.js": "^2.7.2",
     "cookie-parser": "~1.4.3",
@@ -20,9 +20,8 @@
     "debug": "^2.6.9",
     "express": "^4.16.3",
     "ibm_db": "^2.3.1",
-    "jade": "~1.11.0",
     "moment": "^2.22.1",
-    "morgan": "~1.8.1",
+    "morgan": "^1.9.0",
     "node-sass-middleware": "0.9.8",
     "react": "^15.6.2",
     "react-big-calendar": "^0.15.0",
@@ -39,12 +38,12 @@
   "devDependencies": {
     "chromedriver": "^2.38.2",
     "dotenv": "latest",
-    "mocha": "^3.5.3",
+    "mocha": "^5.2.0",
     "mocha-steps": "^1.1.0",
     "should": "^13.2.1",
     "wdio-mocha-framework": "^0.5.13",
     "wdio-selenium-standalone-service": "0.0.9",
     "wdio-spec-reporter": "^0.1.4",
-    "webdriverio": "^4.12.0"
+    "webdriverio": "^4.13.1"
   }
 }
