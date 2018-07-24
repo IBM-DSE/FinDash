@@ -8,6 +8,8 @@ client/build/
 # dotenv environment variables file
 .env
 
+# Log files
+*.log
+
 # Extraneous files
 README.md
-.gitignore
