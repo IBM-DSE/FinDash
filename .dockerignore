@@ -1,2 +1,15 @@
-node_modules
+
+# Dependency directories
+node_modules/
+
+# Client (React) build files
+client/build/
+
+# dotenv environment variables file
+.env
+
+# Log files
 *.log
+
+# Extraneous files
+README.md
