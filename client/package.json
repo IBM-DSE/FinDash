@@ -2,6 +2,10 @@
   "name": "client",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "8.9.x",
+    "npm": "6.2.x"
+  },
   "dependencies": {
     "bootstrap": "^3.3.7",
     "chart.js": "^2.6.0",
@@ -13,7 +17,7 @@
     "react-chartjs-2": "^2.6.2",
     "react-dom": "^15.6.1",
     "react-router-dom": "^4.2.2",
-    "react-scripts": "1.0.11",
+    "react-scripts": "^1.1.4",
     "react-spinkit": "^3.0.0",
     "twix": "^1.2.0"
   },
