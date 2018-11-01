@@ -10,6 +10,3 @@ client/build/
 
 # Log files
 *.log
-
-# Extraneous files
-README.md
