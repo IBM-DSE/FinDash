@@ -1,8 +1,5 @@
 let express = require('express');
 let router = express.Router();
-let fs = require('fs');
-let path = require('path');
-let csv_parse = require('csv-parse');
 let ibmDB = require('../db/ibm-db');
 
 const timeFrame = "AND TRADE_DATE >= '2016-09-01' AND TRADE_DATE <= '2017-07-19'";
@@ -23,7 +20,7 @@ const queryCurrencyCorrelation = "SELECT * FROM CURRENCY_ANALYSIS WHERE (\"SYMBO
   posSym = queryCurrencyCorrelation.indexOf('X'),
   posCurr = queryCurrencyCorrelation.indexOf('Z');
 
-router.get('/', function(req, res, next) {
+router.get('/', function(req, res) {
   res.json({
     categories: {
       "Auto": auto_stocks,
@@ -53,7 +50,7 @@ const newsQueryStart = "SELECT MIN(NEWS_DATE) AS NEWS_DATE, MIN(NEWS_SRC) AS NEW
   indexOfMax = newsQueryEnd.indexOf('<MAX>'),
   offsetMax = indexOfMax+'<MAX>'.length;
 
-router.get('/news/', function(req, res, next) {
+router.get('/news/', function(req, res) {
 
   let startDate = req.query.startDate;
   let endDate = req.query.endDate;
@@ -75,11 +72,11 @@ router.get('/news/', function(req, res, next) {
   ibmDB.queryDatabase(newsQuery, stockNews => res.json(stockNews));
 });
 
-router.get('/currencies', function(req, res, next) {
+router.get('/currencies', function(req, res) {
   res.json(currency_mapping);
 });
 
-router.get('/corr/stocks', function(req, res, next) {
+router.get('/corr/stocks', function(req, res) {
 
   let stock1 = req.query.stock1;
   let stock2 = req.query.stock2;
@@ -134,7 +131,7 @@ router.get('/corr/curr', function(req, res, next) {
 
 });
 
-router.get('/:stock', function(req, res, next) {
+router.get('/:stock', function(req, res) {
 
   let query = queryStockPrices.slice(0, pos) + req.params.stock + queryStockPrices.slice(pos+1);
 
@@ -157,13 +154,6 @@ function list(stocks){
     id: symbol,
     name: mapping[symbol] || symbol
   }});
-}
-
-function getNews(callback) {
-  let csvPath = path.join(__dirname, '..', 'data', 'stock_news.csv');
-  fs.readFile(csvPath, 'utf8', function(err, file_data) {
-    csv_parse(file_data, {delimiter: '|', comment: '#', quote: false}, callback);
-  });
 }
 
 const auto_stocks = ['F','TSLA','FCAU','TM','HMC','RACE','CARZ'];
