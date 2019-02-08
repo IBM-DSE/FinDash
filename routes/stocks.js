@@ -1,6 +1,7 @@
 let express = require('express');
 let router = express.Router();
 let ibmDB = require('../db/ibm-db');
+let sqliteDB = require('../db/sqlite-db');
 
 const timeFrame = "AND TRADE_DATE >= '2016-09-01' AND TRADE_DATE <= '2017-07-19'";
 
@@ -69,7 +70,7 @@ router.get('/news/', function(req, res) {
   }
   newsQuery += newsQueryEnd.slice(0, indexOfMax) + maxRows + newsQueryEnd.slice(offsetMax);
 
-  ibmDB.queryDatabase(newsQuery, stockNews => res.json(stockNews));
+  sqliteDB.queryDatabase(newsQuery, stockNews => res.json(stockNews));
 });
 
 router.get('/currencies', function(req, res) {
@@ -108,7 +109,7 @@ router.get('/corr/stocks', function(req, res) {
 
 });
 
-router.get('/corr/curr', function(req, res, next) {
+router.get('/corr/curr', function(req, res) {
 
   let stock = req.query.stock;
   let currency = req.query.currency;
@@ -149,12 +150,12 @@ router.get('/:stock', function(req, res) {
 
 });
 
-function list(stocks){
-  return stocks.map(function(symbol) {return {
-    id: symbol,
-    name: mapping[symbol] || symbol
-  }});
-}
+// function list(stocks){
+//   return stocks.map(function(symbol) {return {
+//     id: symbol,
+//     name: mapping[symbol] || symbol
+//   }});
+// }
 
 const auto_stocks = ['F','TSLA','FCAU','TM','HMC','RACE','CARZ'];
 const airline_stocks = ['AAL','DAL','UAL','SKYW','JBLU','ALK','JETS'];//'LUV',

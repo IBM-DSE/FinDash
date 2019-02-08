@@ -30,12 +30,25 @@ getNews((err, table) => {
       }
       stmt.finalize();
 
-      db.each('SELECT * FROM news', function (err, row) {
-        console.log(row)
-      })
-
     });
 
-    db.close();
   }
+});
+
+
+const selectStatement = 'SELECT * FROM news LIMIT 6';
+
+
+module.exports = {
+  queryDatabase: (statement, callback) => {
+    db.all(selectStatement, (err, result) => {
+      if(err) console.error(err);
+      callback(result)
+    });
+  }
+};
+
+process.on('exit', (code) => {
+  console.log(`About to exit with code: ${code}`);
+  db.close(err => err ? console.error(err.message) : console.log('Closed the database connection.'));
 });
