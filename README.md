@@ -38,12 +38,18 @@ Built with Node.js + React.js and connects to Db2 system using [IBM Common SQL E
 
 #### Build
 
-From GitHub: 
+##### From GitHub: 
 ```
 docker build -t findash https://github.com/IBM-DSE/FinDash
 ```
 
-From Local Source:
+##### Install / Update Dependencies:
+```
+docker run -it -v `pwd`:/usr/src/app -w /usr/src/app node:8 npm install
+```
+NOTE: subsequent npm commands using the generated `node_modules` should also be run the same way to avoid dependency mismatch
+
+##### From Local Source:
 ```
 docker build -t findash .
 ```

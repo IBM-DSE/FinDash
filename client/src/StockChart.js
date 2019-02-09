@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Line } from 'react-chartjs-2';
-let moment = require('moment');
+const moment = require('moment');
 require('twix');
 
 class StockChart extends Component {
@@ -38,13 +38,13 @@ class StockChart extends Component {
 
   render() {
 
-    let corrData = this.state.corrChartData.datasets.length > 0;
+    const corrData = this.state.corrChartData.datasets.length > 0;
     let stockOptions = this.state.stockData.normalized ? percentOptions : dollarOptions;
     stockOptions = copy(stockOptions);
     stockOptions.scales.yAxes[0].ticks.callback = this.state.stockData.normalized ? percentCallback : dollarCallback;
     stockOptions.tooltips.callbacks.title = () => null;
     stockOptions.tooltips.callbacks.label = this.tooltipStock;
-    stockOptions.tooltips.callbacks.beforeFooter = (tooltipItem, data) => 'Date: '+tooltipItem[0].xLabel;
+    stockOptions.tooltips.callbacks.beforeFooter = (tooltipItem) => 'Date: '+tooltipItem[0].xLabel;
     stockOptions.tooltips.callbacks.afterFooter = this.state.stockData.normalized ? percentTooltip : dollarTooltip;
     if(corrData)
       stockOptions.scales.xAxes[0].ticks.fontColor = '#FFF';
@@ -76,11 +76,11 @@ class StockChart extends Component {
     else {
       this.updateCurrentStocks(this.props.displayStocks, nextProps.displayStocks);
 
-      let newStocks = arr_diff(nextProps.correlationStocks, this.currentChartCorrs());
-      if (newStocks.length>0){
+      const newStocks = arr_diff(nextProps.correlationStocks, this.currentChartCorrs());
+      if (newStocks.length>0) {
 
         let path;
-        let stocks = newStocks[0].slice(8,newStocks[0].indexOf(' )')).split(' , ');
+        const stocks = newStocks[0].slice(8,newStocks[0].indexOf(' )')).split(' , ');
         if(stocks[0].indexOf('DEX')>-1)
           path = '/api/stocks/corr/curr?currency=' + stocks[0] + '&stock=' + stocks[1];
         else if(stocks[1].indexOf('DEX')>-1)
@@ -88,38 +88,40 @@ class StockChart extends Component {
         else
           path = '/api/stocks/corr/stocks?stock1=' + stocks[0] + '&stock2=' + stocks[1];
 
-        newStocks.forEach(stock => fetch(path).then(res => res.json())
+        newStocks.forEach(() => fetch(path).then(res => res.json())
           .then(newStockData => this.addStockData(newStockData, 'correlations')));
       }
     }
   }
 
   updateCurrentStocks(currentStocks, nextStocks) {
-    let newStocks = arr_diff(nextStocks, currentStocks);
-    let delStocks = arr_diff(currentStocks, nextStocks);
+    const newStocks = arr_diff(nextStocks, currentStocks);
+    const delStocks = arr_diff(currentStocks, nextStocks);
 
     if (newStocks.length>0)
       newStocks.forEach(stock =>
         fetch('/api/stocks/' + stock).then(res => res.json())
           .then(newStockData => this.addStockData(newStockData)));
     else if (delStocks.length>0)
-      this.removeChartStocks(delStocks);
+      { // noinspection JSIgnoredPromiseFromCall
+        this.removeChartStocks(delStocks);
+      }
   }
 
   updateDateRange(startDate, endDate, newStock=null) {
 
     ['stockChartData', 'corrChartData'].forEach((dataType) => {
-      let chartData = this.state[dataType];
-      let stockData = this.state.stockData;
+      const chartData = this.state[dataType];
+      const stockData = this.state.stockData;
 
       if (this.state.stockData.dates.length === 0) {
-        let itr = moment.twix(startDate,endDate).iterate("days");
-        let range=[];
+        const itr = moment.twix(startDate,endDate).iterate("days");
+        const range=[];
         while(itr.hasNext()){ range.push(itr.next().format('YYYY-MM-DD')); }
         chartData.labels = range;
       } else {
-        let startInd = binSearch(startDate, stockData.dates);
-        let endInd = binSearch(endDate, stockData.dates);
+        const startInd = binSearch(startDate, stockData.dates);
+        const endInd = binSearch(endDate, stockData.dates);
         stockData.startInd = startInd; stockData.endInd = endInd;
         this.setState({ stockData });
         chartData.labels = stockData.dates.slice(startInd, endInd+1);
@@ -142,7 +144,7 @@ class StockChart extends Component {
     if(newStockData.dates.length===0)
       return this.props.noCorrData(newStockData);
 
-    let stockData = this.state.stockData;
+    const stockData = this.state.stockData;
 
     let updateDates = false;
     if (stockData.dates.length === 0) {   // if this is the first stock we are adding
@@ -155,7 +157,7 @@ class StockChart extends Component {
       return console.error(newStockData.stock+' stock date ranges are inconsistent!');
 
     // add the new stock prices to our state
-    let name = metric==='prices' ? newStockData.stock : correlationLabel(newStockData);
+    const name = metric==='prices' ? newStockData.stock : correlationLabel(newStockData);
     stockData[metric][name] = newStockData[metric];
     this.setState({ stockData });
 
@@ -168,17 +170,17 @@ class StockChart extends Component {
   updateChartData(newStockData, metric='prices'){
     if(newStockData.dates.length > 0) {   // if we have some stock data
 
-      let stockData = this.state.stockData;
-      let chartData = metric==='prices' ? this.state.stockChartData : this.state.corrChartData;
+      const stockData = this.state.stockData;
+      const chartData = metric==='prices' ? this.state.stockChartData : this.state.corrChartData;
       let dataSet = JSON.parse(origDataSet);
 
 
       // create a new chart dataset for the new stock
       let color;
       if(metric==='prices'){
-        let stockName = newStockData.stock;
+        const stockName = newStockData.stock;
         dataSet.label = stockName;
-        let stockButton = document.getElementById("plot-"+stockName);
+        const stockButton = document.getElementById("plot-"+stockName);
         if(stockButton && stockButton.style["background-color"])
           color = stockButton.style["background-color"];
         else{
@@ -204,8 +206,8 @@ class StockChart extends Component {
   }
 
   normalizeChartData(normalized) {
-    let stockChartData = this.state.stockChartData;
-    let stockData = this.state.stockData;
+    const stockChartData = this.state.stockChartData;
+    const stockData = this.state.stockData;
     stockChartData.datasets = this.state.stockChartData.datasets.map(function(dataSet) {
       return normalizeChartDataset(normalized, dataSet, stockData);
     });
@@ -216,8 +218,8 @@ class StockChart extends Component {
 
   async removeChartStocks(delStocks) {
 
-    let stockChartData = this.state.stockChartData;
-    let newDataSets = [];
+    const stockChartData = this.state.stockChartData;
+    const newDataSets = [];
 
     await stockChartData.datasets.forEach((dataSet) => {
       if (!delStocks.includes(dataSet['label']))
@@ -229,8 +231,8 @@ class StockChart extends Component {
   }
 
   tooltipStock(tooltipItem, data) {
-    let ticker = data.datasets[tooltipItem.datasetIndex].label;
-    let name = this.props.stockName[ticker];
+    const ticker = data.datasets[tooltipItem.datasetIndex].label;
+    const name = this.props.stockName[ticker];
     return name+' ('+ticker+')';
   }
 }
@@ -238,7 +240,7 @@ class StockChart extends Component {
 function normalizeChartDataset(normalize, dataSet, stockData) {
 
   if(normalize){
-    let factor = 100.0/dataSet.data[0];
+    const factor = 100.0/dataSet.data[0];
     dataSet.data = dataSet.data.map(function(val) { return factor*val;});
     return dataSet;
   } else {
@@ -299,7 +301,7 @@ const dollarOptions = baseOptionsCopy;
 
 const dollarCallback = value => '$' + value; // Include a dollar sign in the ticks
 
-const dollarTooltip = (tooltipItem, data) => 'Price: $ '+parseFloat(tooltipItem[0].yLabel).toFixed(2);
+const dollarTooltip = (tooltipItem) => 'Price: $ '+parseFloat(tooltipItem[0].yLabel).toFixed(2);
 
 baseOptionsCopy = copy(baseOptions);
 baseOptionsCopy.scales.yAxes[0].scaleLabel.labelString = 'Stock Performance';
@@ -307,8 +309,8 @@ const percentOptions = baseOptionsCopy;
 
 const percentCallback = value => value+' %'; // Include a dollar sign in the ticks
 
-const percentTooltip = (tooltipItem, data) => {
-  let val = parseFloat(tooltipItem[0].yLabel).toFixed(1);
+const percentTooltip = (tooltipItem) => {
+  const val = parseFloat(tooltipItem[0].yLabel).toFixed(1);
   return 'Gain: '+val+'%';
 };
 
@@ -316,8 +318,8 @@ baseOptionsCopy = copy(baseOptions);
 baseOptionsCopy.scales.yAxes[0].scaleLabel.labelString = 'Correlation Coefficient';
 baseOptionsCopy.tooltips.callbacks.title = () => null;
 baseOptionsCopy.tooltips.callbacks.label = (tooltipItem, data) => data.datasets[tooltipItem.datasetIndex].label;
-baseOptionsCopy.tooltips.callbacks.beforeFooter = (tooltipItem, data) => 'Date: ' + tooltipItem[0].xLabel;
-baseOptionsCopy.tooltips.callbacks.afterFooter = (tooltipItem, data) => 'Corr: '+parseFloat(tooltipItem[0].yLabel).toFixed(2);
+baseOptionsCopy.tooltips.callbacks.beforeFooter = (tooltipItem) => 'Date: ' + tooltipItem[0].xLabel;
+baseOptionsCopy.tooltips.callbacks.afterFooter = (tooltipItem) => 'Corr: '+parseFloat(tooltipItem[0].yLabel).toFixed(2);
 baseOptionsCopy.layout.padding.left = 15;
 const corrOptions = baseOptionsCopy;
 
@@ -332,19 +334,19 @@ function correlationLabel(stockData){
 
 // Color Generation
 
-let colors = [];
+const colors = [];
 const lightThreshold = 0.8;
 const distThreshold = 200;
 const iterations = 50;
 
 function getRandomColor() {
 
-  let bestColor = {minDist: 0, color: '', lightness: 1};
+  const bestColor = {minDist: 0, color: '', lightness: 1};
   let i = 0;
   while(i < iterations && (bestColor.minDist < distThreshold || bestColor.lightness >= lightThreshold)) {
-    let newColor = generateColor();
-    let newDist = getMinDist(newColor);
-    let newLightness = colorLightness(newColor);
+    const newColor = generateColor();
+    const newDist = getMinDist(newColor);
+    const newLightness = colorLightness(newColor);
     if((newLightness < lightThreshold) &&
       ((newLightness < bestColor.lightness && newDist > distThreshold) || (newDist > bestColor.minDist))){
       bestColor.minDist = newDist;
@@ -357,45 +359,45 @@ function getRandomColor() {
 }
 
 function generateColor() {
-  let letters = '0123456789ABCDEF';
+  const constters = '0123456789ABCDEF';
   let newColor = '#';
   for (let i = 0; i < 6; i++) {
-    newColor += letters[Math.floor(Math.random() * 16)];
+    newColor += constters[Math.floor(Math.random() * 16)];
   }
   return newColor;
 }
 
 function getMinDist(newColor) {
   let minDist = 1000;
-  let newTriplet = tripletValues(newColor);
-  for(let oldColor of colors){
-    let oldTriplet = tripletValues(oldColor);
-    let dist = colorDistance(newTriplet, oldTriplet);
+  const newTripconst = tripconstValues(newColor);
+  for(const oldColor of colors){
+    const oldTripconst = tripconstValues(oldColor);
+    const dist = colorDistance(newTripconst, oldTripconst);
     if(dist < minDist)
       minDist = dist;
   }
   return minDist;
 }
 
-function tripletValues(color){
-  let r = parseInt(color.slice(1, 3), 16);
-  let g = parseInt(color.slice(3, 5), 16);
-  let b = parseInt(color.slice(5, 7), 16);
+function tripconstValues(color){
+  const r = parseInt(color.slice(1, 3), 16);
+  const g = parseInt(color.slice(3, 5), 16);
+  const b = parseInt(color.slice(5, 7), 16);
   return [r,g,b];
 }
 
-function colorDistance(triplet1, triplet2){
-  let diffR = Math.abs(triplet1[0] - triplet2[0]);
-  let diffG = Math.abs(triplet1[1] - triplet2[1]);
-  let diffB = Math.abs(triplet1[2] - triplet2[2]);
+function colorDistance(tripconst1, tripconst2){
+  const diffR = Math.abs(tripconst1[0] - tripconst2[0]);
+  const diffG = Math.abs(tripconst1[1] - tripconst2[1]);
+  const diffB = Math.abs(tripconst1[2] - tripconst2[2]);
   return diffR + diffG + diffB;
 }
 
 function colorLightness(color){
-  let vals = tripletValues(color);
+  const vals = tripconstValues(color);
   let r=vals[0], g=vals[1], b=vals[2];
   r /= 255; g /= 255; b /= 255;
-  let max = Math.max(r, g, b), min = Math.min(r, g, b);
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
   return (max + min) / 2;
 }
 

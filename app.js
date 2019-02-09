@@ -2,26 +2,23 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
 
-let express = require('express');
-let path = require('path');
-let favicon = require('serve-favicon');
-let logger = require('morgan');
-let cookieParser = require('cookie-parser');
-let bodyParser = require('body-parser');
-let sassMiddleware = require('node-sass-middleware');
+const express = require('express');
+const path = require('path');
+const favicon = require('serve-favicon');
+const logger = require('morgan');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+const sassMiddleware = require('node-sass-middleware');
 
-let index = require('./routes/index');
-let users = require('./routes/users');
-let stocks = require('./routes/stocks');
+const index = require('./routes/index');
+const clients = require('./routes/clients');
+const stocks = require('./routes/stocks');
 
-let app = express();
+const app = express();
 
 // Redirect http to https if we're in production
 if (process.env.NODE_ENV === 'production')
   app.use(requireHTTPS);
-
-// view engine setup
-// app.set('views', path.join(__dirname, 'views'));
 
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
@@ -36,7 +33,7 @@ app.use(sassMiddleware({
 }));
 
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/api/users', users);
+app.use('/api/clients', clients);
 app.use('/api/stocks', stocks);
 
 if ((process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'test')) {
@@ -50,7 +47,7 @@ if ((process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'test')) 
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  let err = new Error('Not Found');
+  const err = new Error('Not Found');
   err.status = 404;
   next(err);
 });

@@ -13,7 +13,7 @@ class ClientList extends Component {
 
   componentDidMount() {
     this.setState({fetching: true});
-    fetch('/api/users/clients')
+    fetch('/api/clients')
       .then(res => res.json())
       .then(clients => this.setState({clients: clients, fetching: false}));
   }
