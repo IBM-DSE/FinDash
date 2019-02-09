@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import { Row, Col, Glyphicon, ControlLabel, Checkbox, Button, DropdownButton, ToggleButton, ToggleButtonGroup } from 'react-bootstrap';
 import StockChart from './StockChart';
 import './daterangepicker.css';
-let DateRangePicker = require('react-bootstrap-daterangepicker');
-let moment = require('moment');
+const DateRangePicker = require('react-bootstrap-daterangepicker');
+const moment = require('moment');
 
 class StockPanel extends Component {
   constructor(props) {
@@ -46,12 +46,13 @@ class StockPanel extends Component {
   render() {
 
     // Initialize Date Variables
-    let start = this.state.startDate.format('YYYY-MM-DD');
-    let end = this.state.endDate.format('YYYY-MM-DD');
+    const start = this.state.startDate.format('YYYY-MM-DD');
+    const end = this.state.endDate.format('YYYY-MM-DD');
     let label = start + ' - ' + end;
     if (start === end) { label = start; }
 
-    let newDisplayStocks = JSON.parse(JSON.stringify(this.state.displayStocks));
+    const newDisplayStocks = Object.keys(this.state.stocks).length === 0 ? [] :
+      JSON.parse(JSON.stringify(this.state.displayStocks));
 
     return(
       <div id="stock-panel">
@@ -116,11 +117,11 @@ class StockPanel extends Component {
   }
 
   stockCategories(stocks, displayStocks) {
-    let categories = Object.keys(stocks.categories);
-    let width = Math.floor(12/categories.length).toString();
+    const categories = Object.keys(stocks.categories);
+    const width = Math.floor(12/categories.length).toString();
     return (categories.map(category => {
 
-      let selected = stocks.categories[category].map(stock => stock).every(stock => displayStocks.includes(stock));
+      const selected = stocks.categories[category].map(stock => stock).every(stock => displayStocks.includes(stock));
 
       return (<div key={"category-"+category} className={"category col-md-"+width}>
 
@@ -181,14 +182,14 @@ class StockPanel extends Component {
   }
 
   onToggleStock(event) {
-    let stock = event.target.value;
-    let add = event.target.checked;
+    const stock = event.target.value;
+    const add = event.target.checked;
     this.setState(function(prevState) {
-      let displayStocks = prevState.displayStocks.slice(0);
+      const displayStocks = prevState.displayStocks.slice(0);
       if (add) {
         displayStocks.push(stock);
       } else {
-        let index = displayStocks.indexOf(stock);
+        const index = displayStocks.indexOf(stock);
         if (index > -1) {
           displayStocks.splice(index, 1);
         }
@@ -198,9 +199,9 @@ class StockPanel extends Component {
   }
 
   async onSelectAllStocks(event) {
-    let category = event.target.value;
-    let add = event.target.checked;
-    let displayStocks = this.state.displayStocks;
+    const category = event.target.value;
+    const add = event.target.checked;
+    const displayStocks = this.state.displayStocks;
     if(add){
       await this.state.stocks.categories[category].forEach((stock) => {
         if(!displayStocks.includes(stock)){
@@ -210,7 +211,7 @@ class StockPanel extends Component {
       });
     } else {
       await this.state.stocks.categories[category].forEach((stock) => {
-        let index = displayStocks.indexOf(stock);
+        const index = displayStocks.indexOf(stock);
         if (index > -1){
           displayStocks.splice(index, 1);
           deselectStock('plot-', stock);
@@ -228,10 +229,10 @@ class StockPanel extends Component {
   }
 
   async onCorrStockSelect(event) {
-    let add = event.target.checked;
-    let stock = event.target.value;
+    const add = event.target.checked;
+    const stock = event.target.value;
     if(add) {
-      let stockButton = document.getElementById("plot-"+stock);
+      const stockButton = document.getElementById("plot-"+stock);
       if(stockButton && stockButton.style["background-color"])
         document.getElementById("corr-"+stock).style["background-color"] = stockButton.style["background-color"];
 
@@ -240,14 +241,14 @@ class StockPanel extends Component {
       });
       if(this.state.corrSelections.length === 2){
 
-        let label = correlationLabel(this.state.corrSelections[0] , this.state.corrSelections[1]);
+        const label = correlationLabel(this.state.corrSelections[0] , this.state.corrSelections[1]);
         this.state.correlations.push(label);
 
         this.setState({corrSelections: [], corrDropdownExpanded: false});
       }
     } else {
       this.setState(() => {
-        let index = this.state.corrSelections.indexOf(stock);
+        const index = this.state.corrSelections.indexOf(stock);
         if (index > -1)
           this.state.corrSelections.splice(index, 1);
       });
@@ -256,15 +257,15 @@ class StockPanel extends Component {
 
   noCorrData(badCorr){
     alert("Sorry, I don't have any correlation data between "+badCorr.stock1+" and "+badCorr.stock2);
-    let badCorrCombined = correlationLabel(badCorr.stock1 , badCorr.stock2);
+    const badCorrCombined = correlationLabel(badCorr.stock1 , badCorr.stock2);
     this.setState(prevState => {
-      let corrs = prevState.correlations;
+      const corrs = prevState.correlations;
       corrs.splice(corrs.indexOf(badCorrCombined), 1);
     });
   }
 
   onToggleNormalization(event) {
-    let normalized = event.target.checked;
+    const normalized = event.target.checked;
     this.setState({normalized});
   }
 
@@ -275,12 +276,12 @@ function correlationLabel(var1, var2){
 }
 
 function deselectStock(prefix, stock) {
-  let stockButton = document.getElementById(prefix+stock);
+  const stockButton = document.getElementById(prefix+stock);
   stockButton.classList.remove('active');
 }
 
 function selectStock(prefix, stock) {
-  let stockButton = document.getElementById(prefix+stock);
+  const stockButton = document.getElementById(prefix+stock);
   stockButton.classList.add('active');
 }
 

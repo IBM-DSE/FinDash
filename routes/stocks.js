@@ -185,7 +185,7 @@ const mapping = {
 
   'AMZN': 'Amazon',
   'GOOGL': 'Alphabet',
-  'AAPL': 'Apple',
+  'AAPL': 'Apple'
   // 'EBAY': 'eBay',
   // 'FB': 'Facebook',
   // 'MSFT': 'Microsoft',
