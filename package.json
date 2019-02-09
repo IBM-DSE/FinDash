@@ -42,6 +42,7 @@
     "mocha": "^5.2.0",
     "mocha-steps": "^1.1.0",
     "should": "^13.2.1",
+    "wdio-chromedriver-service": "^0.1.5",
     "wdio-mocha-framework": "^0.5.13",
     "wdio-selenium-standalone-service": "0.0.9",
     "wdio-spec-reporter": "^0.1.4",

@@ -9,7 +9,11 @@ exports.config = {
       }
     }
   ],
-  services: ['selenium-standalone'],
+  services: ['chromedriver'],
+  port: 9515, // default
+  path: '/',
+  chromeDriverArgs: ['--port=9515'], // default
+  chromeDriverLogs: './',
   specs: ['./test/specs/*.js'],
   exclude: [],
   maxInstances: 1,

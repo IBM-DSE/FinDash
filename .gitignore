@@ -10,3 +10,4 @@ client/build/
 
 # Log files
 *.log
+ChromeDriver.txt
