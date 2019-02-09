@@ -4,44 +4,47 @@ const fs = require('fs');
 const path = require('path');
 const csv_parse = require('csv-parse');
 
-function getNews(callback) {
-  const csvPath = path.join(__dirname, 'data', 'stock_news.csv');//NewsDataForDB2
+function loadDataFile(dataFile, tableName, fileOptions={}) {
+  const csvPath = path.join(__dirname, 'data', dataFile);//NewsDataForDB2
   fs.readFile(csvPath, 'utf8', function(err, file_data) {
-    csv_parse(file_data, {delimiter: '|', comment: '#', quote: false}, callback);
+    csv_parse(file_data, fileOptions, (err, table) => {
+      if (err)
+        console.error(err);
+
+      else {
+
+        const colNames = table[0];
+
+        db.serialize(function () {
+
+          db.run(`CREATE TABLE ${tableName} (` + colNames.map(col => `${col} TEXT`).join(',') + ')');
+
+          const placeholders = colNames.map(() => '?').join(',');
+          const stmt = db.prepare(`INSERT INTO ${tableName} VALUES (${placeholders})`);
+          for (let row of table.slice(1)) {
+            stmt.run(row)
+          }
+          stmt.finalize();
+
+        });
+      }
+    });
   });
 }
 
-getNews((err, table) => {
-  if (err)
-    console.error(err);
+const newsDataFile = 'stock_news.csv';
+const newsFileOptions = {delimiter: '|', comment: '#', quote: false};
+const newsTableName = 'NEWS';
+loadDataFile(newsDataFile, newsTableName, newsFileOptions);
 
-  else {
-
-    const colNames = table[0];
-
-    db.serialize(function () {
-
-      db.run('CREATE TABLE news (' + colNames.map(col => `${col} TEXT`).join(',') + ')');
-
-      const placeholders = colNames.map(() => '?').join(',');
-      const stmt = db.prepare(`INSERT INTO news VALUES (${placeholders})`);
-      for (let row of table.slice(1)) {
-        stmt.run(row)
-      }
-      stmt.finalize();
-
-    });
-
-  }
-});
-
-
-const selectStatement = 'SELECT * FROM news LIMIT 6';
+const customerDataFile = 'BrokerageCustomersID.csv';
+const customerTableName = 'BROKERAGE_CUST';
+loadDataFile(customerDataFile, customerTableName);
 
 
 module.exports = {
   queryDatabase: (statement, callback) => {
-    db.all(selectStatement, (err, result) => {
+    db.all(statement, (err, result) => {
       if(err) console.error(err);
       callback(result)
     });

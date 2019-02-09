@@ -1,21 +1,26 @@
-let express = require('express');
-let router = express.Router();
-let fs = require('fs');
-let csv_parse = require('csv-parse/lib/sync');
-let path = require('path');
-let ibmDB = require('../db/ibm-db');
+const express = require('express');
+const router = express.Router();
+const fs = require('fs');
+const path = require('path');
+const ibmDB = require('../db/ibm-db');
+const sqliteDB = require('../db/sqlite-db');
+
+const jsonPath = path.join(__dirname, '..', 'db', 'users.json');
+const fileData = fs.readFileSync(jsonPath, 'utf8');
+const users = JSON.parse(fileData);
 
 /* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.json(getUsers());
+router.get('/', function(req, res) {
+  res.json(users);
 });
 
-router.get('/clients', function(req, res, next) {
-  let clients = getUsers()['clients'];
-  let ids = clients.map(client => client.id);
+router.get('/clients', function(req, res) {
+  const clients = users['clients'];
+  const ids = clients.map(client => client.id);
 
-  ibmDB.queryDatabase("SELECT \"CustID\", \"AccountBalance\" FROM BROKERAGE_CUST WHERE \"CustID\" IN (" + ids + ")",
+  sqliteDB.queryDatabase("SELECT CustID, AccountBalance FROM BROKERAGE_CUST WHERE CustID IN (" + ids + ")",
     async (clientDetails) => {
+    console.log(clientDetails);
       clientDetails = clientDetails.reduce((acc, client) => {
         acc[client.CustID] = client.AccountBalance;
         return acc;
@@ -26,11 +31,11 @@ router.get('/clients', function(req, res, next) {
   );
 });
 
-router.get('/clients/:id', async function(req, res, next) {
+router.get('/clients/:id', async function(req, res) {
 
-  let clientID = req.params.id;
+  const clientID = req.params.id;
 
-  let client = getUsers()['clients'].filter((client) => client.id === clientID)[0];
+  const client = users['clients'].filter((client) => client.id === clientID)[0];
 
   ibmDB.queryDatabase( "SELECT * FROM BROKERAGE_CUST WHERE \"CustID\"="+clientID,
     (clientDetails) => {
@@ -40,10 +45,5 @@ router.get('/clients/:id', async function(req, res, next) {
   );
 });
 
-function getUsers() {
-  let jsonPath = path.join(__dirname, '..', 'db', 'users.json');
-  let fileData = fs.readFileSync(jsonPath, 'utf8');
-  return JSON.parse(fileData);
-}
 
 module.exports = router;

@@ -33,43 +33,44 @@ router.get('/', function(req, res) {
   });
 });
 
-const newsQueryStart = "SELECT MIN(NEWS_DATE) AS NEWS_DATE, MIN(NEWS_SRC) AS NEWS_SRC, MIN(NEWS_URL) AS NEWS_URL, " +
-                              "NEWS_TITLE, MIN(NEWS_TEXT) AS NEWS_TEXT\n" +
-                       "FROM BLUADMIN.STOCKNEWS\n",
-
-  startDateClause = "NEWS_DATE >= '<START_DATE> 00:00:00.000000000'",
-  indexOfStartDate = startDateClause.indexOf('<START_DATE>'),
-  offsetStartDate = indexOfStartDate+'<START_DATE>'.length,
-
-  endDateClause = "NEWS_DATE <= '<END_DATE> 05:40:00.000000000'",
-  indexOfEndDate = endDateClause.indexOf('<END_DATE>'),
-  offsetEndDate = indexOfEndDate+'<END_DATE>'.length,
-
-  newsQueryEnd =  "GROUP BY NEWS_TITLE\n" +
-                  "ORDER BY NEWS_DATE DESC, NEWS_TITLE DESC\n" +
-                  "FETCH FIRST <MAX> ROWS ONLY;",
-  indexOfMax = newsQueryEnd.indexOf('<MAX>'),
-  offsetMax = indexOfMax+'<MAX>'.length;
+// const newsQueryStart = "SELECT MIN(NEWS_DATE) AS NEWS_DATE, MIN(NEWS_SRC) AS NEWS_SRC, MIN(NEWS_URL) AS NEWS_URL, " +
+//                               "NEWS_TITLE, MIN(NEWS_TEXT) AS NEWS_TEXT\n" +
+//                        "FROM BLUADMIN.STOCKNEWS\n",
+//
+//   startDateClause = "NEWS_DATE >= '<START_DATE> 00:00:00.000000000'",
+//   indexOfStartDate = startDateClause.indexOf('<START_DATE>'),
+//   offsetStartDate = indexOfStartDate+'<START_DATE>'.length,
+//
+//   endDateClause = "NEWS_DATE <= '<END_DATE> 05:40:00.000000000'",
+//   indexOfEndDate = endDateClause.indexOf('<END_DATE>'),
+//   offsetEndDate = indexOfEndDate+'<END_DATE>'.length,
+//
+//   newsQueryEnd =  "GROUP BY NEWS_TITLE\n" +
+//                   "ORDER BY NEWS_DATE DESC, NEWS_TITLE DESC\n" +
+//                   "FETCH FIRST <MAX> ROWS ONLY;",
+//   indexOfMax = newsQueryEnd.indexOf('<MAX>'),
+//   offsetMax = indexOfMax+'<MAX>'.length;
 
 router.get('/news/', function(req, res) {
 
-  let startDate = req.query.startDate;
-  let endDate = req.query.endDate;
-  let maxRows = req.query.max || 6;
+  // let startDate = req.query.startDate;
+  // let endDate = req.query.endDate;
+  // let maxRows = req.query.max || 6;
+  //
+  // let newsQuery = newsQueryStart;
+  // if(startDate || endDate){
+  //   newsQuery += "WHERE (";
+  //   if(startDate)
+  //     newsQuery += startDateClause.slice(0, indexOfStartDate) + startDate + startDateClause.slice(offsetStartDate);
+  //   if(endDate){
+  //     if(startDate) newsQuery += " AND ";
+  //     newsQuery += endDateClause.slice(0, indexOfEndDate) + endDate + endDateClause.slice(offsetEndDate);
+  //   }
+  //   newsQuery += ")\n";
+  // }
+  // newsQuery += newsQueryEnd.slice(0, indexOfMax) + maxRows + newsQueryEnd.slice(offsetMax);
 
-  let newsQuery = newsQueryStart;
-  if(startDate || endDate){
-    newsQuery += "WHERE (";
-    if(startDate)
-      newsQuery += startDateClause.slice(0, indexOfStartDate) + startDate + startDateClause.slice(offsetStartDate);
-    if(endDate){
-      if(startDate) newsQuery += " AND ";
-      newsQuery += endDateClause.slice(0, indexOfEndDate) + endDate + endDateClause.slice(offsetEndDate);
-    }
-    newsQuery += ")\n";
-  }
-  newsQuery += newsQueryEnd.slice(0, indexOfMax) + maxRows + newsQueryEnd.slice(offsetMax);
-
+  const newsQuery = 'SELECT * FROM NEWS LIMIT 6';
   sqliteDB.queryDatabase(newsQuery, stockNews => res.json(stockNews));
 });
 
