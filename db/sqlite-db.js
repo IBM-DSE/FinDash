@@ -37,7 +37,7 @@ const newsFileOptions = {delimiter: '|', comment: '#', quote: false};
 const newsTableName = 'NEWS';
 loadDataFile(newsDataFile, newsTableName, newsFileOptions);
 
-const customerDataFile = 'BrokerageCustomersID.csv';
+const customerDataFile = 'brokerage_cust.csv';
 const customerTableName = 'BROKERAGE_CUST';
 loadDataFile(customerDataFile, customerTableName);
 

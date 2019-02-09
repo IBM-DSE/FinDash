@@ -17,7 +17,7 @@ class ClientPage extends Component {
 
   componentDidMount() {
     this.setState({fetching: true});
-    fetch('/api/users/clients/'+this.props.match.params.clientId)
+    fetch('/api/clients/'+this.props.match.params.clientId)
       .then(res => res.json())
       .then(client_data => this.setState({client_data: client_data, fetching: false}))
       .catch((error) => { console.error(error); });
@@ -45,7 +45,7 @@ class ClientPage extends Component {
         <br/>
 
         <div className="row">
-          <div className="col-md-2"></div>
+          <div className="col-md-2" />
 
           <div className="col-md-3">
             <img src={"/images/"+client.image} alt={'client-'+client.id} className="big-img" />
@@ -60,13 +60,13 @@ class ClientPage extends Component {
             </table>
           </div>
 
-          <div className="col-md-2"></div>
+          <div className="col-md-2" />
         </div>
 
         <br/><br/>
 
         <div className="row">
-          <div className="col-md-1"></div>
+          <div className="col-md-1" />
 
           <div className="col-md-10">
             <table className="table larger">
@@ -83,7 +83,7 @@ class ClientPage extends Component {
             </table>
           </div>
 
-          <div className="col-md-1"></div>
+          <div className="col-md-1" />
         </div>
 
         <br/><br/>
@@ -93,7 +93,7 @@ class ClientPage extends Component {
         <br/><br/><br/>
 
         <div className="row">
-          <div className="col-md-2"></div>
+          <div className="col-md-2" />
 
           <div className="col-md-8">
 
@@ -112,7 +112,7 @@ class ClientPage extends Component {
             </table>
           </div>
 
-          <div className="col-md-2"></div>
+          <div className="col-md-2" />
         </div>
 
         <br/>
@@ -167,11 +167,11 @@ function formatAttrs(key, value){
     else if(categories.includes(key)){
       if(value >= '90%')
         return(<div>
-          {value} <span className="glyphicon glyphicon-arrow-up" style={{color: 'green'}}></span>
+          {value} <span className="glyphicon glyphicon-arrow-up" style={{color: 'green'}} />
         </div>);
       else
         return(<div>
-          {value} <span className="glyphicon glyphicon-arrow-down" style={{color: 'red'}}></span>
+          {value} <span className="glyphicon glyphicon-arrow-down" style={{color: 'red'}} />
         </div>);
     } else
       return value;
