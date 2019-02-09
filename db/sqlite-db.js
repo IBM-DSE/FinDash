@@ -32,14 +32,18 @@ function loadDataFile(dataFile, tableName, fileOptions={}) {
   });
 }
 
+const customerDataFile = 'brokerage_cust.csv';
+const customerTableName = 'BROKERAGE_CUST';
+loadDataFile(customerDataFile, customerTableName);
+
+const stockDataFile = 'stock_trades.csv';
+const stockTableName = 'STOCK_TRADES';
+loadDataFile(stockDataFile, stockTableName);
+
 const newsDataFile = 'stock_news.csv';
 const newsFileOptions = {delimiter: '|', comment: '#', quote: false};
 const newsTableName = 'NEWS';
 loadDataFile(newsDataFile, newsTableName, newsFileOptions);
-
-const customerDataFile = 'brokerage_cust.csv';
-const customerTableName = 'BROKERAGE_CUST';
-loadDataFile(customerDataFile, customerTableName);
 
 
 module.exports = {

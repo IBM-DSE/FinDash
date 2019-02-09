@@ -1,7 +1,7 @@
-let express = require('express');
-let router = express.Router();
-let ibmDB = require('../db/ibm-db');
-let sqliteDB = require('../db/sqlite-db');
+const express = require('express');
+const router = express.Router();
+const ibmDB = require('../db/ibm-db');
+const sqliteDB = require('../db/sqlite-db');
 
 const timeFrame = "AND TRADE_DATE >= '2016-09-01' AND TRADE_DATE <= '2017-07-19'";
 
@@ -80,16 +80,15 @@ router.get('/currencies', function(req, res) {
 
 router.get('/corr/stocks', function(req, res) {
 
-  let stock1 = req.query.stock1;
-  let stock2 = req.query.stock2;
+  const stock1 = req.query.stock1;
+  const stock2 = req.query.stock2;
 
   ibmDB.queryDatabase(queryStocks, function(pairs){
-    let stocks;
     pairs.forEach((pair) => {
-      stocks = Object.values(pair);
+      const stocks = Object.values(pair);
       if(stocks.includes(stock1) && stocks.includes(stock2)){
 
-        let query  = queryStockCorrelation.slice(0, posSym1) +
+        const query  = queryStockCorrelation.slice(0, posSym1) +
           pair['SYMBOL1'] + queryStockCorrelation.slice(posSym1+1, posSym2) +
           pair['SYMBOL2'] + queryStockCorrelation.slice(posSym2+1);
 
@@ -137,7 +136,7 @@ router.get('/:stock', function(req, res) {
 
   let query = queryStockPrices.slice(0, pos) + req.params.stock + queryStockPrices.slice(pos+1);
 
-  ibmDB.queryDatabase(query, function(data){
+  sqliteDB.queryDatabase(query, function(data){
     if (data.length > 0 && data[0]['SYMBOL'] === req.params.stock) {
       res.json({
         stock: req.params.stock,
@@ -150,13 +149,6 @@ router.get('/:stock', function(req, res) {
   });
 
 });
-
-// function list(stocks){
-//   return stocks.map(function(symbol) {return {
-//     id: symbol,
-//     name: mapping[symbol] || symbol
-//   }});
-// }
 
 const auto_stocks = ['F','TSLA','FCAU','TM','HMC','RACE','CARZ'];
 const airline_stocks = ['AAL','DAL','UAL','SKYW','JBLU','ALK','JETS'];//'LUV',
@@ -193,7 +185,11 @@ const mapping = {
 
   'AMZN': 'Amazon',
   'GOOGL': 'Alphabet',
-  'AAPL': 'Apple'
+  'AAPL': 'Apple',
+  // 'EBAY': 'eBay',
+  // 'FB': 'Facebook',
+  // 'MSFT': 'Microsoft',
+  // 'T': 'AT&T'
 };
 
 const currency_mapping = {

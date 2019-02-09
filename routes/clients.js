@@ -16,7 +16,6 @@ router.get('/', function(req, res) {
 
   sqliteDB.queryDatabase("SELECT CustID, AccountBalance FROM BROKERAGE_CUST WHERE CustID IN (" + ids + ")",
     async (clientDetails) => {
-    console.log(clientDetails);
       clientDetails = clientDetails.reduce((acc, client) => {
         acc[client.CustID] = client.AccountBalance;
         return acc;
