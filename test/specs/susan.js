@@ -42,7 +42,7 @@ describe('Susan prepares for her meeting with Leo Rakes', () => {
     // Recent Market News
     browser.getText('h2=Recent Market News');
     browser.waitForExist('div.panel.panel-default');
-    // TODO: browser.getText('h3.panel-title').should.containEql('The US dollar will rebound in the second half of 2017, says JPMorgan')
+    browser.getText('h3.panel-title').should.containEql('The US dollar will rebound in the second half of 2017, says JPMorgan')
 
   });
 
