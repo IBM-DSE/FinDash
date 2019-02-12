@@ -22,6 +22,7 @@
     "ibm_db": "github:ibmdb/node-ibm_db",
     "moment": "^2.22.1",
     "morgan": "^1.9.0",
+    "node-cleanup": "^2.1.2",
     "node-sass-middleware": "0.11.0",
     "react": "^15.6.2",
     "react-big-calendar": "^0.15.0",

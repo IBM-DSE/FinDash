@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const csv_parse = require('csv-parse');
 const stream = require('stream');
+const nodeCleanup = require('node-cleanup');
 
 
 class TableLoadStream extends stream.Writable {
@@ -70,7 +71,16 @@ module.exports = {
   }
 };
 
-process.on('exit', (code) => {
-  console.log(`About to exit with code: ${code}`);
-  db.close(err => err ? console.error(err.message) : console.log('Closed the database connection.'));
+nodeCleanup(function (exitCode, signal) {
+  if (signal) {
+    db.close(err => {
+      if(err)
+        console.error(err.message);
+      else
+        console.log('\nClosed the database connection.');
+      process.kill(process.pid, signal);
+    });
+    nodeCleanup.uninstall(); // don't call cleanup handler again
+    return false;
+  }
 });
