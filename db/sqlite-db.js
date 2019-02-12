@@ -1,49 +1,64 @@
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database(':memory:');
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
 const csv_parse = require('csv-parse');
+const stream = require('stream');
 
-function loadDataFile(dataFile, tableName, fileOptions={}) {
-  const csvPath = path.join(__dirname, 'data', dataFile);//NewsDataForDB2
-  fs.readFile(csvPath, 'utf8', function(err, file_data) {
-    csv_parse(file_data, fileOptions, (err, table) => {
-      if (err)
-        console.error(err);
 
-      else {
+class TableLoadStream extends stream.Writable {
+  constructor(tableName) {
+    super({objectMode: true});
+    this.tableName = tableName;
+    this.header = true;
+    this.stmt = null;
+    this.startTime = null;
+  }
 
-        const colNames = table[0];
+  _write(row, enc, next) {
+    if(this.header){
+      this.startTime = new Date();
 
-        db.serialize(function () {
+      const createStatement = `CREATE TABLE ${this.tableName} ( ${row.map(col => `${col} TEXT`).join(' , ')} )`;
+      console.log(createStatement+'\n');
+      db.run(createStatement);
 
-          db.run(`CREATE TABLE ${tableName} (` + colNames.map(col => `${col} TEXT`).join(',') + ')');
+      const placeholders = row.map(() => '?').join(',');
+      this.stmt = db.prepare(`INSERT INTO ${this.tableName} VALUES (${placeholders})`);
 
-          const placeholders = colNames.map(() => '?').join(',');
-          const stmt = db.prepare(`INSERT INTO ${tableName} VALUES (${placeholders})`);
-          for (let row of table.slice(1)) {
-            stmt.run(row)
-          }
-          stmt.finalize();
+      this.header = false;
+      next();
+    } else {
+      this.stmt.run(row);
+      next();
+    }
+  }
 
-        });
-      }
+  _final() {
+    const elapsed = (new Date() - this.startTime)/1000;
+    db.get(`SELECT COUNT(*) FROM ${this.tableName}`, (err, res) => {
+      this.stmt.finalize(() => console.log(`Loaded ${res['COUNT(*)']} rows into ${this.tableName} in ${elapsed} seconds`))
     });
-  });
+  }
 }
 
-const customerDataFile = 'brokerage_cust.csv';
-const customerTableName = 'BROKERAGE_CUST';
-loadDataFile(customerDataFile, customerTableName);
 
-const stockDataFile = 'stock_trades.csv';
-const stockTableName = 'STOCK_TRADES';
-loadDataFile(stockDataFile, stockTableName);
+function loadDataFile(dataFile, tableName, fileOptions={}) {
 
-const newsDataFile = 'stock_news.csv';
-const newsFileOptions = {delimiter: '|', comment: '#', quote: false};
-const newsTableName = 'NEWS';
-loadDataFile(newsDataFile, newsTableName, newsFileOptions);
+  const csvPath = path.join(__dirname, 'data', dataFile);
+  const finalOptions = Object.assign({skip_lines_with_error: true}, fileOptions);
+  const tableLoadStream = new TableLoadStream(tableName);
+
+  fs.createReadStream(csvPath)
+    .pipe(csv_parse(finalOptions))
+    .on('data', row => { db.serialize(() => tableLoadStream.write(row) ) })
+    .on('end', () => tableLoadStream.end())
+}
+
+
+loadDataFile('brokerage_cust.csv', 'BROKERAGE_CUST');
+loadDataFile('stock_trades.csv', 'STOCK_TRADES');
+loadDataFile('NewsData.csv', 'NEWS', {delimiter: '|', comment: '#', quote: false});
 
 
 module.exports = {
