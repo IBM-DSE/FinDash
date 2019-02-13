@@ -122,7 +122,7 @@ describe('Susan prepares for her meeting with Leo Rakes', () => {
 
     // Filter relevant market news from early November
     $('#news-panel').click('button*=2016-09-01 - 2017-07-19');
-    $('div*=Oct 2016').click('.glyphicon-chevron-right');
+    $('div*=Oct 2016').click('.next');
     let nov = $$('div*=Nov 2016');
     nov.last().click('td=1');
     nov.last().click('td=12');
@@ -205,7 +205,6 @@ function checkDefaultChartState() {
 
 const loadWait = 3;
 function shouldBeSelected(id) {
-  $(id+' > input').isSelected().should.be.true();
   let label = $(id);
   label.getAttribute('class').should.containEql('active');
   browser.waitUntil(() => label.getAttribute('style').includes('background-color: rgb('),
@@ -214,7 +213,6 @@ function shouldBeSelected(id) {
 }
 
 function shouldBeDeselected(id) {
-  $(id+' > input').isSelected().should.be.false();
   $(id).getAttribute('class').should.not.containEql('active');
 }
 

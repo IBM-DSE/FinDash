@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import { Row, Col, Glyphicon, ControlLabel, Checkbox, Button, ToggleButton, ToggleButtonGroup } from 'react-bootstrap';//DropdownButton,
+import DateRangePicker from 'react-bootstrap-daterangepicker';
 import StockChart from './StockChart';
-import './daterangepicker.css';
-const DateRangePicker = require('react-bootstrap-daterangepicker');
 const moment = require('moment');
 
 class StockPanel extends Component {
@@ -37,7 +36,8 @@ class StockPanel extends Component {
 
   componentDidMount() {
     if(Object.keys(this.state.stocks).length === 0)
-      fetch('/api/stocks').then(res => res.json()).then(stocks => this.setState({stocks}));
+      fetch('/api/stocks')
+        .then(res => res.json()).then(stocks => this.setState({stocks}));
 
     fetch('/api/stocks/currencies')
       .then(res => res.json()).then(currencies => this.setState({currencies}));
@@ -81,18 +81,6 @@ class StockPanel extends Component {
 
         <Row>
 
-          {/*<DropdownButton title='Plot Correlation' id='corr-sel' className="larger" style={{marginRight: '100px'}}*/}
-                          {/*open={this.state.corrDropdownExpanded} onToggle={this.onCorrDropdownToggle}>*/}
-            {/*<div style={{display: 'table'}}>*/}
-              {/*<ToggleButtonGroup type="checkbox" style={{display: 'table-cell'}}>*/}
-                {/*{this.stockCorrelationList(this.state.displayStocks)}*/}
-              {/*</ToggleButtonGroup>*/}
-              {/*<ToggleButtonGroup type="checkbox" style={{display: 'table-cell'}}>*/}
-                {/*{this.currencyCorrelationList(this.state.currencies)}*/}
-              {/*</ToggleButtonGroup>*/}
-            {/*</div>*/}
-          {/*</DropdownButton>*/}
-
           <ControlLabel className="larger" >Date Range:</ControlLabel>{' '}
           <DateRangePicker startDate={this.state.startDate} endDate={this.state.endDate} onApply={this.onDateSet}>
             <Button className="selected-date-range-btn">
@@ -122,13 +110,14 @@ class StockPanel extends Component {
     return (categories.map(category => {
 
       const selected = stocks.categories[category].map(stock => stock).every(stock => displayStocks.includes(stock));
+      const defaultValue = selected ? [category] : [];
 
       return (<div key={"category-"+category} className={"category col-md-"+width}>
 
         <h3>{category}</h3>
 
-        <ToggleButtonGroup type="checkbox" className="full-width">
-          <ToggleButton id={'all-'+category} value={category} checked={selected} onChange={this.onSelectAllStocks} block>
+        <ToggleButtonGroup type="checkbox" className="full-width" defaultValue={defaultValue}>
+          <ToggleButton id={'all-'+category} value={category} onChange={this.onSelectAllStocks} block>
             <strong><Glyphicon glyph='check'/> Select All</strong>
           </ToggleButton>
         </ToggleButtonGroup>
@@ -141,10 +130,10 @@ class StockPanel extends Component {
 
   stockList(arr, displayStocks) {
     return (arr.map((elem) => {
+      const selected = displayStocks.includes(elem) ? [elem] : [];
       return (
-        <ToggleButtonGroup key={elem} type="checkbox" className="full-width margin-top-sm">
-          <ToggleButton id={'plot-'+elem} value={elem} className='btn-stock'
-                        checked={displayStocks.includes(elem)} onChange={this.onToggleStock} block>
+        <ToggleButtonGroup key={elem} type="checkbox" className="full-width margin-top-sm" value={selected}>
+          <ToggleButton id={'plot-'+elem} value={elem} className='btn-stock' onChange={this.onToggleStock} block>
             {this.stockName(elem)}
           </ToggleButton>
         </ToggleButtonGroup>
@@ -183,9 +172,9 @@ class StockPanel extends Component {
 
   onToggleStock(event) {
     const stock = event.target.value;
-    const add = event.target.checked;
     this.setState(function(prevState) {
       const displayStocks = prevState.displayStocks.slice(0);
+      const add = !displayStocks.includes(stock);
       if (add) {
         displayStocks.push(stock);
       } else {
@@ -201,7 +190,7 @@ class StockPanel extends Component {
   async onSelectAllStocks(event) {
     const category = event.target.value;
     const add = event.target.checked;
-    const displayStocks = this.state.displayStocks;
+    const displayStocks = this.state.displayStocks.slice(0);
     if(add){
       await this.state.stocks.categories[category].forEach((stock) => {
         if(!displayStocks.includes(stock)){

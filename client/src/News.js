@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
 import { Button, Glyphicon } from 'react-bootstrap';
-import './daterangepicker.css';
+import DateRangePicker from 'react-bootstrap-daterangepicker';
 import Util from './Util'
-let DateRangePicker = require('react-bootstrap-daterangepicker');
-let moment = require('moment');
+const moment = require('moment');
 const Fetching = Util.Fetching;
 
 class News extends Component {
@@ -87,7 +86,8 @@ function newsStories(news_data, full) {
           <p className="align-left">{story['NEWS_TEXT'].slice(0, 200) + '...'}</p>
         </div>
         <div className="panel-footer">
-          Source: <strong><a href={story['NEWS_URL']} target="_blank">{story['NEWS_SRC']} <Glyphicon glyph='new-window'/></a></strong>
+          Source: <strong><a href={story['NEWS_URL']} target="_blank" rel="noopener noreferrer">
+          {story['NEWS_SRC']} <Glyphicon glyph='new-window'/></a></strong>
         </div>
       </div>
     </div>
