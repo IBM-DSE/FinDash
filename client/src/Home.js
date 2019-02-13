@@ -6,9 +6,7 @@ import StockIndices from './StockIndices';
 import ClientList from './ClientList';
 import News from './News';
 
-BigCalendar.setLocalizer(
-  BigCalendar.momentLocalizer(moment)
-);
+const localizer = BigCalendar.momentLocalizer(moment);
 
 const Home = () => (
   <div>
@@ -42,6 +40,7 @@ const Home = () => (
 const MyCalendar = props => (
   <div>
     <BigCalendar
+      localizer={localizer}
       events={props.events}
       step={15}
       min={new Date(2017, 8, 19, 9, 0, 0, 0)}

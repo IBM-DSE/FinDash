@@ -8,16 +8,20 @@
   },
   "dependencies": {
     "bootstrap": "^3.3.7",
+    "bootstrap-daterangepicker": "^3.0.3",
     "chart.js": "^2.6.0",
-    "moment": "^2.21.0",
-    "react": "^15.6.1",
-    "react-big-calendar": "^0.15.0",
-    "react-bootstrap": "github:dtom90/react-bootstrap",
-    "react-bootstrap-daterangepicker": "^3.4.1",
+    "jquery": "^3.3.1",
+    "moment": "^2.24.0",
+    "prop-types": "^15.7.1",
+    "query-string": "^6.2.0",
+    "react": "^16.8.1",
+    "react-big-calendar": "^0.20.3",
+    "react-bootstrap": "^0.32.4",
+    "react-bootstrap-daterangepicker": "^4.1.0",
     "react-chartjs-2": "^2.6.2",
-    "react-dom": "^15.6.1",
+    "react-dom": "^16.8.1",
     "react-router-dom": "^4.2.2",
-    "react-scripts": "1.1.5",
+    "react-scripts": "^2.1.5",
     "react-spinkit": "^3.0.0",
     "twix": "^1.2.0"
   },
@@ -27,5 +31,11 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
-  "proxy": "http://localhost:3001"
+  "proxy": "http://localhost:3001",
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }

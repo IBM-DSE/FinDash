@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
 import { Button, Glyphicon } from 'react-bootstrap';
-import './daterangepicker.css';
+import DateRangePicker from 'react-bootstrap-daterangepicker';
 import Util from './Util'
-let DateRangePicker = require('react-bootstrap-daterangepicker');
-let moment = require('moment');
+const moment = require('moment');
 const Fetching = Util.Fetching;
 
 class News extends Component {
@@ -41,7 +40,7 @@ class News extends Component {
         {dateSel && <div>
           <DateRangePicker startDate={moment(this.state.startDate)} endDate={moment(this.state.endDate)} onApply={this.onDateSet}>
             <Button className="selected-date-range-btn">
-              <div className="pull-left"><Glyphicon glyph="calendar" /> <span>{label}</span> <span className="caret"></span></div>
+              <div className="pull-left"><Glyphicon glyph="calendar" /> <span>{label}</span> <span className="caret"/></div>
             </Button>
           </DateRangePicker>
           <br/>
@@ -77,15 +76,18 @@ function newsStories(news_data, full) {
   return news_data.map((story, i) =>
     <div key={'story-' + i} className={full && "col-md-4 col-sm-6"}>
       <div className="panel panel-default">
-        <div className="panel-heading">
+        <div className="panel-heading" style={{height: 90}}>
           <p className="align-left">{(new Date(story['NEWS_DATE'])).toString().slice(4, 16)}</p>
-          <h3 className="panel-title">{story['NEWS_TITLE']}</h3>
+          <h3 className="panel-title">
+            {story['NEWS_TITLE'].length > 80 ? story['NEWS_TITLE'].slice(0, 80) + '...' : story['NEWS_TITLE']}
+          </h3>
         </div>
         <div className="panel-body">
           <p className="align-left">{story['NEWS_TEXT'].slice(0, 200) + '...'}</p>
         </div>
         <div className="panel-footer">
-          Source: <strong><a href={story['NEWS_URL']} target="_blank">{story['NEWS_SRC']} <Glyphicon glyph='new-window'/></a></strong>
+          Source: <strong><a href={story['NEWS_URL']} target="_blank" rel="noopener noreferrer">
+          {story['NEWS_SRC']} <Glyphicon glyph='new-window'/></a></strong>
         </div>
       </div>
     </div>
