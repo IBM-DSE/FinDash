@@ -130,24 +130,27 @@ describe('Susan prepares for her meeting with Leo Rakes', () => {
     browser.waitForText('h3.panel-title=Donald Trump and the Stock Market: Did You Miss These Moves?');
 
     // Click article about impact of the election on the stock market
-    $('div.panel*=Donald Trump and the Stock Market: Did You Miss These Moves?').click('a');
-    browser.switchTab(browser.windowHandles().value[1]);
+    $('div.panel*=Donald Trump and the Stock Market: Did You Miss These Moves?').click('a').pause(2000);
 
-    // Disabled due to webdriver waiting for full page load, taking too long
-    // browser.getText("h1=Donald Trump and the Stock Market: Did You Miss These Moves?");
-    // browser.getText("h2=Fiat Chrysler's Trump card");
-    // browser.getText("p*=The belief is that the emissions").should.equal(
-    //   "The story is simple: Trump plans to complete a comprehensive review of all federal regulations, " +
-    //   "especially the fuel economy and emissions standards. The belief is that the emissions standards, " +
-    //   "set to require fleets to average 54.5 miles per gallon by 2025, will be relaxed significantly.");
-    // browser.getText('p*=Fiat Chrysler Automobiles').should.equal(
-    //   "That's also why Fiat Chrysler Automobiles (NYSE: FCAU) jumped the highest this week. " +
-    //   "It benefited the most since it was drastically behind the industry in terms of developing " +
-    //   "electric vehicles or hybrids and still heavily relies on Jeep and Ram Truck for profits.");
+    // Check for a new window with url and article content
+    const url = 'https://www.nasdaq.com/article/donald-trump-and-the-stock-market-did-you-miss-these-moves-cm708221';
+    browser.waitUntil(function () {
+      const window2 = browser.windowHandles().value[1];
+      return browser.window(window2).getUrl() === url
+    }, 5000, 'expected url to be different after 5s');
+    browser.getText("h1=Donald Trump and the Stock Market: Did You Miss These Moves?");
+    browser.getText("h2=Fiat Chrysler's Trump card");
+    browser.getText("p*=The belief is that the emissions").should.equal(
+      "The story is simple: Trump plans to complete a comprehensive review of all federal regulations, " +
+      "especially the fuel economy and emissions standards. The belief is that the emissions standards, " +
+      "set to require fleets to average 54.5 miles per gallon by 2025, will be relaxed significantly.");
+    browser.getText('p*=Fiat Chrysler Automobiles').should.equal(
+      "That's also why Fiat Chrysler Automobiles (NYSE: FCAU) jumped the highest this week. " +
+      "It benefited the most since it was drastically behind the industry in terms of developing " +
+      "electric vehicles or hybrids and still heavily relies on Jeep and Ram Truck for profits.");
 
     // Switch back to FinDash
     browser.switchTab();
-    console.log(browser.getCurrentTabId());
     browser.getText('a=Financial Advisor Dashboard');
 
     // Toggle off all Auto stocks

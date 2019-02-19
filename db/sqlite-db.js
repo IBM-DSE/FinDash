@@ -1,9 +1,9 @@
-const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database(':memory:');
 const path = require('path');
 const fs = require('fs');
 const csv_parse = require('csv-parse');
 const stream = require('stream');
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database(':memory:');
 const nodeCleanup = require('node-cleanup');
 
 
