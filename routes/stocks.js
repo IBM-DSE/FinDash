@@ -3,8 +3,6 @@ const router = express.Router();
 const sqliteDB = require('../db/sqlite-db');
 const jStat = require('jStat').jStat;
 
-const withinTimeFrame = " AND TRADE_DATE >= '2016-09-01' AND TRADE_DATE <= '2017-07-19'";
-
 /** Query Stock and Currency Mappings **/
 
 router.get('/', function(req, res) {
@@ -25,15 +23,13 @@ router.get('/currencies', function(req, res) {
 
 /** Query Stock Prices **/
 
-const queryStocks = "SELECT DISTINCT SYMBOL FROM STOCK_TRADES;";
-
 const checkValidStock = (...stocks) => new Promise(function(resolve, reject) {
   /** Check to see if these are valid stocks **/
 
   if (stocks.length === 0)
     reject();
   else {
-    sqliteDB.queryDatabase(queryStocks, function(result) {
+    sqliteDB.queryDatabase("SELECT DISTINCT SYMBOL FROM STOCK_TRADES;", (result) => {
       const allStocks = result.map(x => x['SYMBOL']);
       if (Array.prototype.every.call(stocks, stock => allStocks.includes(stock)))
         resolve();
@@ -43,9 +39,14 @@ const checkValidStock = (...stocks) => new Promise(function(resolve, reject) {
   }
 });
 
-const getStockPrices = (stock, query) => new Promise(function(resolve, reject) {
-  sqliteDB.queryDatabase(query, {$symbol: stock}, function(data) {
-    if (data.length > 0 && data[0]['SYMBOL'] === stock) {
+const queryStockPrices =
+  "SELECT DISTINCT SYMBOL,TRADE_DATE,CLOSE_PRICE from STOCK_TRADES " +
+  "WHERE (\"SYMBOL\"= $symbol AND TRADE_DATE >= $startDate AND TRADE_DATE <= $endDate) " +
+  "ORDER BY TRADE_DATE";
+
+const getStockPrices = ($symbol, $startDate, $endDate) => new Promise((resolve, reject) => {
+  sqliteDB.queryDatabase(queryStockPrices, { $symbol, $startDate, $endDate }, (data) => {
+    if (verifyData(data, $symbol, $startDate, $endDate)) {
       resolve(data)
     } else {
       reject()
@@ -53,18 +54,26 @@ const getStockPrices = (stock, query) => new Promise(function(resolve, reject) {
   });
 });
 
-const queryStockPrices = "SELECT DISTINCT SYMBOL,TRADE_DATE,CLOSE_PRICE from STOCK_TRADES " +
-  "WHERE (\"SYMBOL\"= $symbol " + withinTimeFrame + ") ORDER BY TRADE_DATE";
+function verifyData(data, $symbol, $startDate, $endDate) {
+  return data.length > 0
+    && data[0]['SYMBOL'] === $symbol
+    && data[0]['TRADE_DATE'] >= $startDate
+    && data[data.length-1]['TRADE_DATE'] <= $endDate
+}
+
+const primaryStartDate = '2016-09-01';
+const primaryEndDate = '2017-07-19';
 
 router.get('/price/:stock', function(req, res) {
 
-  const emptyResp = {stock: req.params.stock, dates: [], prices: []};
+  const stock = req.params.stock;
+  const emptyResp = {stock, dates: [], prices: []};
 
-  checkValidStock(req.params.stock)
+  checkValidStock(stock)
     .then(() => {
-      getStockPrices(req.params.stock, queryStockPrices)
+      getStockPrices(stock, primaryStartDate, primaryEndDate)
         .then(data => res.json({
-          stock: req.params.stock,
+          stock: stock,
           dates: data.map(x => x['TRADE_DATE']),
           prices: data.map(x => x['CLOSE_PRICE'])
         }))
@@ -77,11 +86,7 @@ router.get('/price/:stock', function(req, res) {
 /** Query Stock / Currency Correlations **/
 
 correlationWindow = 50;
-
-const corrTimeFrame = " AND TRADE_DATE >= '2016-07-07' AND TRADE_DATE <= '2017-07-19'";
-
-const queryCorrPrices = "SELECT DISTINCT SYMBOL,TRADE_DATE,CLOSE_PRICE from STOCK_TRADES " +
-  "WHERE (\"SYMBOL\"= $symbol " + corrTimeFrame + ") ORDER BY TRADE_DATE";
+const correlationStartDate = '2016-07-07';
 
 router.get('/corr/stocks', function(req, res) {
 
@@ -94,8 +99,8 @@ router.get('/corr/stocks', function(req, res) {
     .then(() => {
 
       Promise.all([
-        getStockPrices(stock1, queryCorrPrices),
-        getStockPrices(stock2, queryCorrPrices),
+        getStockPrices(stock1, correlationStartDate, primaryEndDate),
+        getStockPrices(stock2, correlationStartDate, primaryEndDate),
       ]).then(bothData => {
 
         const prices = bothData.map(data => data.map(x => parseFloat(x['CLOSE_PRICE'])));
@@ -108,6 +113,7 @@ router.get('/corr/stocks', function(req, res) {
         }
 
         resp.dates = bothData[0].map(x => x['TRADE_DATE']).slice(correlationWindow);
+
         res.json(resp)
       })
         .catch(() => res.json(resp))
@@ -115,12 +121,13 @@ router.get('/corr/stocks', function(req, res) {
     .catch(() => res.json(resp))
 });
 
-const queryCurrPrices = "SELECT DISTINCT * from CURRENCY_RATES " +
-  "WHERE (\"CURRENCY\"= $currency " + corrTimeFrame + ") ORDER BY TRADE_DATE";
+const queryCurrrency = "SELECT DISTINCT * from CURRENCY_RATES " +
+  "WHERE (\"CURRENCY\"= $currency AND TRADE_DATE >= '$startDate' AND TRADE_DATE <= '$endDate') " +
+  "ORDER BY TRADE_DATE";
 
-const getCurrencyPrices = (stock, query) => new Promise(function(resolve, reject) {
-  sqliteDB.queryDatabase(query, {$currency: stock}, function(data) {
-    if (data.length > 0 && data[0]['CURRENCY'] === stock) {
+const getCurrencyPrices = ($currency, $startDate, $endDate) => new Promise(function(resolve, reject) {
+  sqliteDB.queryDatabase(queryCurrrency, {$currency, $startDate, $endDate}, function(data) {
+    if (data.length > 0 && data[0]['CURRENCY'] === $currency) {
       resolve(data)
     } else {
       reject()
@@ -139,8 +146,8 @@ router.get('/corr/curr', function(req, res) {
     .then(() => {
 
       Promise.all([
-        getStockPrices(stock, queryCorrPrices),
-        getCurrencyPrices(currency, queryCurrPrices),
+        getStockPrices(stock, correlationStartDate, primaryEndDate),
+        getCurrencyPrices(currency, correlationStartDate, primaryEndDate),
       ]).then(bothData => {
 
         const stockPrices = bothData[0].map(x => parseFloat(x['CLOSE_PRICE']));
