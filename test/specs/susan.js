@@ -16,7 +16,7 @@ describe('Susan prepares for her meeting with Leo Rakes', () => {
     browser.url(url);
 
     // Page title and Welcome text
-    browser.getTitle().should.equal('React App');
+    browser.getTitle().should.equal('Financial Advisor Dashboard');
     browser.getText('a=Financial Advisor Dashboard');
     browser.getText('h1=Welcome, Susan!');
 
@@ -176,9 +176,9 @@ describe('Susan prepares for her meeting with Leo Rakes', () => {
     browser.waitForExist('#corr-plot');
 
     // Plot the correlation between Honda and currency moves in Yen vs Dollar
-    // $('button=Plot Correlation').click();
-    // $('div*=Plot Correlation').click('label=Honda (HMC)');
-    // $('div*=Plot Correlation').click('label=JPY / USD');
+    $('button=Plot Correlation').click();
+    $('div*=Plot Correlation').click('label=Honda (HMC)');
+    $('div*=Plot Correlation').click('label=JPY / USD');
   });
 
 });

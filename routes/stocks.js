@@ -1,15 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const ibmDB = require('../db/ibm-db');
 const sqliteDB = require('../db/sqlite-db');
 const jStat = require('jStat').jStat;
 
 const withinTimeFrame = " AND TRADE_DATE >= '2016-09-01' AND TRADE_DATE <= '2017-07-19'";
-
-const queryCurrencyCorrelation = "SELECT * FROM CURRENCY_ANALYSIS WHERE (\"SYMBOL\"='X' AND \"CURRENCY\"='Z'" +
-  withinTimeFrame + ") ORDER BY TRADE_DATE",
-  posSym = queryCurrencyCorrelation.indexOf('X'),
-  posCurr = queryCurrencyCorrelation.indexOf('Z');
 
 /** Query Stock and Currency Mappings **/
 
@@ -121,30 +115,50 @@ router.get('/corr/stocks', function(req, res) {
     .catch(() => res.json(resp))
 });
 
+const queryCurrPrices = "SELECT DISTINCT * from CURRENCY_RATES " +
+  "WHERE (\"CURRENCY\"= $currency " + corrTimeFrame + ") ORDER BY TRADE_DATE";
+
+const getCurrencyPrices = (stock, query) => new Promise(function(resolve, reject) {
+  sqliteDB.queryDatabase(query, {$currency: stock}, function(data) {
+    if (data.length > 0 && data[0]['CURRENCY'] === stock) {
+      resolve(data)
+    } else {
+      reject()
+    }
+  });
+});
+
 router.get('/corr/curr', function(req, res) {
 
   let stock = req.query.stock;
   let currency = req.query.currency;
 
-  let query = queryCurrencyCorrelation.slice(0, posSym) + stock +
-    queryCurrencyCorrelation.slice(posSym + 1, posCurr) +
-    currency + queryCurrencyCorrelation.slice(posCurr + 1);
+  const resp = {stock: stock, currency: currency, dates: [], correlations: []};
 
-  ibmDB.queryDatabase(query, function(data) {
+  checkValidStock(stock)
+    .then(() => {
 
-    if (data.length > 0 && data[0]['SYMBOL'] === req.query.stock) {
-      res.json({
-        stock: stock, currency: currency,
-        dates: data.map(function(x) {
-          return x['TRADE_DATE'];
-        }),
-        correlations: data.map(function(x) {
-          return x['CORRELATION'];
-        })
-      });
-    } else
-      res.json({stock: stock, currency: currency, dates: [], correlations: []});
-  });
+      Promise.all([
+        getStockPrices(stock, queryCorrPrices),
+        getCurrencyPrices(currency, queryCurrPrices),
+      ]).then(bothData => {
+
+        const stockPrices = bothData[0].map(x => parseFloat(x['CLOSE_PRICE']));
+        const currencyPrices = bothData[1].map(x => parseFloat(x['VALUE']));
+
+        let window1, window2;
+        for (let i = correlationWindow; i < stockPrices.length; i++) {
+          window1 = stockPrices.slice(i - correlationWindow, i);
+          window2 = currencyPrices.slice(i - correlationWindow, i);
+          resp.correlations.push(jStat.corrcoeff(window1, window2));
+        }
+
+        resp.dates = bothData[0].map(x => x['TRADE_DATE']).slice(correlationWindow);
+        res.json(resp)
+      })
+        .catch(() => res.json(resp))
+    })
+    .catch(() => res.json(resp))
 
 });
 

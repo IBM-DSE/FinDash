@@ -48,7 +48,7 @@ class ClientPage extends Component {
           <div className="col-md-2" />
 
           <div className="col-md-3">
-            <img src={"/images/"+client.image} alt={'client-'+client.id} className="big-img" />
+            {client.image && <img src={"/images/"+client.image} alt={'client-'+client.id} className="big-img" />}
           </div>
 
           <div className="col-md-5">
