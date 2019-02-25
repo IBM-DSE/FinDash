@@ -70,8 +70,14 @@ module.exports = {
       params = []
     }
     db.all(statement, params, (err, result) => {
-      if(err) console.error(err);
-      callback(result)
+      if(err) {
+        console.error('\nThe following statement produced an error:\n');
+        console.error(statement);
+        console.error(JSON.stringify(params)+'\n');
+        console.error(err+'\n');
+        callback([])
+      } else
+        callback(result)
     });
   }
 };

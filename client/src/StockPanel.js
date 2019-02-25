@@ -81,15 +81,27 @@ class StockPanel extends Component {
 
         <Row>
 
-          <DropdownButton title='Plot Correlation' id='corr-sel' className="larger" style={{marginRight: '100px'}}
+          <DropdownButton title='Plot Correlation' id='corr-sel' className="larger" style={{marginRight: '300px'}}
                           open={this.state.corrDropdownExpanded} onToggle={this.onCorrDropdownToggle}>
-            <div className="row">
-              <div className="col-sm-6">
+            <div className="flex-row">
+              <div className="flex-elem">
+                <h4>Stock Tickers</h4>
                 {this.stockCorrelationList(this.state.displayStocks, this.state.corrSelections)}
               </div>
-              <div className="col-sm-6">
+              <div className="flex-elem">
+                <h4>Currency Exchange Rates</h4>
                 {this.currencyCorrelationList(this.state.currencies, this.state.corrSelections)}
               </div>
+              {this.state.correlations.length > 0 && <div className="flex-elem">
+                <h4>Displayed Correlations</h4>
+                {this.state.correlations.map(elem => {
+                  return (
+                    <ToggleButtonGroup key={elem} type="checkbox" defaultValue={[elem]}>
+                      <ToggleButton id={'disp-'+elem} value={elem} className='btn-stock' block>{elem}</ToggleButton>
+                    </ToggleButtonGroup>
+                  )
+                })}
+              </div>}
             </div>
           </DropdownButton>
 
@@ -277,8 +289,11 @@ class StockPanel extends Component {
   }
 
   noCorrData(badCorr){
-    alert("Sorry, I don't have any correlation data between "+badCorr.stock1+" and "+badCorr.stock2);
-    const badCorrCombined = correlationLabel(badCorr.stock1 , badCorr.stock2);
+
+    const syms = Object.values(badCorr);
+
+    alert(`Sorry, I don't have any correlation data between ${syms[0]} and ${syms[1]}`);
+    const badCorrCombined = correlationLabel(syms[0] , syms[1]);
     this.setState(prevState => {
       const corrs = prevState.correlations;
       corrs.splice(corrs.indexOf(badCorrCombined), 1);
