@@ -169,13 +169,13 @@ describe('Susan prepares for her meeting with Leo Rakes', () => {
     shouldBeSelected('#plot-HMC');
     shouldBeSelected('#plot-RACE');
 
-    // // Plot the correlation between the two
-    // $('button=Plot Correlation').click();
-    // $('div*=Plot Correlation').click('label=Ferrari NV (RACE)');
-    // $('div*=Plot Correlation').click('label=Honda (HMC)');
-    // browser.waitForExist('#corr-plot');
-    //
-    // // Plot the correlation between Honda and currency moves in Yen vs Dollar
+    // Plot the correlation between the two
+    $('button=Plot Correlation').click();
+    $('div*=Plot Correlation').click('label=Ferrari NV (RACE)');
+    $('div*=Plot Correlation').click('label=Honda (HMC)');
+    browser.waitForExist('#corr-plot');
+
+    // Plot the correlation between Honda and currency moves in Yen vs Dollar
     // $('button=Plot Correlation').click();
     // $('div*=Plot Correlation').click('label=Honda (HMC)');
     // $('div*=Plot Correlation').click('label=JPY / USD');

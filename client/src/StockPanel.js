@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, Glyphicon, ControlLabel, Checkbox, Button, ToggleButton, ToggleButtonGroup } from 'react-bootstrap';//DropdownButton,
+import { Row, Col, Glyphicon, ControlLabel, Checkbox, Button, ToggleButton, ToggleButtonGroup, DropdownButton } from 'react-bootstrap';
 import DateRangePicker from 'react-bootstrap-daterangepicker';
 import StockChart from './StockChart';
 const moment = require('moment');
@@ -80,6 +80,18 @@ class StockPanel extends Component {
                     startDate={start} endDate={end} normalized={this.state.normalized}/>
 
         <Row>
+
+          <DropdownButton title='Plot Correlation' id='corr-sel' className="larger" style={{marginRight: '100px'}}
+                          open={this.state.corrDropdownExpanded} onToggle={this.onCorrDropdownToggle}>
+            <div style={{display: 'table'}}>
+              <ToggleButtonGroup type="checkbox" style={{display: 'table-cell'}}>
+                {this.stockCorrelationList(this.state.displayStocks)}
+              </ToggleButtonGroup>
+              <ToggleButtonGroup type="checkbox" style={{display: 'table-cell'}}>
+                {this.currencyCorrelationList(this.state.currencies)}
+              </ToggleButtonGroup>
+            </div>
+          </DropdownButton>
 
           <ControlLabel className="larger" >Date Range:</ControlLabel>{' '}
           <DateRangePicker startDate={this.state.startDate} endDate={this.state.endDate} onApply={this.onDateSet}>
