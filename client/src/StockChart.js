@@ -86,7 +86,7 @@ class StockChart extends Component {
         else if(stocks[1].indexOf('DEX')>-1)
           path = '/api/stocks/corr/curr?stock=' + stocks[0] + '&currency=' + stocks[1];
         else
-          path = '/api/stocks/corr/stocks?stock1=' + stocks[0] + '&stock2=' + stocks[1];
+          path = `/api/stocks/corr/stocks?stock1=${stocks[0]}&stock2=${stocks[1]}`;
 
         newStocks.forEach(() => fetch(path).then(res => res.json())
           .then(newStockData => this.addStockData(newStockData, 'correlations')));
@@ -100,7 +100,7 @@ class StockChart extends Component {
 
     if (newStocks.length>0)
       newStocks.forEach(stock =>
-        fetch('/api/stocks/' + stock).then(res => res.json())
+        fetch('/api/stocks/price/' + stock).then(res => res.json())
           .then(newStockData => this.addStockData(newStockData)));
     else if (delStocks.length>0)
       { // noinspection JSIgnoredPromiseFromCall
@@ -147,11 +147,12 @@ class StockChart extends Component {
     const stockData = this.state.stockData;
 
     let updateDates = false;
-    if (stockData.dates.length === 0) {   // if this is the first stock we are adding
-      stockData.dates = newStockData.dates; // update our state with the new stock data dates
-      updateDates = true;                   // then update the date range
+    if (stockData.dates.length === 0) {     // if this is the first stock we are adding
+      stockData.dates = newStockData.dates;   // update our state with the new stock data dates
+      updateDates = true;                     // then update the date range
     }
-    else if ( !(stockData.dates[0] === newStockData.dates[0] &&  // check that the stock dates are consistent
+    else if ( metric==='prices' &&          // check that the stock dates are consistent
+              !(stockData.dates[0] === newStockData.dates[0] &&
                 stockData.dates.length === newStockData.dates.length &&
                 stockData.dates[stockData.dates.length-1] === newStockData.dates[newStockData.dates.length - 1]))
       return console.error(newStockData.stock+' stock date ranges are inconsistent!');

@@ -59,12 +59,17 @@ function loadDataFile(dataFile, tableName, fileOptions={}) {
 
 loadDataFile('brokerage_cust.csv', 'BROKERAGE_CUST');
 loadDataFile('stock_trades.csv', 'STOCK_TRADES');
+loadDataFile('currency_rates.csv', 'CURRENCY_RATES');
 loadDataFile('NewsData.csv', 'NEWS', {delimiter: '|', comment: '#', quote: false});
 
 
 module.exports = {
-  queryDatabase: (statement, callback) => {
-    db.all(statement, (err, result) => {
+  queryDatabase: (statement, params, callback) => {
+    if (typeof params === 'function') {
+      callback = params;
+      params = []
+    }
+    db.all(statement, params, (err, result) => {
       if(err) console.error(err);
       callback(result)
     });

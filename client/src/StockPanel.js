@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, Glyphicon, ControlLabel, Checkbox, Button, ToggleButton, ToggleButtonGroup } from 'react-bootstrap';//DropdownButton,
+import { Row, Col, Glyphicon, ControlLabel, Checkbox, Button, ToggleButton, ToggleButtonGroup, DropdownButton } from 'react-bootstrap';
 import DateRangePicker from 'react-bootstrap-daterangepicker';
 import StockChart from './StockChart';
 const moment = require('moment');
@@ -81,6 +81,18 @@ class StockPanel extends Component {
 
         <Row>
 
+          <DropdownButton title='Plot Correlation' id='corr-sel' className="larger" style={{marginRight: '100px'}}
+                          open={this.state.corrDropdownExpanded} onToggle={this.onCorrDropdownToggle}>
+            <div className="row">
+              <div className="col-sm-6">
+                {this.stockCorrelationList(this.state.displayStocks, this.state.corrSelections)}
+              </div>
+              <div className="col-sm-6">
+                {this.currencyCorrelationList(this.state.currencies, this.state.corrSelections)}
+              </div>
+            </div>
+          </DropdownButton>
+
           <ControlLabel className="larger" >Date Range:</ControlLabel>{' '}
           <DateRangePicker startDate={this.state.startDate} endDate={this.state.endDate} onApply={this.onDateSet}>
             <Button className="selected-date-range-btn">
@@ -132,8 +144,9 @@ class StockPanel extends Component {
     return (arr.map((elem) => {
       const selected = displayStocks.includes(elem) ? [elem] : [];
       return (
-        <ToggleButtonGroup key={elem} type="checkbox" className="full-width margin-top-sm" value={selected}>
-          <ToggleButton id={'plot-'+elem} value={elem} className='btn-stock' onChange={this.onToggleStock} block>
+        <ToggleButtonGroup key={elem} type="checkbox" className="full-width margin-top-sm" value={selected}
+                           onChange={(sel) => this.onToggleStock(sel, [elem])}>
+          <ToggleButton id={'plot-'+elem} value={elem} className='btn-stock' block>
             {this.stockName(elem)}
           </ToggleButton>
         </ToggleButtonGroup>
@@ -141,26 +154,36 @@ class StockPanel extends Component {
     }));
   }
 
-  stockCorrelationList(arr) {
-    return (arr.map(elem =>
-      <ToggleButton key={'corr-'+elem} id={'corr-'+elem} value={elem} className='btn-stock'
-                    checked={this.state.corrSelections.includes(elem)}
-                    onChange={this.onCorrStockSelect} block>
-        {this.stockName(elem)}
-      </ToggleButton>
-    ));
+  stockCorrelationList(arr, corrSelections) {
+    return (arr.map(elem => {
+      const selected = corrSelections.includes(elem) ? [elem] : [];
+      return (
+        <ToggleButtonGroup key={'corr-'+elem} type="checkbox" value={selected}
+                           onChange={(sel) => this.onCorrStockSelect(sel, [elem])}>
+          <ToggleButton id={'corr-'+elem} value={elem} className='btn-stock' block>
+            {this.stockName(elem)}
+          </ToggleButton>
+        </ToggleButtonGroup>
+      )
+    }));
   }
 
   stockName(ticker) {
     return this.state.stocks.name ? this.state.stocks.name[ticker]+' ('+ticker+')' : ticker;
   }
 
-  currencyCorrelationList(hash) {
-    return (Object.keys(hash).map(sym =>
-      <ToggleButton key={'corr-'+sym} id={'corr-'+sym} value={sym}
-                    checked={this.state.corrSelections.includes(sym)}
-                    onChange={this.onCorrStockSelect} block>{hash[sym]}</ToggleButton>
-    ));
+  currencyCorrelationList(hash, corrSelections) {
+    return (Object.keys(hash).map(sym => {
+      const selected = corrSelections.includes(sym) ? [sym] : [];
+      return (
+        <ToggleButtonGroup key={'corr-'+sym} type="checkbox" value={selected}
+                           onChange={(sel) => this.onCorrStockSelect(sel, [sym])}>
+          <ToggleButton id={'corr-'+sym} value={sym} block>
+            {hash[sym]}
+          </ToggleButton>
+        </ToggleButtonGroup>
+      )
+    }));
   }
 
   onDateSet(event, picker) {
@@ -170,8 +193,10 @@ class StockPanel extends Component {
     });
   }
 
-  onToggleStock(event) {
-    const stock = event.target.value;
+  onToggleStock(selection, expected) {
+
+    const stock = expected[0];
+
     this.setState(function(prevState) {
       const displayStocks = prevState.displayStocks.slice(0);
       const add = !displayStocks.includes(stock);
@@ -217,16 +242,20 @@ class StockPanel extends Component {
       this.setState({corrDropdownExpanded: true});
   }
 
-  async onCorrStockSelect(event) {
-    const add = event.target.checked;
-    const stock = event.target.value;
+  async onCorrStockSelect(selection, expected) {
+
+    const add = selection.length > 0;
+    const stock = expected[0];
+
     if(add) {
       const stockButton = document.getElementById("plot-"+stock);
       if(stockButton && stockButton.style["background-color"])
         document.getElementById("corr-"+stock).style["background-color"] = stockButton.style["background-color"];
 
       await this.setState(() => {
-        this.state.corrSelections.push(stock);
+        const corrSelections = this.state.corrSelections;
+        corrSelections.push(stock);
+        return { corrSelections }
       });
       if(this.state.corrSelections.length === 2){
 
@@ -237,9 +266,12 @@ class StockPanel extends Component {
       }
     } else {
       this.setState(() => {
-        const index = this.state.corrSelections.indexOf(stock);
-        if (index > -1)
-          this.state.corrSelections.splice(index, 1);
+        const corrSelections = this.state.corrSelections;
+        const index = corrSelections.indexOf(stock);
+        if (index > -1) {
+          corrSelections.splice(index, 1);
+          return { corrSelections }
+        }
       });
     }
   }
