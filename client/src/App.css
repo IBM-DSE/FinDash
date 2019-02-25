@@ -101,6 +101,16 @@
   flex-direction: column;
 }
 
+.flex-row {
+  display: flex;
+}
+
+.flex-elem {
+  flex: 1;
+  margin-left: 14px;
+  margin-right: 14px;
+}
+
 .align-bottom {
   margin-top: auto;
 }

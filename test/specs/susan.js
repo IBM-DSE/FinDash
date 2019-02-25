@@ -170,15 +170,21 @@ describe('Susan prepares for her meeting with Leo Rakes', () => {
     shouldBeSelected('#plot-RACE');
 
     // Plot the correlation between the two
+    const correlationDropdown = $('div*=Plot Correlation');
     $('button=Plot Correlation').click();
-    $('div*=Plot Correlation').click('label=Ferrari NV (RACE)');
-    $('div*=Plot Correlation').click('label=Honda (HMC)');
+    correlationDropdown.getText('h4=Stock Tickers');
+    correlationDropdown.getText('h4=Currency Exchange Rates');
+    correlationDropdown.click('label=Ferrari NV (RACE)');
+    correlationDropdown.click('label=Honda (HMC)');
     browser.waitForExist('#corr-plot');
 
     // Plot the correlation between Honda and currency moves in Yen vs Dollar
     $('button=Plot Correlation').click();
-    $('div*=Plot Correlation').click('label=Honda (HMC)');
-    $('div*=Plot Correlation').click('label=JPY / USD');
+    correlationDropdown.getText('h4=Displayed Correlations');
+    correlationDropdown.getText('label*=Corr ( RACE , HMC )');
+    correlationDropdown.click('label=Honda (HMC)');
+    correlationDropdown.click('label=JPY / USD');
+    correlationDropdown.getText('label*=Corr ( HMC , DEXJPUS )');
   });
 
 });

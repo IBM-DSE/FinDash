@@ -121,12 +121,12 @@ router.get('/corr/stocks', function(req, res) {
     .catch(() => res.json(resp))
 });
 
-const queryCurrrency = "SELECT DISTINCT * from CURRENCY_RATES " +
-  "WHERE (\"CURRENCY\"= $currency AND TRADE_DATE >= '$startDate' AND TRADE_DATE <= '$endDate') " +
+const queryCurrency = "SELECT * from CURRENCY_RATES " +
+  "WHERE (\"CURRENCY\"= $currency AND TRADE_DATE >= $startDate AND TRADE_DATE <= $endDate) " +
   "ORDER BY TRADE_DATE";
 
 const getCurrencyPrices = ($currency, $startDate, $endDate) => new Promise(function(resolve, reject) {
-  sqliteDB.queryDatabase(queryCurrrency, {$currency, $startDate, $endDate}, function(data) {
+  sqliteDB.queryDatabase(queryCurrency, {$currency, $startDate, $endDate}, function(data) {
     if (data.length > 0 && data[0]['CURRENCY'] === $currency) {
       resolve(data)
     } else {

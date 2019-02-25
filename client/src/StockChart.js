@@ -191,6 +191,8 @@ class StockChart extends Component {
       } else {
         color = getRandomColor(); // generate a random color for the new data set
         dataSet.label = correlationLabel(newStockData);
+        const corrButton = document.getElementById("disp-"+dataSet.label);
+        corrButton.style["background-color"] = color;
       }
 
       dataSet.backgroundColor = dataSet.borderColor = dataSet.pointBorderColor = dataSet.pointBackgroundColor =
