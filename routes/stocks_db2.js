@@ -1,27 +1,8 @@
 let express = require('express');
 let router = express.Router();
-// let fs = require('fs');
-// let path = require('path');
-// let csv_parse = require('csv-parse');
+const jStat = require('jStat').jStat;
 let ibmDB = require('../db/ibm-db');
 
-const timeFrame = "AND TRADE_DATE >= '2016-09-01' AND TRADE_DATE <= '2017-07-19'";
-
-const queryStockPrices = "SELECT DISTINCT SYMBOL,TRADE_DATE,CLOSE_PRICE from STOCK_TRADES WHERE (\"SYMBOL\"='X' " +
-  timeFrame+") ORDER BY TRADE_DATE",
-  pos = queryStockPrices.indexOf('X');
-
-const queryStocks = "SELECT DISTINCT SYMBOL1, SYMBOL2 from STOCK_ANALYSIS;";
-
-const queryStockCorrelation = "SELECT * FROM STOCK_ANALYSIS WHERE (\"SYMBOL1\"='X' AND \"SYMBOL2\"='Z'" +
-  timeFrame+") ORDER BY TRADE_DATE",
-  posSym1 = queryStockCorrelation.indexOf('X'),
-  posSym2 = queryStockCorrelation.indexOf('Z');
-
-const queryCurrencyCorrelation = "SELECT * FROM CURRENCY_ANALYSIS WHERE (\"SYMBOL\"='X' AND \"CURRENCY\"='Z'" +
-  timeFrame+") ORDER BY TRADE_DATE",
-  posSym = queryCurrencyCorrelation.indexOf('X'),
-  posCurr = queryCurrencyCorrelation.indexOf('Z');
 
 router.get('/', function(req, res) {
   res.json({
@@ -79,36 +60,51 @@ router.get('/currencies', function(req, res) {
   res.json(currency_mapping);
 });
 
+/** Query Stock / Currency Correlations **/
+
+correlationWindow = 50;
+const correlationStartDate = '2016-07-07';
+
 router.get('/corr/stocks', function(req, res) {
 
-  let stock1 = req.query.stock1;
-  let stock2 = req.query.stock2;
+  const stock1 = req.query.stock1;
+  const stock2 = req.query.stock2;
 
-  ibmDB.queryDatabase(queryStocks, function(pairs){
-    let stocks;
-    pairs.forEach((pair) => {
-      stocks = Object.values(pair);
-      if(stocks.includes(stock1) && stocks.includes(stock2)){
+  const resp = {stock1: stock1, stock2: stock2, dates: [], correlations: []};
 
-        let query  = queryStockCorrelation.slice(0, posSym1) +
-          pair['SYMBOL1'] + queryStockCorrelation.slice(posSym1+1, posSym2) +
-          pair['SYMBOL2'] + queryStockCorrelation.slice(posSym2+1);
+  Promise.all([
+    getStockPrices(stock1, correlationStartDate, primaryEndDate),
+    getStockPrices(stock2, correlationStartDate, primaryEndDate),
+  ]).then(bothData => {
 
-        ibmDB.queryDatabase(query, function(data){
-          if (data.length > 0 && data[0]['SYMBOL1'] === pair['SYMBOL1'] && data[0]['SYMBOL2'] === pair['SYMBOL2']) {
-            res.json({
-              stock1: stock1, stock2: stock2,
-              dates: data.map(function(x){ return x['TRADE_DATE']; }),
-              correlations: data.map(function(x){ return x['CORRELATION']; })
-            });
-          } else
-            res.json({ stock1: stock1, stock2: stock2, dates: [], correlations: [] });
-        });
-      } else
-        res.json({ stock1: stock1, stock2: stock2, dates: [], correlations: [] });
-    });
+    const prices = bothData.map(data => data.map(x => parseFloat(x['CLOSE_PRICE'])));
+
+    let window1, window2;
+    for (let i = correlationWindow; i < prices[0].length; i++) {
+      window1 = prices[0].slice(i - correlationWindow, i);
+      window2 = prices[1].slice(i - correlationWindow, i);
+      resp.correlations.push(jStat.corrcoeff(window1, window2));
+    }
+
+    resp.dates = bothData[0].map(x => x['TRADE_DATE']).slice(correlationWindow);
+
+    res.json(resp)
+  })
+    .catch(() => res.json(resp))
+});
+
+const getCurrencyPrices = ($currency, $startDate, $endDate) => new Promise(function(resolve, reject) {
+
+  let query = `SELECT * from CURRENCY_RATES WHERE (\"CURRENCY\"='${$currency}' 
+  AND TRADE_DATE >= '${$startDate}' AND TRADE_DATE <= '${$endDate}') ORDER BY TRADE_DATE`;
+
+  ibmDB.queryDatabase(query, (data) => {
+    if (data.length > 0 && data[0]['CURRENCY'] === $currency) {
+      resolve(data)
+    } else {
+      reject()
+    }
   });
-
 });
 
 router.get('/corr/curr', function(req, res) {
@@ -116,55 +112,65 @@ router.get('/corr/curr', function(req, res) {
   let stock = req.query.stock;
   let currency = req.query.currency;
 
-  let query  = queryCurrencyCorrelation.slice(0, posSym) + stock +
-    queryCurrencyCorrelation.slice(posSym+1, posCurr) +
-    currency + queryCurrencyCorrelation.slice(posCurr+1);
+  const resp = {stock: stock, currency: currency, dates: [], correlations: []};
 
-  ibmDB.queryDatabase(query, function(data){
+  Promise.all([
+    getStockPrices(stock, correlationStartDate, primaryEndDate),
+    getCurrencyPrices(currency, correlationStartDate, primaryEndDate),
+  ]).then(bothData => {
 
-    if (data.length > 0 && data[0]['SYMBOL'] === req.query.stock) {
-      res.json({
-        stock: stock, currency: currency,
-        dates: data.map(function(x){ return x['TRADE_DATE']; }),
-        correlations: data.map(function(x){ return x['CORRELATION']; })
-      });
-    } else
-      res.json({ stock: stock, currency: currency, dates: [], correlations: [] });
+    const stockPrices = bothData[0].map(x => parseFloat(x['CLOSE_PRICE']));
+    const currencyPrices = bothData[1].map(x => parseFloat(x['VALUE']));
+
+    let window1, window2;
+    for (let i = correlationWindow; i < stockPrices.length; i++) {
+      window1 = stockPrices.slice(i - correlationWindow, i);
+      window2 = currencyPrices.slice(i - correlationWindow, i);
+      resp.correlations.push(jStat.corrcoeff(window1, window2));
+    }
+
+    resp.dates = bothData[0].map(x => x['TRADE_DATE']).slice(correlationWindow);
+    res.json(resp)
+  })
+    .catch(() => res.json(resp))
+
+});
+
+const primaryStartDate = '2016-09-01';
+const primaryEndDate = '2017-07-19';
+
+function verifyData(data, $symbol, $startDate, $endDate) {
+  return data.length > 0
+    && data[0]['SYMBOL'] === $symbol
+    && data[0]['TRADE_DATE'] >= $startDate
+    && data[data.length-1]['TRADE_DATE'] <= $endDate
+}
+
+const getStockPrices = ($symbol, $startDate, $endDate) => new Promise((resolve, reject) => {
+
+  let query = `SELECT DISTINCT SYMBOL,TRADE_DATE,CLOSE_PRICE from STOCK_TRADES WHERE (\"SYMBOL\"='${$symbol}' 
+  AND TRADE_DATE >= '${$startDate}' AND TRADE_DATE <= '${$endDate}') ORDER BY TRADE_DATE`;
+
+  ibmDB.queryDatabase(query, (data) => {
+    if (verifyData(data, $symbol, $startDate, $endDate)) {
+      resolve(data)
+    } else {
+      reject()
+    }
   });
-
 });
 
 router.get('/price/:stock', function(req, res) {
 
-  let query = queryStockPrices.slice(0, pos) + req.params.stock + queryStockPrices.slice(pos+1);
-
-  ibmDB.queryDatabase(query, function(data){
-    if (data.length > 0 && data[0]['SYMBOL'] === req.params.stock) {
-      res.json({
-        stock: req.params.stock,
-        dates: data.map(function(x){ return x['TRADE_DATE']; }),
-        prices: data.map(function(x){ return x['CLOSE_PRICE']; })
-      });
-    } else {
-      res.json({ stock: req.params.stock, dates: [], prices: [] });
-    }
-  });
+  getStockPrices(req.params.stock, primaryStartDate, primaryEndDate)
+    .then(data => res.json({
+      stock: req.params.stock,
+      dates: data.map(x => x['TRADE_DATE']),
+      prices: data.map(x => x['CLOSE_PRICE'])
+    }))
+    .catch(() => res.json({ stock: req.params.stock, dates: [], prices: [] }));
 
 });
-
-// function list(stocks){
-//   return stocks.map(function(symbol) {return {
-//     id: symbol,
-//     name: mapping[symbol] || symbol
-//   }});
-// }
-//
-// function getNews(callback) {
-//   let csvPath = path.join(__dirname, '..', 'data', 'stock_news.csv');
-//   fs.readFile(csvPath, 'utf8', function(err, file_data) {
-//     csv_parse(file_data, {delimiter: '|', comment: '#', quote: false}, callback);
-//   });
-// }
 
 const auto_stocks = ['F','TSLA','FCAU','TM','HMC','RACE','CARZ'];
 const airline_stocks = ['AAL','DAL','UAL','SKYW','JBLU','ALK','JETS'];//'LUV',
