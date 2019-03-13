@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const sqliteDB = require('../db/sqlite-db');
+const db = (process.env.DB_HOST && process.env.DB_PORT &&
+            process.env.DB_USER && process.env.DB_PASS &&
+            process.env.DB_BASE) ? require('../db/ibm-db') : require('../db/sqlite-db');
 const jStat = require('jStat').jStat;
 
 /** Query Stock and Currency Mappings **/
@@ -29,7 +31,7 @@ const checkValidStock = (...stocks) => new Promise(function(resolve, reject) {
   if (stocks.length === 0)
     reject();
   else {
-    sqliteDB.queryDatabase("SELECT DISTINCT SYMBOL FROM STOCK_TRADES;", (result) => {
+    db.queryDatabase("SELECT DISTINCT SYMBOL FROM STOCK_TRADES;", (result) => {
       const allStocks = result.map(x => x['SYMBOL']);
       if (Array.prototype.every.call(stocks, stock => allStocks.includes(stock)))
         resolve();
@@ -45,7 +47,7 @@ const queryStockPrices =
   "ORDER BY TRADE_DATE";
 
 const getStockPrices = ($symbol, $startDate, $endDate) => new Promise((resolve, reject) => {
-  sqliteDB.queryDatabase(queryStockPrices, { $symbol, $startDate, $endDate }, (data) => {
+  db.queryDatabase(queryStockPrices, { $symbol, $startDate, $endDate }, (data) => {
     if (verifyData(data, $symbol, $startDate, $endDate)) {
       resolve(data)
     } else {
@@ -126,7 +128,7 @@ const queryCurrency = "SELECT * from CURRENCY_RATES " +
   "ORDER BY TRADE_DATE";
 
 const getCurrencyPrices = ($currency, $startDate, $endDate) => new Promise(function(resolve, reject) {
-  sqliteDB.queryDatabase(queryCurrency, {$currency, $startDate, $endDate}, function(data) {
+  db.queryDatabase(queryCurrency, {$currency, $startDate, $endDate}, function(data) {
     if (data.length > 0 && data[0]['CURRENCY'] === $currency) {
       resolve(data)
     } else {
@@ -207,7 +209,7 @@ router.get('/news/', function(req, res) {
   newsQuery += newsQueryEnd.slice(0, indexOfMax) + maxRows + newsQueryEnd.slice(offsetMax);
 
   // const newsQuery = 'SELECT * FROM NEWS LIMIT 6';
-  sqliteDB.queryDatabase(newsQuery, stockNews => res.json(stockNews));
+  db.queryDatabase(newsQuery, stockNews => res.json(stockNews));
 });
 
 
